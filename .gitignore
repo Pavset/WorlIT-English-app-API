@@ -4,9 +4,9 @@
 /react-native/my-project/node_modules/
 /node/node_modules/
 # Expo
-.expo/
-dist/
-web-build/
+/react-native/my-project/.expo/
+/react-native/my-project/dist/
+/react-native/my-project/web-build/
 
 # Native
 *.orig.*
@@ -25,7 +25,7 @@ yarn-debug.*
 yarn-error.*
 
 # macOS
-.DS_Store
+/react-native/my-project/.DS_Store
 *.pem
 
 # local env files
