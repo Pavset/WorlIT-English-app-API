@@ -117,6 +117,11 @@ const Theories = sequelize.define("Theories",{
         allowNull: false,
         unique: false
     },
+    title:{
+        type: DataTypes.ARRAY(DataTypes.STRING),
+        allowNull: false,
+        unique: false
+    },
     imagePaths:{
         type: DataTypes.ARRAY(DataTypes.STRING),
         allowNull: false,

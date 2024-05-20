@@ -85,7 +85,6 @@ router.get("/course", async (req, res) => {
                       modules.push(module.dataValues);
                     }
                 }
-
                 if (modules.length > 0){
                     let topics = []
                     for (const val of modules) {
@@ -157,7 +156,98 @@ router.get("/topics/:id",async(req,res)=>{
                             }
                         }
                         if (tasks.length > 0){
-                            return res.status(200).json({data: tasks})
+                            let theories = []
+                            for (const val of topic.theories) {
+                                let theory = await Theories.findOne({
+                                    where:{
+                                        id: val
+                                    }
+                                })
+                                if (theory){
+                                    theories.push(theory)
+                                }
+                            }
+                            return res.status(200).json({tasks: tasks, theories: theories})
+                        } else {
+                            return res.status(404).json({error: "Немає завдань"})
+                        }
+                    } else {
+                        return res.status(403).json({error: "Ви не увійшли в акаунт"})
+                    }
+                } else {
+                    return res.status(404).json({error: "Такої теми немає у модулях"})
+                }
+            } else {
+                return res.status(404).json({error: "Немає теми"})
+            }
+        }else {
+            return res.status(403).json({error: "Ви не увійшли в акаунт"})
+        }
+    } catch(err){
+        console.error(err)
+        return res.status(500).json({error: "Виникла помилка"})
+    }
+})
+
+// Theory
+
+router.get("/theories/:theoryId",async(req,res)=>{
+    let apikey = req.headers.token
+    try {
+        let data = await User.findOne({
+            where:{
+                apikey: apikey
+            }
+        })
+        if (data){
+            let theory = await Theories.findOne({
+                where:{
+                    id: req.params.theoryId
+                }
+            })
+            if (theory){
+                let topic = await Topics.findOne({
+                where: { 
+                    theories: {[Op.contains]: [theory.id] }
+                }
+                })
+                if (topic){
+                let module = await Modules.findOne({
+                    where:{
+                        topics: {[Op.contains] : [topic.id]}
+                    }
+                })
+                if (module){
+                    let course = await Courses.findOne({
+                        where: { 
+                            modules: {[Op.contains]: [module.id] }
+                        }
+                    })
+                    if (course){
+                        let tasks = []
+                        for (const val of topic.tasks) {
+                            let task = await Tasks.findOne({
+                                where:{
+                                    id: val
+                                }
+                            })
+                            if (task){
+                                tasks.push(task)
+                            }
+                        }
+                        if (tasks.length > 0){
+                            let theories = []
+                            for (const val of topic.theories) {
+                                let theory = await Theories.findOne({
+                                    where:{
+                                        id: val
+                                    }
+                                })
+                                if (theory){
+                                    theories.push(theory)
+                                }
+                            }
+                            return res.status(200).json({data: theory})
                         } else {
                             return res.status(404).json({error: "Немає завдань"})
                         }
@@ -169,8 +259,11 @@ router.get("/topics/:id",async(req,res)=>{
                     return res.status(404).json({error: "Такої теми немає у модулях"})
                 }
 
-            } else {
-                return res.status(404).json({error: "Немає теми"})
+                } else {
+                    return res.status(404).json({error: "Немає теми"})
+                }
+            }else {
+                return res.status(404).json({error: "Немає теорії"})
             }
         }else {
             return res.status(403).json({error: "Ви не увійшли в акаунт"})
