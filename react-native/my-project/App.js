@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, LogBox, TouchableOpacity, TextInput } from 'react-native';
+import { StyleSheet, Text, View, LogBox, TouchableOpacity, TextInput, Image, Link } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native'
 import { useState, useEffect } from 'react';
@@ -159,6 +159,77 @@ function Register({navigation}) {
   )
 }
 
+function Account(){
+  let username = "Тестер 45678"
+  let mentorName = "МАНТАР"
+  let mentorNumber = "00000000"
+  let menejerName = "МЕНАЖЕР"
+  let menejerNumber = "00000"
+
+  return(
+    <View style={styles.profileContainer}>
+
+      <View style={styles.profileUp}>
+        <Text style={[styles.white,styles.font32]}>Профіль</Text>
+      </View>
+
+
+      <View style={styles.profileMid}>
+        <Image style={styles.avatar} source={ require("assets/account.png") }/>
+        <Text style={[styles.orange,styles.font24]}>{username}</Text>
+      </View>
+
+
+      <View style={styles.profileDown}>
+
+        <Text style={[styles.black,styles.font24]}>Ментор</Text>
+        <View style={styles.profileSector}>
+
+          <Image style={styles.profileSectorImage} source={ require("assets/telegram.png") }/>
+          <View style={styles.profileSectorRight}>
+
+            <Text style={[styles.black,styles.font20]}>{mentorName}</Text>
+            <Text style={[styles.orange,styles.font16]}>{mentorNumber}</Text>
+            <View style={styles.socialsDiv}>
+              <Link>
+                <Image style={styles.socials} source={ require("assets/telegram.png") }/>
+              </Link>
+              <Link>
+                <Image style={styles.socials} source={ require("assets/viber.png") } />
+              </Link>
+            </View>
+
+          </View>
+
+        </View>
+
+        <Text style={[styles.black,styles.font24]}>Менеджер</Text>
+        <View style={styles.profileSector}>
+
+          <Image style={styles.profileSectorImage} source={ require("assets/telegram.png") }/>
+          <View style={styles.profileSectorRight} >
+
+            <Text style={[styles.black,styles.font20]}>{menejerName}</Text>
+            <Text style={[styles.orange,styles.font16]}>{menejerNumber}</Text>
+            <View style={styles.socialsDiv}>
+              <Link>
+                <Image style={styles.socials} source={ require("assets/telegram.png") }/>
+              </Link>
+              <Link>
+                <Image style={styles.socials} source={ require("assets/viber.png") } />
+              </Link>
+            </View>
+
+          </View>
+
+        </View>
+
+      </View>
+
+    </View>
+  )
+}
+
 export default function App() {
   return (
     <NavigationContainer>
@@ -173,9 +244,123 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    display: "flex",
+    flexDirection:"column",
     backgroundColor: '#fff',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'start',
   },
+  profileContainer:{
+    display: "flex",
+    flexDirection:"column",
+    backgroundColor: '#F5F5F5',
+    alignItems: 'center',
+    justifyContent: 'start',
+    padding: "0 0 10px 0",
+    gap: 30,
+  },
+  profileUp:{
+    display: "flex",
+    flexDirection:"column",
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: "100%",
+    gap: 10,
+    padding: 10,
+    backgroundColor:"#252124",
+    boxSizing: "border-box",
+  },
+  white:{
+    color:"#fff",
+  },
+  black:{
+    color:"#252124",
+  },
+  orange:{
+    color: "#E19A38"
+  },
+  font32:{
+    fontsize:32
+  },
+  font24:{
+    fontsize:24
+  },
+  font20:{
+    fontsize:20
+  },
+  font16:{
+    fontsize:16
+  },
+
+
+  profileMid:{
+    display: "flex",
+    flexDirection:"column",
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: "100%",
+    gap: 10,
+    padding: 10,
+    boxSizing: "border-box",
+  },
+  avatar:{
+    width: 106,
+    height: 106
+  },
+  username:{
+    width: "100%",
+    display: "flex",
+    flexDirection:"column",
+    alignItems: 'center',
+    textAlign: 'center',
+    color: "#E19A38"
+  },
+  profileDown:{
+    display: "flex",
+    flexDirection:"column",
+    alignItems: 'start',
+    justifyContent: 'start',
+    width: "100%",
+    gap: 20,
+    padding: 10,
+    boxSizing: "border-box",
+  },
+  profileSector:{
+    display: "flex",
+    flexDirection:"row",
+    alignItems: 'start',
+    justifyContent: 'start',
+    width: "100%",
+    backgroundColor:"#fff",
+    gap: 20,
+    padding: 10,
+    boxSizing: "border-box",
+  },
+  profileSectorImage:{
+    width: 100,
+    height: 100,
+    borderRadius: 10
+  },
+  profileSectorRight:{
+    display: "flex",
+    flexDirection:"column",
+    alignItems: 'start',
+    justifyContent: 'start',
+    width: "100%",
+    height:"100%",
+    gap: 10,
+    padding: 10,
+    boxSizing: "border-box",
+  },
+  socialsDiv:{
+    display: "flex",
+    flexDirection:"row",
+    alignItems: 'center',
+    justifyContent: 'start',
+    width: "100%",
+    gap: 10,
+    padding: 0,
+    boxSizing: "border-box",
+  }
 });
 
