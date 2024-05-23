@@ -22,6 +22,19 @@ router.get("", async (req, res) => {
 
 // User
 
+router.get("/account", async (req, res) => {
+    let data = await User.findOne({
+        where: {
+            apikey: req.headers.token,
+        }
+    })
+    if(data){
+        return res.status(200).json({data: "Success"})
+    } else{
+        return res.status(403).json({error: "Немає токена"})
+    }
+})
+
 router.post("/signin", async (req, res) => {
     let data = await User.findOne({
         where: {
@@ -264,6 +277,81 @@ router.get("/theories/:theoryId",async(req,res)=>{
                 }
             }else {
                 return res.status(404).json({error: "Немає теорії"})
+            }
+        }else {
+            return res.status(403).json({error: "Ви не увійшли в акаунт"})
+        }
+    } catch(err){
+        console.error(err)
+        return res.status(500).json({error: "Виникла помилка"})
+    }
+})
+
+// Questions
+
+router.get("/questions/:tasksId",async(req,res)=>{
+    let apikey = req.headers.token
+    try {
+        let data = await User.findOne({
+            where:{
+                apikey: apikey
+            }
+        })
+        if (data){
+            let task = await Tasks.findOne({
+                where:{
+                    id: req.params.tasksId,
+                    type: "text"
+                }
+            })
+            if (task){
+                let topic = await Topics.findOne({
+                where: { 
+                    tasks: {[Op.contains]: [task.id] }
+                }
+                })
+                if (topic){
+                let module = await Modules.findOne({
+                    where:{
+                        topics: {[Op.contains] : [topic.id]}
+                    }
+                })
+                if (module){
+                    let course = await Courses.findOne({
+                        where: { 
+                            modules: {[Op.contains]: [module.id] }
+                        }
+                    })
+                    if (course){
+                        let ques = []
+                        for (const val of task.questions) {
+                            let question = await Question.findOne({
+                                where:{
+                                    id: val
+                                }
+                            })
+                            if (question){
+                                ques.push(question)
+                            }
+                        }
+                        if (ques.length > 0){
+                            return res.status(200).json({data: ques})
+                        } else {
+                            return res.status(404).json({error: "Немає завдань"})
+                        }
+                    } else {
+                        return res.status(403).json({error: "Ви не увійшли в акаунт"})
+                    }
+
+                } else {
+                    return res.status(404).json({error: "Такої теми немає у модулях"})
+                }
+
+                } else {
+                    return res.status(404).json({error: "Немає теми"})
+                }
+            }else {
+                return res.status(404).json({error: "Немає завдання"})
             }
         }else {
             return res.status(403).json({error: "Ви не увійшли в акаунт"})
