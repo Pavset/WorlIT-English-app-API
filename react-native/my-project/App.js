@@ -1,8 +1,10 @@
-import { StyleSheet, Text, View, LogBox, TouchableOpacity, TextInput, Image, Link } from 'react-native';
+import { StyleSheet, Text, View, LogBox, TouchableOpacity, TextInput, Image, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native'
 import { useState, useEffect } from 'react';
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
+
+import NavigationPanel from "./components/navPanel"
 const Stack = createNativeStackNavigator()
 const port = 8000
 const url = `http://192.168.0.105:${port}`
@@ -163,9 +165,12 @@ function Account(){
   let username = "Тестер 45678"
   let mentorName = "МАНТАР"
   let mentorNumber = "00000000"
+  let mentorTgUrl = "https://t.me/+kj3lQ5kV14s3NTMy"
+  let mentorVibUrl = "https://t.me/+kj3lQ5kV14s3NTMy"
   let menejerName = "МЕНАЖЕР"
   let menejerNumber = "00000"
-
+  let menejerTgUrl = "https://t.me/+kj3lQ5kV14s3NTMy"
+  let menejerVibUrl = "https://t.me/+kj3lQ5kV14s3NTMy"
   return(
     <View style={styles.profileContainer}>
 
@@ -175,7 +180,7 @@ function Account(){
 
 
       <View style={styles.profileMid}>
-        <Image style={styles.avatar} source={ require("assets/account.png") }/>
+        <Image style={styles.avatar} source={ require("./assets/account.png") }/>
         <Text style={[styles.orange,styles.font24]}>{username}</Text>
       </View>
 
@@ -185,18 +190,19 @@ function Account(){
         <Text style={[styles.black,styles.font24]}>Ментор</Text>
         <View style={styles.profileSector}>
 
-          <Image style={styles.profileSectorImage} source={ require("assets/telegram.png") }/>
+          <Image style={styles.profileSectorImage} source={ require("./assets/wit_picture.png") }/>
           <View style={styles.profileSectorRight}>
 
             <Text style={[styles.black,styles.font20]}>{mentorName}</Text>
             <Text style={[styles.orange,styles.font16]}>{mentorNumber}</Text>
             <View style={styles.socialsDiv}>
-              <Link>
-                <Image style={styles.socials} source={ require("assets/telegram.png") }/>
-              </Link>
-              <Link>
-                <Image style={styles.socials} source={ require("assets/viber.png") } />
-              </Link>
+                <Text onPress={() => Linking.openURL(mentorTgUrl)}> 
+                  <Image style={styles.socials} source={ require("./assets/telegram.png") }/> 
+                </Text>
+                <Text onPress={() => Linking.openURL(mentorVibUrl)}> 
+                  <Image style={styles.socials} source={ require("./assets/viber.png") } />
+                </Text>
+                
             </View>
 
           </View>
@@ -206,18 +212,18 @@ function Account(){
         <Text style={[styles.black,styles.font24]}>Менеджер</Text>
         <View style={styles.profileSector}>
 
-          <Image style={styles.profileSectorImage} source={ require("assets/telegram.png") }/>
+          <Image style={styles.profileSectorImage} source={ require("./assets/wit_picture.png") }/>
           <View style={styles.profileSectorRight} >
 
             <Text style={[styles.black,styles.font20]}>{menejerName}</Text>
             <Text style={[styles.orange,styles.font16]}>{menejerNumber}</Text>
             <View style={styles.socialsDiv}>
-              <Link>
-                <Image style={styles.socials} source={ require("assets/telegram.png") }/>
-              </Link>
-              <Link>
-                <Image style={styles.socials} source={ require("assets/viber.png") } />
-              </Link>
+                <Text onPress={() => Linking.openURL(menejerTgUrl)}> 
+                  <Image style={styles.socials} source={ require("./assets/telegram.png") }/> 
+                </Text>
+                <Text onPress={() => Linking.openURL(menejerVibUrl)}> 
+                  <Image style={styles.socials} source={ require("./assets/viber.png") } />
+                </Text>
             </View>
 
           </View>
@@ -225,7 +231,7 @@ function Account(){
         </View>
 
       </View>
-
+      <NavigationPanel navigation={navigation}/>
     </View>
   )
 }
@@ -233,9 +239,10 @@ function Account(){
 export default function App() {
   return (
     <NavigationContainer>
-    <Stack.Navigator initialRouteName='Login'>
+    <Stack.Navigator initialRouteName='Account'>
       <Stack.Screen options={{headerShown: false}} name="Login" component={Login}/>
       <Stack.Screen options={{headerShown: false}} name="Register" component={Register}/>
+      <Stack.Screen options={{headerShown: false}} name="Account" component={Account}/>
     </Stack.Navigator>
   </NavigationContainer>
   );
@@ -249,6 +256,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'start',
+    padding: 0,
+    margin:0,
+    width: "100%"
   },
   profileContainer:{
     display: "flex",
@@ -257,7 +267,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'start',
     padding: "0 0 10px 0",
-    gap: 30,
+    gap: 20,
+
+    width:"100%",
+    height: "100%",
+    padding: 0,
+    margin:0,
   },
   profileUp:{
     display: "flex",
@@ -268,7 +283,7 @@ const styles = StyleSheet.create({
     gap: 10,
     padding: 10,
     backgroundColor:"#252124",
-    boxSizing: "border-box",
+
   },
   white:{
     color:"#fff",
@@ -279,17 +294,20 @@ const styles = StyleSheet.create({
   orange:{
     color: "#E19A38"
   },
+  font40:{
+    fontSize:40
+  },
   font32:{
-    fontsize:32
+    fontSize:32
   },
   font24:{
-    fontsize:24
+    fontSize:24
   },
   font20:{
-    fontsize:20
+    fontSize:20
   },
   font16:{
-    fontsize:16
+    fontSize:16
   },
 
 
@@ -321,24 +339,24 @@ const styles = StyleSheet.create({
     alignItems: 'start',
     justifyContent: 'start',
     width: "100%",
-    gap: 20,
+    gap: 10,
     padding: 10,
     boxSizing: "border-box",
   },
   profileSector:{
     display: "flex",
     flexDirection:"row",
-    alignItems: 'start',
+    alignItems: 'center',
     justifyContent: 'start',
     width: "100%",
     backgroundColor:"#fff",
-    gap: 20,
-    padding: 10,
+    gap: "5%",
+    padding: "2%",
     boxSizing: "border-box",
   },
   profileSectorImage:{
-    width: 100,
-    height: 100,
+    width: 75,
+    height: 75,
     borderRadius: 10
   },
   profileSectorRight:{
@@ -346,10 +364,11 @@ const styles = StyleSheet.create({
     flexDirection:"column",
     alignItems: 'start',
     justifyContent: 'start',
-    width: "100%",
-    height:"100%",
+    // width: "90%",
+    // height:"100%",
     gap: 10,
     padding: 10,
+    // paddingHorizontal: 10,
     boxSizing: "border-box",
   },
   socialsDiv:{
