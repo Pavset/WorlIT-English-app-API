@@ -36,7 +36,7 @@ const User = sequelize.define("User",{
         unique: true
     },
     address:{
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false,
         unique: false
     },
@@ -49,7 +49,8 @@ const User = sequelize.define("User",{
         type: DataTypes.ARRAY(DataTypes.INTEGER),
         allowNull: true,
         unique: false
-    }
+    },
+
 })
 
 const Courses = sequelize.define("Courses",{
@@ -67,7 +68,17 @@ const Courses = sequelize.define("Courses",{
         type: DataTypes.ARRAY(DataTypes.INTEGER),
         allowNull: false,
         unique: false
-    }
+    },
+    teacher:{
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        unique: false
+    },
+    manager:{
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        unique: false
+    },
 })
 
 const Modules = sequelize.define("Modules",{
@@ -99,8 +110,31 @@ const Topics = sequelize.define("Topics",{
         allowNull: false,
         unique: false
     },
+    homework:{
+        type: DataTypes.ARRAY(DataTypes.INTEGER),
+        allowNull: false,
+        unique: false
+    },
     theories:{
         type: DataTypes.ARRAY(DataTypes.INTEGER),
+        allowNull: false,
+        unique: false
+    }
+})
+
+const Sections = sequelize.define("Sections",{
+    text:{
+        type: DataTypes.TEXT,
+        allowNull: false,
+        unique: false
+    },
+    title:{
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: false
+    },
+    imagePath:{
+        type: DataTypes.TEXT,
         allowNull: false,
         unique: false
     }
@@ -112,18 +146,8 @@ const Theories = sequelize.define("Theories",{
         allowNull: false,
         unique: false
     },
-    text:{
-        type: DataTypes.ARRAY(DataTypes.STRING),
-        allowNull: false,
-        unique: false
-    },
-    title:{
-        type: DataTypes.ARRAY(DataTypes.STRING),
-        allowNull: false,
-        unique: false
-    },
-    imagePaths:{
-        type: DataTypes.ARRAY(DataTypes.STRING),
+    sectionsList:{
+        type: DataTypes.ARRAY(DataTypes.INTEGER),
         allowNull: false,
         unique: false
     }
@@ -141,19 +165,45 @@ const Tasks = sequelize.define("Tasks",{
         unique: false
     },
     audio:{
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: true,
         unique: false
     },
     video:{
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
+        allowNull: true,
+        unique: false
+    },
+    wordArray:{
+        type: DataTypes.ARRAY(DataTypes.INTEGER),
         allowNull: true,
         unique: false
     }
 })
 
-const Question = sequelize.define("Question",{
+const WordList = sequelize.define("WordList",{
+    array:{
+        type: DataTypes.ARRAY(DataTypes.INTEGER),
+        allowNull: false,
+        unique: false
+    }
+})
+
+const Word = sequelize.define("Word",{
+    word:{
+        type: DataTypes.TEXT,
+        allowNull: false,
+        unique: false
+    },
     translated:{
+        type: DataTypes.TEXT,
+        allowNull: true,
+        unique: false
+    },
+})
+
+const Question = sequelize.define("Question",{
+    question:{
         type: DataTypes.STRING,
         allowNull: true,
         unique: false
@@ -163,22 +213,56 @@ const Question = sequelize.define("Question",{
         allowNull: true,
         unique: false
     },
-    text:{
-        type: DataTypes.STRING,
-        allowNull: true,
-        unique: false
-    },
-    rightAnswer:{
-        type: DataTypes.STRING,
+    trueAnswers:{
+        type: DataTypes.ARRAY(DataTypes.TEXT),
         allowNull: false,
         unique: false
     },
     wrongAnswers:{
-        type: DataTypes.ARRAY(DataTypes.STRING),
+        type: DataTypes.ARRAY(DataTypes.TEXT),
         allowNull: false,
+        unique: false
+    },
+    extraQuestionText:{
+        type: DataTypes.TEXT,
+        allowNull: true,
         unique: false
     }
 })
+
+const Staff = sequelize.define("Staff",{
+    name:{
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: false
+    },
+    surname:{
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: false
+    },
+    image:{
+        type: DataTypes.TEXT,
+        allowNull: false,
+        unique: false
+    },
+    phone:{
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: false
+    },
+    tg:{
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: false
+    },
+    viber:{
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: false
+    },
+})
+
 
 sequelize.authenticate()
 sequelize.sync()
@@ -190,5 +274,9 @@ module.exports = {
     Topics: Topics,
     Theories: Theories,
     Tasks: Tasks,
-    Question: Question
+    Question: Question,
+    Sections: Sections,
+    Staff: Staff,
+    Word: Word,
+    WordList: WordList
 }

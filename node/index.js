@@ -20,6 +20,7 @@ router.get("", async (req, res) => {
     return res.status(200).json({data: "Success"})
 })
 
+
 // User
 
 router.get("/account", async (req, res) => {
@@ -98,23 +99,9 @@ router.get("/course", async (req, res) => {
                       modules.push(module.dataValues);
                     }
                 }
+                
                 if (modules.length > 0){
-                    let topics = []
-                    for (const val of modules) {
-                        let topic = await Topics.findOne({
-                            where:{
-                                id: val.id
-                            }
-                        })
-                        if (topic){
-                            topics.push(topic)
-                        }
-                    }
-                    if (topics.length > 0){
-                        return res.status(200).json({course: course, modules: modules, topics: topics})
-                    } else {
-                        return res.status(404).json({error: "Немає тем"})
-                    }
+                    return res.status(200).json({course: course, modules: modules})
                 }else{
                     return res.status(404).json({error: "Немає модулів"})
                 }
@@ -361,6 +348,40 @@ router.get("/questions/:tasksId",async(req,res)=>{
         return res.status(500).json({error: "Виникла помилка"})
     }
 })
+
+// router.get('/complete/:taskId/:id', async (req, res)=>{
+//     try {
+//         let apikey = await User.findOne({
+//             where:{
+//                 id: req.headers.token
+//             }
+//         })
+//         if (apikey){
+//             let task = await Tasks.findOne({
+//                 where:{
+//                     id: req.params.taskId,
+//                     type: "text"
+//                 }
+//             })
+//             if (task){
+//                 let question = await Question.findOne({
+//                     where:{
+//                         id: req.params.id
+//                     }
+//                 })
+//                 if (question){
+                    
+//                 }
+//             }else{
+//                 return res.status(404).json({error: "Немає завдання"})
+//             }
+//         }else{
+//             return res.status(403).json({error: "Ви не увійшли в акаунт"})
+//         }
+//     }catch(err){
+//         console.error(err)
+//     }
+// })
 
 // Start Server
 
