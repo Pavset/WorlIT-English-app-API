@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, LogBox, Pressable , TextInput, Image, Link } fr
 export default function NavigationPanel({navigation}){
     return(
         <View style={styles.navBar}>
-          <Pressable style={styles.button} onPress={()=>{navigation.navigate("ModulesList")}}>
+          <Pressable style={styles.button} onPress={()=>{navigation.navigate("Modules")}}>
             <Image style={styles.buttonImage} source={ require("../assets/book.png") }/>
           </Pressable >
           <Pressable style={styles.button} onPress={()=>{navigation.navigate("Account")}}>

@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, LogBox, TouchableOpacity, TextInput, Image, Linking } from 'react-native';
+import { StyleSheet, Text, View, LogBox, TouchableOpacity, TextInput, Image, Linking, ScrollView, StatusBar, } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native'
 import { useState, useEffect } from 'react';
@@ -7,7 +7,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import NavigationPanel from "./components/navPanel"
 const Stack = createNativeStackNavigator()
 const port = 8000
-const url = `http://192.168.0.105:${port}`
+const ip = "192.168.80.57"
+const url = `http://${ip}:${port}`
 LogBox.ignoreAllLogs();
 
 function Login({navigation}) {
@@ -37,7 +38,7 @@ function Login({navigation}) {
           setError("Не вдалося зберегти токен у сховищі")
         } finally {
           setError("")
-          navigation.navigate("Main")
+          navigation.navigate("Home")
         }
       }
     })
@@ -46,6 +47,7 @@ function Login({navigation}) {
   return(
     <View style={styles.container}>
       <Text>Login</Text>
+      {/* <Text>{error}</Text> */}
       <TextInput 
         style={styles.input}
         placeholder="Имя пользователя"
@@ -75,6 +77,7 @@ function Register({navigation}) {
   const [phonenumber, setPhonenumber] = useState('');
   const [Countryregioncity, setCountryregioncity] = useState('');
   const [error, setError] = useState("")
+
   function handleSubmit() {
     //Сюда
     fetch(`${url}/signup`, {
@@ -104,11 +107,12 @@ function Register({navigation}) {
           setError("Не вдалося зберегти токен у сховищі")
         } finally {
           setError("")
-          navigation.navigate("Main")
+          navigation.navigate("Home")
         }
       }
     })
   }
+
 
   return(
     <View style={styles.container}>
@@ -157,98 +161,238 @@ function Register({navigation}) {
       />
       <TouchableOpacity onPress={()=>{handleSubmit()}}><Text>Реєстрація</Text></TouchableOpacity>
       <TouchableOpacity onPress={()=>{navigation.navigate("Login")}}>Є аккаунт?</TouchableOpacity>
+      <NavigationPanel navigation={navigation}/>
     </View>
   )
 }
 
-function Account(){
-  let username = "Тестер 45678"
-  let mentorName = "МАНТАР"
-  let mentorNumber = "00000000"
-  let mentorTgUrl = "https://t.me/+kj3lQ5kV14s3NTMy"
-  let mentorVibUrl = "https://t.me/+kj3lQ5kV14s3NTMy"
-  let menejerName = "МЕНАЖЕР"
-  let menejerNumber = "00000"
-  let menejerTgUrl = "https://t.me/+kj3lQ5kV14s3NTMy"
-  let menejerVibUrl = "https://t.me/+kj3lQ5kV14s3NTMy"
+function Home(){
+  const [listOfTaskId, SetListOfTaskId] = useState('')
+  const [listOfTOpicsId, SetListOfTopicsId] = useState('')
+
+  async function getListId(){
+    fetch(`${url}/topics/${id}`, {
+      method: 'GET',
+      headers: {
+        "token": await AsyncStorage.getItem('apikey')
+      }
+    })
+    .then((response)=> response.json())
+    .then(
+      async data => {
+        SetListOfTaskId(await data)
+      }
+    )
+  }
+  async function getModule(){
+    fetch(`${url}/cource`, {
+      method: 'GET',
+      headers: {
+        "token": await AsyncStorage.getItem('apikey')
+      }
+    })
+    .then((response)=> response.json())
+    .then(
+      async data => {
+       SetListOfTopicsId(await data)
+      }
+    )
+  }
+  async function getModule(){
+    fetch(`${url}/cource`, {
+      method: 'GET',
+      headers: {
+        "token": await AsyncStorage.getItem('apikey')
+      }
+    })
+    .then((response)=> response.json())
+    .then(
+      async data => {
+        SetListOfTaskId(await data)
+      }
+    )
+  }
+
+
   return(
-    <View style={styles.profileContainer}>
-
-      <View style={styles.profileUp}>
-        <Text style={[styles.white,styles.font32]}>Профіль</Text>
-      </View>
-
-
-      <View style={styles.profileMid}>
-        <Image style={styles.avatar} source={ require("./assets/account.png") }/>
-        <Text style={[styles.orange,styles.font24]}>{username}</Text>
-      </View>
-
-
-      <View style={styles.profileDown}>
-
-        <Text style={[styles.black,styles.font24]}>Ментор</Text>
-        <View style={styles.profileSector}>
-
-          <Image style={styles.profileSectorImage} source={ require("./assets/wit_picture.png") }/>
-          <View style={styles.profileSectorRight}>
-
-            <Text style={[styles.black,styles.font20]}>{mentorName}</Text>
-            <Text style={[styles.orange,styles.font16]}>{mentorNumber}</Text>
-            <View style={styles.socialsDiv}>
-                <Text onPress={() => Linking.openURL(mentorTgUrl)}> 
-                  <Image style={styles.socials} source={ require("./assets/telegram.png") }/> 
-                </Text>
-                <Text onPress={() => Linking.openURL(mentorVibUrl)}> 
-                  <Image style={styles.socials} source={ require("./assets/viber.png") } />
-                </Text>
-                
-            </View>
-
-          </View>
-
-        </View>
-
-        <Text style={[styles.black,styles.font24]}>Менеджер</Text>
-        <View style={styles.profileSector}>
-
-          <Image style={styles.profileSectorImage} source={ require("./assets/wit_picture.png") }/>
-          <View style={styles.profileSectorRight} >
-
-            <Text style={[styles.black,styles.font20]}>{menejerName}</Text>
-            <Text style={[styles.orange,styles.font16]}>{menejerNumber}</Text>
-            <View style={styles.socialsDiv}>
-                <Text onPress={() => Linking.openURL(menejerTgUrl)}> 
-                  <Image style={styles.socials} source={ require("./assets/telegram.png") }/> 
-                </Text>
-                <Text onPress={() => Linking.openURL(menejerVibUrl)}> 
-                  <Image style={styles.socials} source={ require("./assets/viber.png") } />
-                </Text>
-            </View>
-
-          </View>
-
-        </View>
-
-      </View>
+    <View>
+      <Text>2ertyhju/xt</Text>
+    
       <NavigationPanel navigation={navigation}/>
     </View>
+  )
+  
+}
+
+function Account(){
+  const [userData, setUserData] = useState("")
+  const [teacherData, setTeacherData] = useState("")
+  const [managerData, setManagerData] = useState("")
+  const [courseData, setCourseData] = useState("")
+
+  const [errorUser, setErrorUser] = useState("")
+  const [errorCourse, setErrorCourse] = useState("")
+
+
+  async function getProfile(){
+    fetch(`${url}/account`, {
+      method: "GET",
+      headers:{
+        "token": await AsyncStorage.getItem('apikey')
+      }
+    })
+    .then((response)=> response.json())
+    .then(
+      async data =>{
+        console.log(data)
+        if (data.error){
+          setErrorUser(data.error)
+          await navigation.navigate("Register")
+        } else{
+          setUserData(await data.user)
+          setTeacherData(await data.teacher)
+          setManagerData(await data.manager)
+          setCourseData(await data.course)
+        }
+      }
+    )
+  }
+
+  useEffect(()=>{getProfile()},[])
+
+  clearAsyncStorage = async() => {
+    AsyncStorage.clear();
+    await navigation.navigate("Register")
+  }
+
+  if (userData){
+    return(
+
+      <View style={styles.profileContainer}>
+        <View style={styles.profileUp}>
+          <Text style={[styles.white,styles.font32]}>Профіль</Text>
+        </View>
+        <ScrollView style={styles.scroll100}>
+
+          <View style={styles.profileMid}>
+            <Image style={styles.avatar} source={ require("./assets/account.png") }/>
+            <Text style={[styles.orange,styles.font24]}>{userData.name}</Text>
+          </View>
+          <View style={styles.profileDown}>
+            <View style={[styles.profileSector,styles.blackBG]}>
+              <Text style={[styles.white,styles.font20]}>Курс:</Text>
+              <Text style={[styles.orange,styles.font20]}>{courseData.name}</Text>
+            </View>
+            <Text style={[styles.black,styles.font24]}>Ментор</Text>
+            <View style={styles.profileSector}>
+    
+              <Image style={styles.profileSectorImage} source={ require("./assets/wit_picture.png") }/>
+              <View style={styles.profileSectorRight}>
+    
+                <Text style={[styles.black,styles.font20]}>{teacherData.name}</Text>
+                <Text style={[styles.orange,styles.font16]}>{teacherData.phone}</Text>
+                <View style={styles.socialsDiv}>
+                    <Text onPress={() => Linking.openURL(teacherData.tg)}> 
+                      <Image style={styles.socials} source={ require("./assets/telegram.png") }/> 
+                    </Text>
+                    <Text onPress={() => Linking.openURL(teacherData.viber)}> 
+                      <Image style={styles.socials} source={ require("./assets/viber.png") } />
+                    </Text>
+                    
+                </View>
+    
+              </View>
+    
+            </View>
+    
+            <Text style={[styles.black,styles.font24]}>Менеджер</Text>
+            <View style={styles.profileSector}>
+    
+              <Image style={styles.profileSectorImage} source={ require("./assets/wit_picture.png") }/>
+              <View style={styles.profileSectorRight} >
+    
+                <Text style={[styles.black,styles.font20]}>{managerData.name}</Text>
+                <Text style={[styles.orange,styles.font16]}>{managerData.phone}</Text>
+                <View style={styles.socialsDiv}>
+                    <Text onPress={() => Linking.openURL(managerData.tg)}> 
+                      <Image style={styles.socials} source={ require("./assets/telegram.png") }/> 
+                    </Text>
+                    <Text onPress={() => Linking.openURL(managerData.viber)}> 
+                      <Image style={styles.socials} source={ require("./assets/viber.png") } />
+                    </Text>
+                </View>
+    
+              </View>
+    
+            </View>
+    
+          </View>
+          <TouchableOpacity onPress={()=>{clearAsyncStorage()}}>
+            <Text>Вийти</Text>
+          </TouchableOpacity>
+        </ScrollView>
+  
+  
+        <NavigationPanel navigation={navigation}/>
+      </View>
+    )
+} 
+// else{
+//   navigation.navigate("Register")
+// }
+}
+
+{/* Лёша */}
+function Modules() {
+  return(
+    <View style={styles.container}>
+       <Text>Модулі</Text>
+       {/* Сюда Text, View */}
+       <View>
+       <View>
+          <Text>Present Simple</Text>
+       </View>
+       <View>
+          <Text>Present Simple</Text>
+       </View>
+       <View>
+          <Text>Present Simple</Text>
+       </View>
+       <View>
+          <Text>Present Simple</Text>
+       </View>
+       <View>
+          <Text>Present Simple</Text>
+       </View>
+       
+              </View>
+
+    </View> 
   )
 }
 
 export default function App() {
   return (
     <NavigationContainer>
-    <Stack.Navigator initialRouteName='Account'>
+     <Stack.Navigator initialRouteName='Register'>
       <Stack.Screen options={{headerShown: false}} name="Login" component={Login}/>
       <Stack.Screen options={{headerShown: false}} name="Register" component={Register}/>
       <Stack.Screen options={{headerShown: false}} name="Account" component={Account}/>
+      <Stack.Screen options={{headerShown: false}} name="Home" component={Home}/>
+      <Stack.Screen options={{headerShown: false}} name="Modules" component={Modules}/>
     </Stack.Navigator>
   </NavigationContainer>
   );
 }
 
 const styles = StyleSheet.create({
+  scroll100:{
+    padding: 0,
+    margin:0,
+    width: "100%",
+    paddingBottom: "20%"
+
+  },
   container: {
     flex: 1,
     display: "flex",
@@ -266,8 +410,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
     alignItems: 'center',
     justifyContent: 'start',
-    padding: "0 0 10px 0",
-    gap: 20,
+    // padding: "0 0 10px 0",
+    // gap: 20,
 
     width:"100%",
     height: "100%",
@@ -284,6 +428,9 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor:"#252124",
 
+  },
+  blackBG:{
+    backgroundColor:"#252124"
   },
   white:{
     color:"#fff",
@@ -353,6 +500,7 @@ const styles = StyleSheet.create({
     gap: "5%",
     padding: "2%",
     boxSizing: "border-box",
+    borderRadius: "10px"
   },
   profileSectorImage:{
     width: 75,
@@ -382,4 +530,3 @@ const styles = StyleSheet.create({
     boxSizing: "border-box",
   }
 });
-
