@@ -615,7 +615,7 @@ router.get("/account",async (req, res)=>{
                         id: course.manager
                     }
                 })
-                return res.status(200).json({data: course, teacher: teacher, manager: manager})
+                return res.status(200).json({data: course, teacher: teacher, manager: manager,user: data})
             }else{
                 return res.status(403).json({error: "Вас немає у курсу"})
             }
