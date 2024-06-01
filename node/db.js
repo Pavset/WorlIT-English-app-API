@@ -69,6 +69,11 @@ const Courses = sequelize.define("Courses",{
         allowNull: false,
         unique: false
     },
+    enabledModules:{
+        type: DataTypes.ARRAY(DataTypes.INTEGER),
+        allowNull: false,
+        unique: false
+    },
     teacher:{
         type: DataTypes.INTEGER,
         allowNull: false,
