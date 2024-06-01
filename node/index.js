@@ -144,7 +144,8 @@ router.get("/modules/:moduleId", async (req, res) => {
                 let course = await Courses.findOne({
                     where: { 
                         users: {[Op.contains]: [data.id] },
-                        modules: {[Op.contains]: [req.params.moduleId]}
+                        modules: {[Op.contains]: [req.params.moduleId]},
+                        enabledModules: {[Op.contains]: [module.id] }
                     }
                 })
 
@@ -203,7 +204,8 @@ router.get("/topics/:id",async(req,res)=>{
                 if (module){
                     let course = await Courses.findOne({
                         where: { 
-                            modules: {[Op.contains]: [module.id] }
+                            modules: {[Op.contains]: [module.id] },
+                            enabledModules: {[Op.contains]: [module.id] }
                         }
                     })
                     if (course){
@@ -296,7 +298,8 @@ router.get("/theories/:theoryId",async(req,res)=>{
                 if (module){
                     let course = await Courses.findOne({
                         where: { 
-                            modules: {[Op.contains]: [module.id] }
+                            modules: {[Op.contains]: [module.id] },
+                            enabledModules: {[Op.contains]: [module.id] }
                         }
                     })
                     if (course){
@@ -381,13 +384,14 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                 if (topic){
                 let module = await Modules.findOne({
                     where:{
-                        topics: {[Op.contains] : [topic.id]}
+                        topics: {[Op.contains] : [topic.id]},
                     }
                 })
                 if (module){
                     let course = await Courses.findOne({
                         where: { 
-                            modules: {[Op.contains]: [module.id] }
+                            modules: {[Op.contains]: [module.id] },
+                            enabledModules: {[Op.contains]: [module.id] }
                         }
                     })
                     if (course)
@@ -454,7 +458,8 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                     if (module){
                         let course = await Courses.findOne({
                             where: { 
-                                modules: {[Op.contains]: [module.id] }
+                                modules: {[Op.contains]: [module.id] },
+                                enabledModules: {[Op.contains]: [module.id] }
                             }
                         })
                         if (course){
