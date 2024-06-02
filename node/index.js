@@ -604,6 +604,7 @@ router.get("/account",async (req, res)=>{
                     users: {[Op.contains]: [data.id] }
                 }
             })
+            // console.log(data.dataValues)
             if (course){
                 let teacher = await Staff.findOne({
                     where:{
