@@ -54,6 +54,10 @@ router.post("/signin", async (req, res) => {
     })
     if(data){
         return res.status(200).json({apikey: data.apikey})
+    } else if (!req.body.name){
+        return res.status(400).json({error: "Ви не увели ім'я"})
+    } else if (!req.body.password){
+        return res.status(400).json({error: "Ви не увели пароль"})
     } else{
         return res.status(400).json({error: "Неправильне ім'я або пароль"})
     }
@@ -73,10 +77,16 @@ router.post("/signup", async (req, res) => {
             phoneNumber: body.phone,
             apikey: apikey
         })
+        // if (data.name.length < 0){
+        //     return res.status(400).json({error: "Ви не увели ім'я"})
+        // } else if(data.surname.length < 0) {
+        //     return res.status(400).json({error: "Ви не увели прізвище"})
+        // } else{
         return res.status(201).json({apikey: data.apikey})
+        // }
     } catch (error) {
-        console.error(error)
         return res.status(400).json({error: "Виникла помилка"})
+
     }
 })
 
