@@ -2,7 +2,7 @@
 
 const express = require('express')
 const cors = require('cors');
-const { User,Courses,Modules,Topics,Theories,Tasks,Question,Staff,Word,WordList,Sections } = require("./db.js")
+const { User,Courses,Modules,Topics,Theories,Tasks,Question,Staff,Word,WordList,Sections,ModuleCourse } = require("./db.js")
 const { v4: uuidv4 } = require('uuid');
 const { Op } = require("sequelize");
 
@@ -32,7 +32,8 @@ router.get("/apikey", async (req, res) => {
     if(data){
         let course = await Courses.findOne({
             where: { 
-                users: {[Op.contains]: [data.id] }
+                
+                id: data.course,
             }
         })
         if (course){
@@ -103,23 +104,34 @@ router.get("/course", async (req, res) => {
         if (data){
             let course = await Courses.findOne({
                 where: { 
-                    users: {[Op.contains]: [data.id] }
+                    id: data.course,
                 }
             })
             if (course){
                 let modules = []
-                for (const val of course.modules) {
+                const moduleList = await ModuleCourse.findAll({
+                    where:{
+                        CourseId: course.id
+                    }
+                })
+                // console.log("xxxxxxxxxxxxxxxuuuuuuuuuuuuuuuuuuiiiiiiiiii")
+                // console.log(moduleList[1]["dataValues"]["ModuleId"])
+                for (let key of moduleList) {
+                    // console.log(key["dataValues"]["ModuleId"])
+                    
                     const module = await Modules.findOne({
-                      where: {
-                        id: val,
-                      },
-                    });
+                        where:{
+                            id: key["dataValues"]["ModuleId"]
+                        }
+                    })
                     if (module) {
                       modules.push(module.dataValues);
                     }
                 }
-                
+                // console.log(modules)
+
                 if (modules.length > 0){
+                    // console.log("SUCCES")
                     return res.status(200).json({course: course, modules: modules})
                 }else{
                     return res.status(404).json({error: "Немає модулів"})
@@ -133,6 +145,15 @@ router.get("/course", async (req, res) => {
     } catch(err){
         console.error(err)
         return res.status(500).json({error: "Виникла помилка"})
+    }
+})
+
+router.get("/modules", async (req, res)=>{
+    let allModules = await Modules.findAll()
+    if (allModules.length > 0){
+        return res.status(200).json({allModules: allModules.sort((a, b) => a.id - b.id)})
+    }else{
+        return res.status(404).json({error: "Немає модулів"})
     }
 })
 
@@ -151,30 +172,42 @@ router.get("/modules/:moduleId", async (req, res) => {
                 }
             })
             if (module){
+                
+
+
                 let course = await Courses.findOne({
                     where: { 
-                        users: {[Op.contains]: [data.id] },
-                        modules: {[Op.contains]: [req.params.moduleId]}
+                        id: data.course,
+                        // modules: {[Op.contains]: [req.params.moduleId]}
                     }
                 })
 
                 if (course){
-                    let topics = []
-                    for (const val of module.topics) {
-                        const topic = await Topics.findOne({
-                          where: {
-                            id: val,
-                          },
-                        });
-                        if (topic) {
-                            topics.push(topic.dataValues);
+                    let moduleList = await ModuleCourse.findOne({
+                        where: { 
+                            CourseId: course.id,
+                            ModuleId: req.params.moduleId
+                        }
+                    })
+                    if (moduleList){
+                        let topics = []
+                        for (const val of module.topics) {
+                            const topic = await Topics.findOne({
+                              where: {
+                                id: val,
+                              },
+                            });
+                            if (topic) {
+                                topics.push(topic.dataValues);
+                            }
+                        }
+                        if (topics.length > 0){
+                            return res.status(200).json({module: module, topics: topics})
+                        }else{
+                            return res.status(404).json({error: "Немає тем"})
                         }
                     }
-                    if (topics.length > 0){
-                        return res.status(200).json({module: module, topics: topics})
-                    }else{
-                        return res.status(404).json({error: "Немає тем"})
-                    }
+
                 }else{
                     return res.status(403).json({error: "Ви не маете доступ к цьому модулю"})
                 }
@@ -213,50 +246,62 @@ router.get("/topics/:id",async(req,res)=>{
                 if (module){
                     let course = await Courses.findOne({
                         where: { 
-                            modules: {[Op.contains]: [module.id] }
+                            id: data.course,
+                            // modules: {[Op.contains]: [req.params.moduleId]}
                         }
                     })
+    
+
                     if (course){
-                        let tasks = []
-                        for (const val of topic.tasks) {
-                            let task = await Tasks.findOne({
-                                where:{
-                                    id: val
-                                }
-                            })
-                            if (task){
-                                tasks.push(task)
+                        let moduleList = await ModuleCourse.findOne({
+                            where: { 
+                                CourseId: course.id,
+                                ModuleId: module.id
                             }
-                        }
-                        if (tasks.length > 0){
-                            let theories = []
-                            let homeworks = []
-
-                            for (const val of topic.theories) {
-                                let theory = await Theories.findOne({
+                        })
+                        if (moduleList){
+                            let tasks = []
+                            for (const val of topic.tasks) {
+                                let task = await Tasks.findOne({
                                     where:{
                                         id: val
                                     }
                                 })
-                                if (theory){
-                                    theories.push(theory)
+                                if (task){
+                                    tasks.push(task)
                                 }
                             }
-
-                            for (const val of topic.homework) {
-                                let theory = await Tasks.findOne({
-                                    where:{
-                                        id: val
+                            if (tasks.length > 0){
+                                let theories = []
+                                let homeworks = []
+    
+                                for (const val of topic.theories) {
+                                    let theory = await Theories.findOne({
+                                        where:{
+                                            id: val
+                                        }
+                                    })
+                                    if (theory){
+                                        theories.push(theory)
                                     }
-                                })
-                                if (theory){
-                                    homeworks.push(theory)
                                 }
+    
+                                for (const val of topic.homework) {
+                                    let theory = await Tasks.findOne({
+                                        where:{
+                                            id: val
+                                        }
+                                    })
+                                    if (theory){
+                                        homeworks.push(theory)
+                                    }
+                                }
+                                return res.status(200).json({topic: topic, tasks: tasks, theories: theories, homework: homeworks})
+                            } else {
+                                return res.status(404).json({error: "Немає завдань"})
                             }
-                            return res.status(200).json({topic: topic, tasks: tasks, theories: theories, homework: homeworks})
-                        } else {
-                            return res.status(404).json({error: "Немає завдань"})
                         }
+ 
                     } else {
                         return res.status(403).json({error: "Ви не увійшли в акаунт"})
                     }
@@ -611,7 +656,7 @@ router.get("/account",async (req, res)=>{
         if (data){
             let course = await Courses.findOne({
                 where: { 
-                    users: {[Op.contains]: [data.id] }
+                    id: data.course,
                 }
             })
             // console.log(data.dataValues)

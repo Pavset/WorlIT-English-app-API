@@ -302,7 +302,7 @@ function Home({navigation}){
     )
   }
   async function getModule(){
-    fetch(`${url}/cource`, {
+    fetch(`${url}/course`, {
       method: 'GET',
       headers: {
         "token": await AsyncStorage.getItem('apikey')
@@ -445,10 +445,11 @@ function Account({navigation}){
 
 }
 
-{/* Лёша */}
+
 function Modules() {
   
   const [listOfModules, SetListOfModules] = useState('')
+  const [allModules, SetAllModules] = useState('')
   const [course, SetCourse] = useState('')
 
   async function getModule(){
@@ -462,28 +463,70 @@ function Modules() {
     .then(
       async data => {
         SetListOfModules(await data.modules)
-        SetCourse(await data.modules.course)
+        SetCourse(await data.course)
         console.log(data)
       }
     )
   }
+
+  async function getAllModules(){
+    fetch(`${url}/modules`, {
+      method: 'GET',
+      headers: {
+        "token": await AsyncStorage.getItem('apikey')
+      }
+    })
+    .then((response)=> response.json())
+    .then(
+      async data => {
+        SetAllModules(await data.allModules)
+        console.log(data)
+      }
+    )
+  }
+
+  useEffect(()=>{getAllModules()},[])
   useEffect(()=>{getModule()},[])
   return(
-    <View style={styles.container}>
-       <Text>Модулі</Text>
-       {listOfModules &&
-        <View>
-          {listOfModules.map((module, idx) =>{
-            return(
-              <View key={idx}>
-                <Text>{module.name}</Text>
-              </View>
-            )
+    <ScrollView style={styles.modulesContainer} >
+
+       <Text style={[styles.orange,styles.font32,{width:"100%",display:"flex",justifyContent:"center"}]}>Модулі</Text>
+       {/* <Text>{JSON.stringify(listOfModules)}</Text>
+       <Text>Усі Модулі</Text>
+       <Text>{JSON.stringify(allModules.sort())}</Text> */}
+
+       {allModules && listOfModules &&
+        <View style={styles.modulesContainer}>
+          {allModules.map((module, idx) =>{
+            let idList = []
+            for (let h of listOfModules){
+              idList.push(h.id)
+            }
+            let a = idList.includes(module.id)
+            if (a){
+              return(
+                <TouchableOpacity style={styles.unlockedModuleButton} key={idx}>
+                  <Text style={[styles.white,styles.font20,{maxWidth:"80%",wordBreak: "break-word"}]}>{module.name}</Text>
+                  <View style={styles.ModuleButtonRight}>
+                    <Text style={[styles.white,styles.font20]}>0.5</Text>
+                    <Image style={styles.lockImage} source={ require("./assets/unlocked.png") }/>
+                  </View>
+                </TouchableOpacity>
+            )} else{
+              return(
+                <View style={styles.lockedModuleButton} key={idx}>
+                  <Text style={[styles.white,styles.font20,{maxWidth:"80%",wordBreak: "break-word"}]}>{module.name}</Text>
+                  <View style={styles.ModuleButtonRight}>
+                    <Text style={[styles.white,styles.font20]}>0</Text>
+                    <Image style={styles.lockImage} source={ require("./assets/locked.png") }/>
+                  </View>
+                </View>
+            )}
           })
           }
         </View>
        }
-    </View> 
+    </ScrollView> 
   )
 }
 
@@ -502,6 +545,53 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
+
+  blackBG:{
+    backgroundColor:"#252124"
+  },
+  blackLightBG:{
+    backgroundColor:"#4F4F4F"
+  },
+  white:{
+    color:"#fff",
+  },
+  black:{
+    color:"#252124",
+  },
+  orange:{
+    color: "#E19A38"
+  },
+  red:{
+    color: "#E15638"
+  },
+  font40:{
+    fontSize:40
+  },
+  font32:{
+    fontSize:32
+  },
+  font24:{
+    fontSize:24
+  },
+  font20:{
+    fontSize:20
+  },
+  font16:{
+    fontSize:16
+  },
+  orangeButton:{
+    paddingHorizontal: 40,
+    paddingVertical: 10,
+    backgroundColor:"#E19A38",
+    borderRadius: 10
+  },
+  scroll100:{
+    padding: 0,
+    margin:0,
+    width: "100%",
+    paddingBottom: "20%",
+  },
+
   // reg/log 
   container: {
     display: "flex",
@@ -594,12 +684,7 @@ const styles = StyleSheet.create({
 
 
   // account
-  scroll100:{
-    padding: 0,
-    margin:0,
-    width: "100%",
-    paddingBottom: "20%",
-  },
+
   profileContainer:{
     display: "flex",
     flexDirection:"column",
@@ -624,41 +709,6 @@ const styles = StyleSheet.create({
     backgroundColor:"#252124",
 
   },
-  blackBG:{
-    backgroundColor:"#252124"
-  },
-  blackLightBG:{
-    backgroundColor:"#4F4F4F"
-  },
-  white:{
-    color:"#fff",
-  },
-  black:{
-    color:"#252124",
-  },
-  orange:{
-    color: "#E19A38"
-  },
-  red:{
-    color: "#E15638"
-  },
-  font40:{
-    fontSize:40
-  },
-  font32:{
-    fontSize:32
-  },
-  font24:{
-    fontSize:24
-  },
-  font20:{
-    fontSize:20
-  },
-  font16:{
-    fontSize:16
-  },
-
-
   profileMid:{
     display: "flex",
     flexDirection:"column",
@@ -750,11 +800,54 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     width:"100px"
   },
-  orangeButton:{
-    paddingHorizontal: 40,
-    paddingVertical: 10,
-    backgroundColor:"#E19A38",
-    borderRadius: 10
-  },
 
+  // modules
+
+  modulesContainer:{
+    // display: "flex",
+    // flexDirection:"column",
+    backgroundColor: '#252124',
+    // alignItems: 'center',
+    // justifyContent: 'start',
+    paddingHorizontal: 15,
+    paddingVertical: 40,
+    margin:0,
+    gap: 15,
+    width: "100%",
+    height: "100%",
+    width: "100%"
+  },
+  unlockedModuleButton:{
+    display: "flex",
+    flexDirection:"row",
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 20,
+    border: "2px #E19A38 solid",
+    borderRadius: 5,
+    backgroundColor:"#3B3B3B",
+    width: "100%"
+  },
+  lockedModuleButton:{
+    display: "flex",
+    flexDirection:"row",
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 20,
+    border: "2px #9DACAC solid",
+    borderRadius: 5,
+    backgroundColor:"#3B3B3B",
+    width: "100%"
+  },
+  ModuleButtonRight:{
+    display: "flex",
+    flexDirection:"row",
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10
+  },
+  lockImage:{
+    width: 22,
+    height: 22
+  }
 });

@@ -50,22 +50,16 @@ const User = sequelize.define("User",{
         allowNull: true,
         unique: false
     },
-
+    course:{
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        unique: false
+    }
 })
 
 const Courses = sequelize.define("Courses",{
     name:{ 
         type: DataTypes.STRING,
-        allowNull: false,
-        unique: false
-    },
-    users:{
-        type: DataTypes.ARRAY(DataTypes.INTEGER),
-        allowNull: false,
-        unique: false
-    },
-    modules:{
-        type: DataTypes.ARRAY(DataTypes.INTEGER),
         allowNull: false,
         unique: false
     },
@@ -86,13 +80,10 @@ const Modules = sequelize.define("Modules",{
         type: DataTypes.STRING,
         allowNull: false,
         unique: false
-    },
-    topics:{
-        type: DataTypes.ARRAY(DataTypes.INTEGER),
-        allowNull: false,
-        unique: false
     }
 })
+
+const ModuleCourse = sequelize.define("ModuleCourse")
 
 const Topics = sequelize.define("Topics",{
     mainName:{
@@ -119,6 +110,11 @@ const Topics = sequelize.define("Topics",{
         type: DataTypes.ARRAY(DataTypes.INTEGER),
         allowNull: false,
         unique: false
+    }, 
+    module:{
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        unique: false
     }
 })
 
@@ -135,6 +131,11 @@ const Sections = sequelize.define("Sections",{
     },
     imagePath:{
         type: DataTypes.TEXT,
+        allowNull: true,
+        unique: false
+    },
+    theory:{
+        type: DataTypes.INTEGER,
         allowNull: false,
         unique: false
     }
@@ -143,11 +144,6 @@ const Sections = sequelize.define("Sections",{
 const Theories = sequelize.define("Theories",{
     name: {
         type: DataTypes.STRING,
-        allowNull: false,
-        unique: false
-    },
-    sectionsList:{
-        type: DataTypes.ARRAY(DataTypes.INTEGER),
         allowNull: false,
         unique: false
     }
@@ -175,18 +171,19 @@ const Tasks = sequelize.define("Tasks",{
         unique: false
     },
     wordArray:{
-        type: DataTypes.ARRAY(DataTypes.INTEGER),
+        type: DataTypes.INTEGER,
         allowNull: true,
         unique: false
     }
 })
 
+
 const WordList = sequelize.define("WordList",{
-    array:{
-        type: DataTypes.ARRAY(DataTypes.INTEGER),
+    name:{
+        type: DataTypes.TEXT,
         allowNull: false,
-        unique: false
-    }
+        unique: true
+    } 
 })
 
 const Word = sequelize.define("Word",{
@@ -200,6 +197,11 @@ const Word = sequelize.define("Word",{
         allowNull: true,
         unique: false
     },
+    list:{
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        unique: false
+    }
 })
 
 const Question = sequelize.define("Question",{
@@ -263,9 +265,42 @@ const Staff = sequelize.define("Staff",{
     },
 })
 
+User.belongsTo(Courses,{
+    foreignKey: "course"
+})
+
+Courses.belongsTo(Staff,{
+    foreignKey: "teacher"
+})
+
+Courses.belongsTo(Staff,{
+    foreignKey: "manager"
+})
+
+Word.belongsTo(WordList,{
+    foreignKey: "list"
+})
+
+Theories.hasMany(Sections,{
+    foreignKey: "theory"
+})
+Sections.belongsTo(Theories,{
+    foreignKey: "theory"
+})
+
+Modules.hasMany(Topics,{
+    foreignKey: "module"
+})
+Topics.belongsTo(Modules,{
+    foreignKey: "module"
+})
+
+Modules.belongsToMany(Courses, { through: ModuleCourse })
+Courses.belongsToMany(Modules, { through: ModuleCourse })
 
 sequelize.authenticate()
-sequelize.sync()
+// sequelize.sync()
+
 
 module.exports = {
     User: User,
@@ -278,5 +313,6 @@ module.exports = {
     Sections: Sections,
     Staff: Staff,
     Word: Word,
-    WordList: WordList
+    WordList: WordList,
+    ModuleCourse: ModuleCourse
 }
