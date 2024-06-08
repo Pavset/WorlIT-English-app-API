@@ -446,7 +446,7 @@ function Account({navigation}){
 }
 
 
-function Modules() {
+function Modules({ navigation }) {
   
   const [listOfModules, SetListOfModules] = useState('')
   const [allModules, SetAllModules] = useState('')
@@ -505,7 +505,7 @@ function Modules() {
             let a = idList.includes(module.id)
             if (a){
               return(
-                <TouchableOpacity style={styles.unlockedModuleButton} key={idx}>
+                <TouchableOpacity style={styles.unlockedModuleButton} key={idx} onPress={()=>{navigation.navigate("ModulePage", {moduleId: module.id})}}>
                   <Text style={[styles.white,styles.font20,{maxWidth:"80%",wordBreak: "break-word"}]}>{module.name}</Text>
                   <View style={styles.ModuleButtonRight}>
                     <Text style={[styles.white,styles.font20]}>0.5</Text>
@@ -530,6 +530,166 @@ function Modules() {
   )
 }
 
+function ModulePage({ navigation, route }){
+
+  const [moduleInfo, SetModuleInfo] = useState('')
+  const [topics, SetTopics] = useState('')
+
+  const moduleId = route.params.moduleId;
+
+  async function getModuleInfo(){
+    fetch(`${url}/modules/${moduleId}`, {
+      method: "GET",
+      headers: {
+        "token": await AsyncStorage.getItem('apikey')
+      }
+    })
+    .then(response => response.json())
+    .then(
+      async data => {
+        SetModuleInfo(await data.module)
+        SetTopics(await data.topicsList)
+        console.log(data)
+      }
+    )
+  }
+  useEffect(()=>{getModuleInfo()},[])
+
+  return(
+    <View>
+
+      <View>
+        <Text>kekw{moduleInfo.name}</Text>
+      {/* <Text>kekw{JSON.stringify(topics)}</Text> */}
+      </View>
+
+
+      { topics &&
+        <View>
+          {topics.map((topic,idx) =>{
+            return(
+              <View key={idx}>
+                <View>
+                  <Text>{topic.name}</Text>
+                  <Text>{topic.mainName}</Text>
+                </View>
+
+                <View>
+                  { topic.theories.map((theory, idx)=>{
+                    return(
+                      <TouchableOpacity key={idx}>
+                        <Image style={styles.lockImage} source={ require("./assets/book2.png") }/>
+                        <Text>Theory</Text>
+                      </TouchableOpacity>
+                    )
+                  })}
+
+                  { topic.tasks.map((task, idx)=>{
+                    let typeImage
+                    let typeText
+                    if (task.type == "video"){
+                      typeImage = require("./assets/video.png")
+                      typeText = "video"
+                    } else if (task.type == "test"){
+                      typeImage = require("./assets/test.png")
+                      typeText = "test"
+                    } else if (task.type == "words"){
+                      typeImage = require("./assets/words.png")
+                      typeText = "words"
+                    } else if (task.type == "routes"){
+                      typeImage = require("./assets/routes.png")
+                      typeText = "routes"
+                    } else if (task.type == "sentences"){
+                      typeImage = require("./assets/sentences.png")
+                      typeText = "sentences"
+                    }
+                    return(
+                      <TouchableOpacity key={idx}>
+                        <Image style={styles.lockImage} source={ typeImage }/>
+                        <Text>{typeText}</Text>
+                      </TouchableOpacity>
+                    )
+                  })}
+
+                  { topic.homework.map((work, idx)=>{
+                    let typeText
+                    let typeImage
+                    if (work.type == "video"){
+                      typeText = "video"
+                      typeImage = require("./assets/video.png")
+                    } else if (work.type == "test"){
+                      typeText = "test"
+                      typeImage = require("./assets/test.png")
+                    } else if (work.type == "words"){
+                      typeText = "words"
+                      typeImage = require("./assets/words.png")
+                    } else if (work.type == "routes"){
+                      typeText = "routes"
+                      typeImage = require("./assets/routes.png")
+                    } else if (work.type == "sentences"){
+                      typeText = "sentences"
+                      typeImage = require("./assets/sentences.png")
+                    }
+                    return(
+                      <TouchableOpacity key={idx}>
+                        <Image style={styles.lockImage} source={ typeImage }/>
+                        <Text>{typeText}</Text>
+                      </TouchableOpacity>
+                    )
+                  })}
+                </View>
+
+                {/* <Text>{JSON.stringify(topic)}</Text> */}
+
+              </View>
+            )
+            })
+          }
+          
+        </View>
+      }
+      {/* <NavigationPanel navigation={navigation}/> */}
+    </View>
+  )
+
+}
+
+function Theory({ navigation, route }) {
+  const theoryId = route.params.theoryId
+  const [theory, setTheory] = useState([])
+  async function handleSubmit() {
+    fetch(`${url}/theories/${theoryId}`,{
+      method: "GET",
+      headers:{
+        "token": await AsyncStorage.getItem('apikey')
+      }
+    })
+    .then(response => response.json())
+    .then(
+      async data => {
+        setTheory(await data.data)
+      }
+    )
+  }
+
+  useEffect(()=>{handleSubmit()},[theoryId])
+
+  return(
+    <View style={styles.profileContainer}>
+    <View style={[styles.orange,{width: "100%", height: 30}]}></View>
+    <ScrollView style={styles.scroll100}>
+      
+    </ScrollView>
+
+    <NavigationPanel navigation={navigation}/>
+  </View>
+  )
+}
+  
+function Test ({ navigation, route}){
+  
+}
+
 export default function App() {
   return (
     <NavigationContainer>
@@ -539,6 +699,7 @@ export default function App() {
       <Stack.Screen options={{headerShown: false}} name="Account" component={Account}/>
       <Stack.Screen options={{headerShown: false}} name="Home" component={Home}/>
       <Stack.Screen options={{headerShown: false}} name="Modules" component={Modules}/>
+      <Stack.Screen options={{headerShown: false}} name="ModulePage" component={ModulePage}/>
     </Stack.Navigator>
   </NavigationContainer>
   );

@@ -183,29 +183,108 @@ router.get("/modules/:moduleId", async (req, res) => {
                 })
 
                 if (course){
-                    let moduleList = await ModuleCourse.findOne({
+                    let foundTopics = await Topics.findAll({
                         where: { 
-                            CourseId: course.id,
-                            ModuleId: req.params.moduleId
+                            module: module.dataValues.id
                         }
                     })
-                    if (moduleList){
+                    // console.log("HHHHHHHHHHHHHUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
+
+                    // console.log(foundTopics)
+                    if (foundTopics.length > 0){
                         let topics = []
-                        for (const val of module.topics) {
+                        for (const val of foundTopics) {
+                            // console.log(val.dataValues)
                             const topic = await Topics.findOne({
                               where: {
-                                id: val,
+                                id: val.dataValues.id,
                               },
                             });
                             if (topic) {
                                 topics.push(topic.dataValues);
                             }
                         }
+                        // console.log(topics)
                         if (topics.length > 0){
-                            return res.status(200).json({module: module, topics: topics})
-                        }else{
+                            
+                            let topicsList = []
+
+                            for (const topic of topics){
+                                let theories = []
+                                let homeworks = []
+                                let tasks = []
+
+                                // console.log(topic.tasks)
+                                // console.log("sfkjfhdbvkhdfvkjhfd")
+
+
+                                for (const val of topic.tasks) {
+                                    let task = await Tasks.findOne({
+                                        where:{
+                                            id: val
+                                        }
+                                    })
+                                    if (task){
+                                        tasks.push(task.dataValues)
+                                    }
+                                }
+                                console.log(tasks)
+                                // if (tasks.length > 0){
+                                for (const val of topic.theories) {
+                                    let theory = await Theories.findOne({
+                                        where:{
+                                            id: val
+                                        }
+                                    })
+                                    if (theory){
+                                        theories.push(theory.dataValues)
+                                    }
+                                }
+    
+                                for (const val of topic.homework) {
+                                    let home = await Tasks.findOne({
+                                        where:{
+                                            id: val
+                                        }
+                                    })
+                                    if (home){
+                                        homeworks.push(home.dataValues)
+                                    }
+                                }
+                                    // return res.status(200).json({module: module, topic: topic, tasks: tasks, theories: theories, homework: homeworks})
+                                    // } else {
+                                    //     return res.status(404).json({error: "Немає завдань"})
+                                    // }
+                                // return res.status(200).json({module: module, topics: topics})
+                                // }
+                                // let thisTopicId = topic.id
+                                // console.log("HHHHHHHHHHHHHUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
+                                // console.log(thisTopicId)
+                                // let thisTopic = {
+                                //     thisTopicId : {
+                                //         tasks: tasks, theories: theories, homework: homeworks
+                                //     }
+                                // }
+                                // let thisTopic = {}
+                                let thisTopic = {
+                                    topicId: topic.id ,
+                                    name: topic.name, 
+                                    mainName: topic.mainName,
+                                    tasks: tasks, 
+                                    theories: theories, 
+                                    homework: homeworks
+                                }
+                                topicsList.push(thisTopic)
+                            }
+
+                            
+                            return res.status(200).json({module: module, topicsList: topicsList})
+
+                        } else{
                             return res.status(404).json({error: "Немає тем"})
                         }
+                    } else{
+                        return res.status(404).json({error: "В цьому модулі немає тем"})
                     }
 
                 }else{
@@ -223,102 +302,7 @@ router.get("/modules/:moduleId", async (req, res) => {
     }
 })
 
-router.get("/topics/:id",async(req,res)=>{
-    let apikey = req.headers.token
-    try {
-        let data = await User.findOne({
-            where:{
-                apikey: apikey
-            }
-        })
-        if (data){
-            let topic = await Topics.findOne({
-                where:{
-                    id: req.params.id
-                }
-            })
-            if (topic){
-                let module = await Modules.findOne({
-                    where:{
-                        topics: {[Op.contains] : [topic.id]}
-                    }
-                })
-                if (module){
-                    let course = await Courses.findOne({
-                        where: { 
-                            id: data.course,
-                            // modules: {[Op.contains]: [req.params.moduleId]}
-                        }
-                    })
-    
 
-                    if (course){
-                        let moduleList = await ModuleCourse.findOne({
-                            where: { 
-                                CourseId: course.id,
-                                ModuleId: module.id
-                            }
-                        })
-                        if (moduleList){
-                            let tasks = []
-                            for (const val of topic.tasks) {
-                                let task = await Tasks.findOne({
-                                    where:{
-                                        id: val
-                                    }
-                                })
-                                if (task){
-                                    tasks.push(task)
-                                }
-                            }
-                            if (tasks.length > 0){
-                                let theories = []
-                                let homeworks = []
-    
-                                for (const val of topic.theories) {
-                                    let theory = await Theories.findOne({
-                                        where:{
-                                            id: val
-                                        }
-                                    })
-                                    if (theory){
-                                        theories.push(theory)
-                                    }
-                                }
-    
-                                for (const val of topic.homework) {
-                                    let theory = await Tasks.findOne({
-                                        where:{
-                                            id: val
-                                        }
-                                    })
-                                    if (theory){
-                                        homeworks.push(theory)
-                                    }
-                                }
-                                return res.status(200).json({topic: topic, tasks: tasks, theories: theories, homework: homeworks})
-                            } else {
-                                return res.status(404).json({error: "Немає завдань"})
-                            }
-                        }
- 
-                    } else {
-                        return res.status(403).json({error: "Ви не увійшли в акаунт"})
-                    }
-                } else {
-                    return res.status(404).json({error: "Такої теми немає у модулях"})
-                }
-            } else {
-                return res.status(404).json({error: "Немає теми"})
-            }
-        }else {
-            return res.status(403).json({error: "Ви не увійшли в акаунт"})
-        }
-    } catch(err){
-        console.error(err)
-        return res.status(500).json({error: "Виникла помилка"})
-    }
-})
 
 // Theory
 
@@ -351,10 +335,34 @@ router.get("/theories/:theoryId",async(req,res)=>{
                 if (module){
                     let course = await Courses.findOne({
                         where: { 
-                            modules: {[Op.contains]: [module.id] }
+                            id: data.course
                         }
                     })
                     if (course){
+                        let moduleCheck = await ModuleCourse.findOne({
+                            where:{
+                                CourseId: course.id,
+                                ModuleId: module.id
+                            }
+                        })
+                        if (moduleCheck){
+
+                            
+                            let sections = await Sections.findAll({
+                                where:{
+                                    theory: theory.id
+                                }
+                            })
+                            if (sections){
+                                return res.status(200).json({data: sections})
+                            }else{
+                                return res.status(404).json({error: "Не знайшли секції для цієї теорії"})
+                            }
+
+                            
+                        }else{
+                            return res.status(403).json({error: "Ця теорія вам не доступна"})
+                        }
                         // let tasks = []
                         // for (const val of topic.tasks) {
                         //     let task = await Tasks.findOne({
@@ -367,19 +375,7 @@ router.get("/theories/:theoryId",async(req,res)=>{
                         //     }
                         // }
                         // if (tasks.length > 0){
-                            let theories = []
 
-                            for (const val of theory.sectionsList) {
-                                let theory = await Sections.findOne({
-                                    where:{
-                                        id: val
-                                    }
-                                })
-                                if (theory){
-                                    theories.push(theory)
-                                }
-                            }
-                            return res.status(200).json({data: theory, theories: theories})
                         // } else {
                         //     return res.status(404).json({error: "Немає завдань"})
                         // }
