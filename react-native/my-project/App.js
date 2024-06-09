@@ -4,7 +4,7 @@ import { NavigationContainer } from '@react-navigation/native'
 import { useState, useEffect } from 'react';
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import MaskInput from 'react-native-mask-input';
-
+// import Video, {VideoRef} from 'react-native-video';
 import NavigationPanel from "./components/navPanel"
 const Stack = createNativeStackNavigator()
 const port = 8000
@@ -556,29 +556,29 @@ function ModulePage({ navigation, route }){
   useEffect(()=>{getModuleInfo()},[])
 
   return(
-    <View>
+    <View style={styles.profileContainer}>
 
-      <View>
-        <Text>kekw{moduleInfo.name}</Text>
-      {/* <Text>kekw{JSON.stringify(topics)}</Text> */}
+      <View style={styles.header}>
+        <Text style={[styles.white,styles.font32]}>{moduleInfo.name}</Text>
       </View>
 
-
       { topics &&
-        <View>
+        <ScrollView style={styles.scroll100}>
           {topics.map((topic,idx) =>{
             return(
-              <View key={idx}>
-                <View>
-                  <Text>{topic.name}</Text>
-                  <Text>{topic.mainName}</Text>
+              <View style={styles.topicSection} key={idx}>
+                <View style={styles.topicNameDiv}>
+                  <Text style={[styles.orange, styles.font32]}>{topic.name} <Text style={[styles.white,styles.font32]}>{topic.mainName}</Text></Text>
                 </View>
+                
 
-                <View>
+                <View style={styles.divForTasks}>
                   { topic.theories.map((theory, idx)=>{
                     return(
-                      <TouchableOpacity key={idx}>
-                        <Image style={styles.lockImage} source={ require("./assets/book2.png") }/>
+                      <TouchableOpacity style={styles.taskButton} key={idx} onPress={()=>{navigation.navigate("Theory",{id: theory.id})}}>
+                        <View style={styles.taskButtonView}>
+                          <Image style={styles.taskButtonImg} source={ require("./assets/book2.png") }/>
+                        </View>
                         <Text>Theory</Text>
                       </TouchableOpacity>
                     )
@@ -587,9 +587,11 @@ function ModulePage({ navigation, route }){
                   { topic.tasks.map((task, idx)=>{
                     let typeImage
                     let typeText
+                    let media = false
                     if (task.type == "video"){
                       typeImage = require("./assets/video.png")
                       typeText = "video"
+                      media = true
                     } else if (task.type == "test"){
                       typeImage = require("./assets/test.png")
                       typeText = "test"
@@ -602,21 +604,41 @@ function ModulePage({ navigation, route }){
                     } else if (task.type == "sentences"){
                       typeImage = require("./assets/sentences.png")
                       typeText = "sentences"
+                    } else if (task.type == "audio"){
+                      typeText = "audio"
+                      typeImage = {uri: "https://img.icons8.com/?size=100&id=80743&format=png&color=000000"}
+                      media = true
                     }
-                    return(
-                      <TouchableOpacity key={idx}>
-                        <Image style={styles.lockImage} source={ typeImage }/>
-                        <Text>{typeText}</Text>
-                      </TouchableOpacity>
-                    )
+                    if (media){
+                      return(
+                        <TouchableOpacity style={styles.taskButton} key={idx} onPress={()=>{navigation.navigate(`Media`)}}>
+                          <View style={styles.taskButtonView}>
+                            <Image style={styles.taskButtonImg} source={ typeImage }/>
+                          </View>
+                          <Text>{typeText}</Text>
+                        </TouchableOpacity>
+                      )
+                    } else {
+                      return(
+                        <TouchableOpacity style={styles.taskButton} key={idx} onPress={()=>{navigation.navigate(`Test`)}}>
+                          <View style={styles.taskButtonView}>
+                            <Image style={styles.taskButtonImg} source={ typeImage }/>
+                          </View>
+                          <Text>{typeText}</Text>
+                        </TouchableOpacity>
+                      )
+                    }
+
                   })}
 
                   { topic.homework.map((work, idx)=>{
                     let typeText
                     let typeImage
+                    let media = false
                     if (work.type == "video"){
                       typeText = "video"
                       typeImage = require("./assets/video.png")
+                      media = true
                     } else if (work.type == "test"){
                       typeText = "test"
                       typeImage = require("./assets/test.png")
@@ -629,13 +651,30 @@ function ModulePage({ navigation, route }){
                     } else if (work.type == "sentences"){
                       typeText = "sentences"
                       typeImage = require("./assets/sentences.png")
+                    } else if (task.type == "audio"){
+                      typeText = "audio"
+                      typeImage = {uri: "https://img.icons8.com/?size=100&id=80743&format=png&color=000000"}
+                      media = true
                     }
-                    return(
-                      <TouchableOpacity key={idx}>
-                        <Image style={styles.lockImage} source={ typeImage }/>
-                        <Text>{typeText}</Text>
-                      </TouchableOpacity>
-                    )
+                    if (media){
+                      return(
+                        <TouchableOpacity style={styles.taskButton} key={idx} onPress={()=>{navigation.navigate(`Media`)}}>
+                          <View style={styles.taskButtonView}>
+                            <Image style={styles.taskButtonImg} source={ typeImage }/>
+                          </View>
+                          <Text>{typeText}</Text>
+                        </TouchableOpacity>
+                      )
+                    } else {
+                      return(
+                        <TouchableOpacity style={styles.taskButton} key={idx} onPress={()=>{navigation.navigate(`Test`)}}>
+                          <View style={styles.taskButtonView}>
+                            <Image style={styles.taskButtonImg} source={ typeImage }/>
+                          </View>
+                          <Text>{typeText}</Text>
+                        </TouchableOpacity>
+                      )
+                    }
                   })}
                 </View>
 
@@ -646,17 +685,18 @@ function ModulePage({ navigation, route }){
             })
           }
           
-        </View>
+        </ScrollView>
       }
-      {/* <NavigationPanel navigation={navigation}/> */}
+      <NavigationPanel navigation={navigation}/>
     </View>
   )
 
 }
 
 function Theory({ navigation, route }) {
-  const theoryId = route.params.theoryId
+  const theoryId = route.params.id
   const [theory, setTheory] = useState([])
+  const [sections, setSections] = useState()
   async function handleSubmit() {
     fetch(`${url}/theories/${theoryId}`,{
       method: "GET",
@@ -667,7 +707,9 @@ function Theory({ navigation, route }) {
     .then(response => response.json())
     .then(
       async data => {
-        setTheory(await data.data)
+        setTheory(await data.info)
+        setSections(await data.sections)
+        console.log(data)
       }
     )
   }
@@ -678,7 +720,28 @@ function Theory({ navigation, route }) {
     <View style={styles.profileContainer}>
     <View style={[styles.orange,{width: "100%", height: 30}]}></View>
     <ScrollView style={styles.scroll100}>
-      
+      <View>
+        <Text>{theory.name}</Text>
+      </View>
+      { sections &&
+        <View>
+          { sections.map((section, idx) =>{
+            return(
+              <View key={idx}>
+                { section.title &&
+                  <Text>{section.title}</Text>
+                }
+                { section.text &&
+                  <Text>{section.text}</Text>
+                }
+                { section.imagePath &&
+                  <Image style={styles.lockImage} source={ section.imagePath }/>
+                }
+              </View>
+            )
+          })}
+        </View>
+      }
     </ScrollView>
 
     <NavigationPanel navigation={navigation}/>
@@ -686,8 +749,47 @@ function Theory({ navigation, route }) {
   )
 }
   
-function Test ({ navigation, route}){
-  
+function Media ({ navigation, route}){
+  const mediaId = route.params.id
+  // const videoRef = useRef<VideoRef>(null)
+
+  async function handleSubmit() {
+    fetch(`${url}/tasks/${mediaId}`,{
+      method: "GET",
+      headers:{
+        "token": await AsyncStorage.getItem('apikey')
+      }
+    })
+    .then(response => response.json())
+    .then(
+      async data => {
+
+        console.log(data)
+      }
+    )
+  }
+
+  useEffect(()=>{handleSubmit()},[mediaId])
+  // /tasks/:tasksId
+  return(
+    <View>
+      <Text>
+        jjdjdjdsfgh
+      </Text>
+      {/* <Video 
+    // Can be a URL or a local file.
+    source={{uri: "https://youtu.be/PgNhc9YiyJg"}}
+    // Store reference  
+    ref={videoRef}
+    // Callback when remote video is buffering                                      
+    onBuffer={onBuffer}
+    // Callback when video cannot be loaded              
+    onError={onError}               
+    // style={styles.backgroundVideo}
+   /> */}
+      <NavigationPanel navigation={navigation}/>
+    </View>
+  )
 }
 
 export default function App() {
@@ -700,6 +802,8 @@ export default function App() {
       <Stack.Screen options={{headerShown: false}} name="Home" component={Home}/>
       <Stack.Screen options={{headerShown: false}} name="Modules" component={Modules}/>
       <Stack.Screen options={{headerShown: false}} name="ModulePage" component={ModulePage}/>
+      <Stack.Screen options={{headerShown: false}} name="Theory" component={Theory}/>
+      <Stack.Screen options={{headerShown: false}} name="Media" component={Media}/>
     </Stack.Navigator>
   </NavigationContainer>
   );
@@ -774,8 +878,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 10,
     paddingTop: 40,
-    height:"10%",
-    maxHeight:100,
+    // height:"10%",
+    // maxHeight:100,
     width:"100%"
   },
   mainRegLog:{
@@ -868,6 +972,7 @@ const styles = StyleSheet.create({
     gap: 10,
     padding: 10,
     backgroundColor:"#252124",
+    paddingTop: 40
 
   },
   profileMid:{
@@ -1010,5 +1115,56 @@ const styles = StyleSheet.create({
   lockImage:{
     width: 22,
     height: 22
+  },
+
+  // module
+
+  topicNameDiv:{
+    display: "flex",
+    flexDirection:"row",
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign:"center",
+    borderBottomWidth: 3,
+    borderBottomColor:"#fff",
+    width:"100%"
+  },
+  topicSection:{
+    display: "flex",
+    flexDirection:"column",
+    alignItems: 'center',
+    justifyContent: 'start',
+    width:"100%",
+    gap: 10
+  },
+  divForTasks:{
+    display: "flex",
+    flexDirection:"row",
+    alignItems: 'start',
+    justifyContent: 'space-between',
+    flexWrap:"wrap",
+    width:"80%",
+    gap: 20
+  },
+  taskButton:{
+    display: "flex",
+    flexDirection:"column",
+    alignItems: 'center',
+    justifyContent: 'start',
+    gap: 10,
+    padding: 10,
+    maxWidth: 140
+  },
+  taskButtonImg:{
+    width: 74,
+    height: 74,
+  },
+  taskButtonView:{
+    padding: 25,
+    display: "flex",
+    flexDirection:"column",
+    alignItems: 'center',
+    justifyContent: 'center',
+    border: "4px #E19A38 solid",
   }
 });

@@ -94,7 +94,10 @@ router.post("/signup", async (req, res) => {
 // Courses
 
 router.get("/course", async (req, res) => {
-    let apikey = req.headers.token
+        let apikey = req.headers.token
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    }
     try {
         let data = await User.findOne({
             where:{
@@ -158,7 +161,10 @@ router.get("/modules", async (req, res)=>{
 })
 
 router.get("/modules/:moduleId", async (req, res) => {
-    let apikey = req.headers.token
+        let apikey = req.headers.token
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    }
     try {
         let data = await User.findOne({
             where:{
@@ -228,7 +234,7 @@ router.get("/modules/:moduleId", async (req, res) => {
                                         tasks.push(task.dataValues)
                                     }
                                 }
-                                console.log(tasks)
+                                // console.log(tasks)
                                 // if (tasks.length > 0){
                                 for (const val of topic.theories) {
                                     let theory = await Theories.findOne({
@@ -308,6 +314,9 @@ router.get("/modules/:moduleId", async (req, res) => {
 
 router.get("/theories/:theoryId",async(req,res)=>{
     let apikey = req.headers.token
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    }
     try {
         let data = await User.findOne({
             where:{
@@ -320,6 +329,7 @@ router.get("/theories/:theoryId",async(req,res)=>{
                     id: req.params.theoryId
                 }
             })
+            
             if (theory){
                 let topic = await Topics.findOne({
                 where: { 
@@ -329,7 +339,7 @@ router.get("/theories/:theoryId",async(req,res)=>{
                 if (topic){
                 let module = await Modules.findOne({
                     where:{
-                        topics: {[Op.contains] : [topic.id]}
+                        id: topic.module
                     }
                 })
                 if (module){
@@ -354,7 +364,7 @@ router.get("/theories/:theoryId",async(req,res)=>{
                                 }
                             })
                             if (sections){
-                                return res.status(200).json({data: sections})
+                                return res.status(200).json({sections: sections, info: theory})
                             }else{
                                 return res.status(404).json({error: "Не знайшли секції для цієї теорії"})
                             }
@@ -405,7 +415,10 @@ router.get("/theories/:theoryId",async(req,res)=>{
 // Questions
 
 router.get("/tasks/:tasksId",async(req,res)=>{
-    let apikey = req.headers.token
+        let apikey = req.headers.token
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    }
     try {
         let data = await User.findOne({
             where:{
@@ -430,15 +443,16 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                     }
                     })
                 if (topic){
-                let module = await Modules.findOne({
-                    where:{
-                        topics: {[Op.contains] : [topic.id]}
-                    }
-                })
+                    let module = await Modules.findOne({
+                        where:{
+                            id: topic.module
+                        }
+                    })
                 if (module){
-                    let course = await Courses.findOne({
+                    let course = await ModuleCourse.findOne({
                         where: { 
-                            modules: {[Op.contains]: [module.id] }
+                            ModuleId: module.id,
+                            CourseId: data.course
                         }
                     })
                     if (course)
@@ -499,13 +513,14 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                 }else if (topicHomework){
                     let module = await Modules.findOne({
                         where:{
-                            topics: {[Op.contains] : [topicHomework.id]}
+                            id: topicHomework.module
                         }
                     })
                     if (module){
-                        let course = await Courses.findOne({
+                        let course = await ModuleCourse.findOne({
                             where: { 
-                                modules: {[Op.contains]: [module.id] }
+                                ModuleId: module.id,
+                                CourseId: data.course
                             }
                         })
                         if (course){
@@ -642,7 +657,10 @@ router.get('/complete/:taskId/:id', async (req, res)=>{
 })
 
 router.get("/account",async (req, res)=>{
-    let apikey = req.headers.token
+        let apikey = req.headers.token
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    }
     try {
         let data = await User.findOne({
             where:{
