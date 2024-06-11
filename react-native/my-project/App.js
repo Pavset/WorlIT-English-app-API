@@ -6,6 +6,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import MaskInput from 'react-native-mask-input';
 // import Video, {VideoRef} from 'react-native-video';
 import NavigationPanel from "./components/navPanel"
+// import Video from 'react-native-video';
 const Stack = createNativeStackNavigator()
 const port = 8000
 const ip = "localhost" //192.168.80.57
@@ -533,6 +534,7 @@ function Modules({ navigation }) {
 function ModulePage({ navigation, route }){
 
   const [moduleInfo, SetModuleInfo] = useState('')
+  const [taskStatuses, SetTaskStatuses] = useState('')
   const [topics, SetTopics] = useState('')
 
   const moduleId = route.params.moduleId;
@@ -549,10 +551,12 @@ function ModulePage({ navigation, route }){
       async data => {
         SetModuleInfo(await data.module)
         SetTopics(await data.topicsList)
+        SetTaskStatuses(await data.taskStatusesList)
         console.log(data)
       }
     )
   }
+  
   useEffect(()=>{getModuleInfo()},[])
 
   return(
@@ -565,6 +569,12 @@ function ModulePage({ navigation, route }){
       { topics &&
         <ScrollView style={styles.scroll100}>
           {topics.map((topic,idx) =>{
+            let videoCounter = 0
+            let testCounter = 0
+            let wordsCounter = 0
+            let routesCounter = 0
+            let sentencesCounter = 0
+            let audioCounter = 0
             return(
               <View style={styles.topicSection} key={idx}>
                 <View style={styles.topicNameDiv}>
@@ -576,10 +586,10 @@ function ModulePage({ navigation, route }){
                   { topic.theories.map((theory, idx)=>{
                     return(
                       <TouchableOpacity style={styles.taskButton} key={idx} onPress={()=>{navigation.navigate("Theory",{id: theory.id})}}>
-                        <View style={styles.taskButtonView}>
+                        <View style={[styles.taskButtonView, styles.uncompletedTask]}>
                           <Image style={styles.taskButtonImg} source={ require("./assets/book2.png") }/>
                         </View>
-                        <Text>Theory</Text>
+                        <Text style={[styles.white, styles.font20]}>Theory</Text>
                       </TouchableOpacity>
                     )
                   })}
@@ -588,97 +598,139 @@ function ModulePage({ navigation, route }){
                     let typeImage
                     let typeText
                     let media = false
+                    let counter = 0
+                    let completeStyle = styles.uncompletedTask
+
                     if (task.type == "video"){
                       typeImage = require("./assets/video.png")
                       typeText = "video"
                       media = true
+                      videoCounter += 1
+                      counter = videoCounter
                     } else if (task.type == "test"){
                       typeImage = require("./assets/test.png")
                       typeText = "test"
+                      testCounter += 1
+                      counter = testCounter
                     } else if (task.type == "words"){
                       typeImage = require("./assets/words.png")
                       typeText = "words"
+                      wordsCounter += 1
+                      counter = wordsCounter
                     } else if (task.type == "routes"){
                       typeImage = require("./assets/routes.png")
                       typeText = "routes"
+                      routesCounter += 1
+                      counter = routesCounter
                     } else if (task.type == "sentences"){
                       typeImage = require("./assets/sentences.png")
                       typeText = "sentences"
+                      sentencesCounter += 1
+                      counter = sentencesCounter
                     } else if (task.type == "audio"){
                       typeText = "audio"
                       typeImage = {uri: "https://img.icons8.com/?size=100&id=80743&format=png&color=000000"}
                       media = true
+                      audioCounter += 1
+                      counter = audioCounter
                     }
-                    if (media){
-                      return(
-                        <TouchableOpacity style={styles.taskButton} key={idx} onPress={()=>{navigation.navigate(`Media`)}}>
-                          <View style={styles.taskButtonView}>
+
+                    if(task.initialyBlocked){
+                      if(taskStatuses.blocked.includes(task.id)){
+                        typeImage = require("./assets/lockedFile.png")
+                      } 
+                    }
+
+                    if(taskStatuses.completed.includes(task.id)){
+                      completeStyle = styles.completedTask
+                    }
+
+                    return(
+                      
+                        <TouchableOpacity style={[styles.taskButton,styles.antiIndexMargin]} key={idx} onPress={()=>{navigation.navigate( media ?"Media":"Test")}}>
+                          <Text style={[styles.black, styles.font20,styles.taskIndex]}>{counter}</Text>
+                          <View style={[styles.taskButtonView, completeStyle]}>
                             <Image style={styles.taskButtonImg} source={ typeImage }/>
                           </View>
-                          <Text>{typeText}</Text>
+                          <Text style={[styles.white, styles.font20]}>{typeText}</Text>
                         </TouchableOpacity>
                       )
-                    } else {
-                      return(
-                        <TouchableOpacity style={styles.taskButton} key={idx} onPress={()=>{navigation.navigate(`Test`)}}>
-                          <View style={styles.taskButtonView}>
-                            <Image style={styles.taskButtonImg} source={ typeImage }/>
-                          </View>
-                          <Text>{typeText}</Text>
-                        </TouchableOpacity>
-                      )
-                    }
 
                   })}
-
+                
+                <View style={[styles.topicNameDiv,styles.topicHomeWork]}>
+                  <Text style={[styles.orange, styles.font32]}>Домашнє завдання</Text>  
+                </View>
                   { topic.homework.map((work, idx)=>{
-                    let typeText
+                    if(idx <= 0){
+                      videoCounter = 0
+                      testCounter  = 0
+                      wordsCounter  = 0
+                      routesCounter  = 0
+                      sentencesCounter  = 0
+                      audioCounter  = 0
+                    }
                     let typeImage
+                    let typeText
                     let media = false
+                    let counter = 0
+                    let completeStyle = styles.uncompletedTask
+                    
                     if (work.type == "video"){
-                      typeText = "video"
                       typeImage = require("./assets/video.png")
+                      typeText = "video"
                       media = true
+                      videoCounter += 1
+                      counter = videoCounter
                     } else if (work.type == "test"){
-                      typeText = "test"
                       typeImage = require("./assets/test.png")
+                      typeText = "test"
+                      testCounter += 1
+                      counter = testCounter
                     } else if (work.type == "words"){
-                      typeText = "words"
                       typeImage = require("./assets/words.png")
+                      typeText = "words"
+                      wordsCounter += 1
+                      counter = wordsCounter
                     } else if (work.type == "routes"){
-                      typeText = "routes"
                       typeImage = require("./assets/routes.png")
+                      typeText = "routes"
+                      routesCounter += 1
+                      counter = routesCounter
                     } else if (work.type == "sentences"){
-                      typeText = "sentences"
                       typeImage = require("./assets/sentences.png")
-                    } else if (task.type == "audio"){
+                      typeText = "sentences"
+                      sentencesCounter += 1
+                      counter = sentencesCounter
+                    } else if (work.type == "audio"){
                       typeText = "audio"
                       typeImage = {uri: "https://img.icons8.com/?size=100&id=80743&format=png&color=000000"}
                       media = true
+                      audioCounter += 1
+                      counter = audioCounter
                     }
-                    if (media){
-                      return(
-                        <TouchableOpacity style={styles.taskButton} key={idx} onPress={()=>{navigation.navigate(`Media`)}}>
-                          <View style={styles.taskButtonView}>
+
+                    if(work.initialyBlocked){
+                      if(taskStatuses.blocked.includes(work.id)){
+                        typeImage = require("./assets/lockedFile.png")
+                      } 
+                    }
+
+                    if(taskStatuses.completed.includes(work.id)){
+                      completeStyle = styles.completedTask
+                    }
+
+                    return(
+                        <TouchableOpacity style={[styles.taskButton,styles.antiIndexMargin]} key={idx} onPress={()=>{navigation.navigate( media ?"Media":"Test")}}>
+                          <Text style={[styles.black, styles.font20,styles.taskIndex]}>{counter}</Text>
+                          <View style={[styles.taskButtonView, completeStyle]}>
                             <Image style={styles.taskButtonImg} source={ typeImage }/>
                           </View>
-                          <Text>{typeText}</Text>
+                          <Text style={[styles.white, styles.font20]}>{typeText}</Text>
                         </TouchableOpacity>
                       )
-                    } else {
-                      return(
-                        <TouchableOpacity style={styles.taskButton} key={idx} onPress={()=>{navigation.navigate(`Test`)}}>
-                          <View style={styles.taskButtonView}>
-                            <Image style={styles.taskButtonImg} source={ typeImage }/>
-                          </View>
-                          <Text>{typeText}</Text>
-                        </TouchableOpacity>
-                      )
-                    }
                   })}
                 </View>
-
-                {/* <Text>{JSON.stringify(topic)}</Text> */}
 
               </View>
             )
@@ -750,6 +802,7 @@ function Theory({ navigation, route }) {
 }
   
 function Media ({ navigation, route}){
+  console.log("media page is in production")
   const mediaId = route.params.id
   // const videoRef = useRef<VideoRef>(null)
 
@@ -792,6 +845,16 @@ function Media ({ navigation, route}){
   )
 }
 
+
+function Test ({ navigation, route}){
+  console.log("test page is in production")
+  return(
+    <View>
+      <NavigationPanel navigation={navigation}/>
+    </View>
+  )
+}
+
 export default function App() {
   return (
     <NavigationContainer>
@@ -804,6 +867,7 @@ export default function App() {
       <Stack.Screen options={{headerShown: false}} name="ModulePage" component={ModulePage}/>
       <Stack.Screen options={{headerShown: false}} name="Theory" component={Theory}/>
       <Stack.Screen options={{headerShown: false}} name="Media" component={Media}/>
+      <Stack.Screen options={{headerShown: false}} name="Test" component={Test}/>
     </Stack.Navigator>
   </NavigationContainer>
   );
@@ -1129,6 +1193,9 @@ const styles = StyleSheet.create({
     borderBottomColor:"#fff",
     width:"100%"
   },
+  topicHomeWork:{
+    border: "none"
+  },
   topicSection:{
     display: "flex",
     flexDirection:"column",
@@ -1144,7 +1211,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     flexWrap:"wrap",
     width:"80%",
-    gap: 20
+    // gap: 20
+  },
+  antiIndexMargin:{
+    marginTop: -50
   },
   taskButton:{
     display: "flex",
@@ -1153,7 +1223,7 @@ const styles = StyleSheet.create({
     justifyContent: 'start',
     gap: 10,
     padding: 10,
-    maxWidth: 140
+    maxWidth: 140,
   },
   taskButtonImg:{
     width: 74,
@@ -1166,5 +1236,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     border: "4px #E19A38 solid",
-  }
+
+    borderRadius: 20
+  },
+  taskIndex:{
+    position:"relative",
+    display: "flex",
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 40,
+    height: 40,
+    border: "4px #252124 solid",
+    borderRadius: 360,
+    backgroundColor:"#E19A38",
+    top: 46,
+    right: -50,
+    zIndex: 2
+  },
+  uncompletedTask:{
+    backgroundColor:"#D1D8DB",
+    border:"4px #E19A38 solid"
+  },
+  completedTask:{
+    backgroundColor:"#E19A38",
+    border:"4px #252124 solid"
+  },
 });

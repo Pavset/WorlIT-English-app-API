@@ -174,9 +174,26 @@ const Tasks = sequelize.define("Tasks",{
         type: DataTypes.INTEGER,
         allowNull: true,
         unique: false
+    },
+    initialyBlocked:{
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        unique: false
     }
 })
 
+const TasksUsers = sequelize.define("TasksUsers",{
+    blocked: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        unique: false
+    },
+    completed:{
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        unique: false
+    }
+})
 
 const WordList = sequelize.define("WordList",{
     name:{
@@ -298,6 +315,9 @@ Topics.belongsTo(Modules,{
 Modules.belongsToMany(Courses, { through: ModuleCourse })
 Courses.belongsToMany(Modules, { through: ModuleCourse })
 
+User.belongsToMany(Tasks, {through: TasksUsers})
+Tasks.belongsToMany(User, {through: TasksUsers})
+
 sequelize.authenticate()
 // sequelize.sync()
 
@@ -314,5 +334,6 @@ module.exports = {
     Staff: Staff,
     Word: Word,
     WordList: WordList,
-    ModuleCourse: ModuleCourse
+    ModuleCourse: ModuleCourse,
+    TasksUsers: TasksUsers
 }

@@ -2,7 +2,7 @@
 
 const express = require('express')
 const cors = require('cors');
-const { User,Courses,Modules,Topics,Theories,Tasks,Question,Staff,Word,WordList,Sections,ModuleCourse } = require("./db.js")
+const { User,Courses,Modules,Topics,Theories,Tasks,Question,Staff,Word,WordList,Sections,ModuleCourse,TasksUsers } = require("./db.js")
 const { v4: uuidv4 } = require('uuid');
 const { Op } = require("sequelize");
 
@@ -13,6 +13,37 @@ router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 router.use(cors());
 router.use(express.static('public'))
+
+// Auto Run Functions
+
+async function createTasksWithStatus(apikey) {
+    let tasks = await Tasks.findAll()
+    let user = await User.findOne({
+        where: {
+            apikey: apikey
+        }
+    })
+    for (let task of tasks){
+        let data = await TasksUsers.findAll({
+            where:{
+                UserId: user.id,
+                TaskId: task.id,
+            }
+        })
+        if (data.length <= 0){
+            let block = false
+            if(task.initialyBlocked){
+                block = true
+            }
+            let MtM = await TasksUsers.create({
+                UserId: user.id,
+                TaskId: task.id,
+                blocked: block,
+                completed: false
+            })
+        }
+    }
+}
 
 // Check Connection
 
@@ -54,6 +85,7 @@ router.post("/signin", async (req, res) => {
         }
     })
     if(data){
+        createTasksWithStatus(data.apikey)
         return res.status(200).json({apikey: data.apikey})
     } else if (!req.body.name){
         return res.status(400).json({error: "Ви не увели ім'я"})
@@ -62,6 +94,7 @@ router.post("/signin", async (req, res) => {
     } else{
         return res.status(400).json({error: "Неправильне ім'я або пароль"})
     }
+    
 })
 
 router.post("/signup", async (req, res) => {
@@ -83,6 +116,8 @@ router.post("/signup", async (req, res) => {
         // } else if(data.surname.length < 0) {
         //     return res.status(400).json({error: "Ви не увели прізвище"})
         // } else{
+            createTasksWithStatus(data.apikey)
+
         return res.status(201).json({apikey: data.apikey})
         // }
     } catch (error) {
@@ -213,6 +248,45 @@ router.get("/modules/:moduleId", async (req, res) => {
                         // console.log(topics)
                         if (topics.length > 0){
                             
+                            const blockedTasks = await TasksUsers.findAll({
+                                where:{
+                                    UserId: data.id,
+                                    blocked: true
+                                }
+                            })
+                            const unlockedTasks = await TasksUsers.findAll({
+                                where:{
+                                    UserId: data.id,
+                                    blocked: false,
+                                    completed: false
+                                }
+                            })
+                            const completedTasks = await TasksUsers.findAll({
+                                where:{
+                                    UserId: data.id,
+                                    completed: true
+                                }
+                            })
+                            let taskStatusesList = {}
+                            if (blockedTasks){
+                                taskStatusesList["blocked"] = []
+                                for (let blocked of blockedTasks){
+                                    taskStatusesList["blocked"].push(blocked.TaskId)
+                                }
+                            }
+                            if (unlockedTasks){
+                                taskStatusesList["unlocked"] = []
+                                for (let unlocked of unlockedTasks){
+                                    taskStatusesList["unlocked"].push(unlocked.TaskId)
+                                }
+                            }
+                            if (completedTasks){
+                                taskStatusesList["completed"] = []
+                                for (let completed of completedTasks){
+                                    taskStatusesList["completed"].push(completed.TaskId)
+                                }
+                            }
+
                             let topicsList = []
 
                             for (const topic of topics){
@@ -284,7 +358,7 @@ router.get("/modules/:moduleId", async (req, res) => {
                             }
 
                             
-                            return res.status(200).json({module: module, topicsList: topicsList})
+                            return res.status(200).json({module: module, topicsList: topicsList.sort((a, b) => a.topicId - b.topicId), taskStatusesList: taskStatusesList})
 
                         } else{
                             return res.status(404).json({error: "Немає тем"})
