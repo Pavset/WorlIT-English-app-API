@@ -6,7 +6,12 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import MaskInput from 'react-native-mask-input';
 // import Video, {VideoRef} from 'react-native-video';
 import NavigationPanel from "./components/navPanel"
+import FullWidthImage from "./components/fullWidthImage"
+import { Audio } from 'expo-av';
+import VideoScreen from "./components/video"
+import AudioBar from './components/playTrack';
 // import Video from 'react-native-video';
+// import TrackPlayer from 'react-native-track-player';
 const Stack = createNativeStackNavigator()
 const port = 8000
 const ip = "localhost" //192.168.80.57
@@ -600,11 +605,13 @@ function ModulePage({ navigation, route }){
                     let media = false
                     let counter = 0
                     let completeStyle = styles.uncompletedTask
+                    let redirect = "Test"
 
                     if (task.type == "video"){
                       typeImage = require("./assets/video.png")
                       typeText = "video"
                       media = true
+                      redirect = "Media"
                       videoCounter += 1
                       counter = videoCounter
                     } else if (task.type == "test"){
@@ -631,15 +638,18 @@ function ModulePage({ navigation, route }){
                       typeText = "audio"
                       typeImage = {uri: "https://img.icons8.com/?size=100&id=80743&format=png&color=000000"}
                       media = true
+                      redirect = "AudioPage"
                       audioCounter += 1
                       counter = audioCounter
                     }
 
-                    if(task.initialyBlocked){
-                      if(taskStatuses.blocked.includes(task.id)){
-                        typeImage = require("./assets/lockedFile.png")
-                      } 
-                    }
+                    // if(task.initialyBlocked){
+
+                    // }
+                    if(taskStatuses.blocked.includes(task.id)){
+                      typeImage = require("./assets/lockedFile.png")
+                      redirect = ""
+                    } 
 
                     if(taskStatuses.completed.includes(task.id)){
                       completeStyle = styles.completedTask
@@ -647,7 +657,7 @@ function ModulePage({ navigation, route }){
 
                     return(
                       
-                        <TouchableOpacity style={[styles.taskButton,styles.antiIndexMargin]} key={idx} onPress={()=>{navigation.navigate( media ?"Media":"Test")}}>
+                        <TouchableOpacity style={[styles.taskButton,styles.antiIndexMargin]} key={idx} onPress={()=>{navigation.navigate( redirect,{id: task.id} )}}>
                           <Text style={[styles.black, styles.font20,styles.taskIndex]}>{counter}</Text>
                           <View style={[styles.taskButtonView, completeStyle]}>
                             <Image style={styles.taskButtonImg} source={ typeImage }/>
@@ -657,10 +667,11 @@ function ModulePage({ navigation, route }){
                       )
 
                   })}
-                
+                { topic.homework &&
                 <View style={[styles.topicNameDiv,styles.topicHomeWork]}>
                   <Text style={[styles.orange, styles.font32]}>Домашнє завдання</Text>  
                 </View>
+                }
                   { topic.homework.map((work, idx)=>{
                     if(idx <= 0){
                       videoCounter = 0
@@ -675,11 +686,13 @@ function ModulePage({ navigation, route }){
                     let media = false
                     let counter = 0
                     let completeStyle = styles.uncompletedTask
+                    let redirect = "Test"
                     
                     if (work.type == "video"){
                       typeImage = require("./assets/video.png")
                       typeText = "video"
                       media = true
+                      redirect = "Media"
                       videoCounter += 1
                       counter = videoCounter
                     } else if (work.type == "test"){
@@ -706,22 +719,24 @@ function ModulePage({ navigation, route }){
                       typeText = "audio"
                       typeImage = {uri: "https://img.icons8.com/?size=100&id=80743&format=png&color=000000"}
                       media = true
+                      redirect = "AudioPage"
                       audioCounter += 1
                       counter = audioCounter
                     }
-
-                    if(work.initialyBlocked){
-                      if(taskStatuses.blocked.includes(work.id)){
-                        typeImage = require("./assets/lockedFile.png")
-                      } 
-                    }
+                    
+                    if(taskStatuses.blocked.includes(work.id)){
+                      typeImage = require("./assets/lockedFile.png")
+                      redirect = ""
+                    } 
+                    
 
                     if(taskStatuses.completed.includes(work.id)){
                       completeStyle = styles.completedTask
                     }
 
+
                     return(
-                        <TouchableOpacity style={[styles.taskButton,styles.antiIndexMargin]} key={idx} onPress={()=>{navigation.navigate( media ?"Media":"Test")}}>
+                        <TouchableOpacity style={[styles.taskButton,styles.antiIndexMargin]} key={idx} onPress={()=>{navigation.navigate( redirect,{id: word.id} )}}>
                           <Text style={[styles.black, styles.font20,styles.taskIndex]}>{counter}</Text>
                           <View style={[styles.taskButtonView, completeStyle]}>
                             <Image style={styles.taskButtonImg} source={ typeImage }/>
@@ -766,28 +781,59 @@ function Theory({ navigation, route }) {
     )
   }
 
+  function replaceHighlighting(text){
+    const regex = /~(.*?)~/g;
+  
+    // Используем регулярное выражение для замены ~...~ на компоненты <Text> в React Native
+    const parts = [];
+    let lastIndex = 0;
+  
+    text.replace(regex, (match, p1, offset) => {
+      // Добавляем текст до текущего совпадения
+      if (offset > lastIndex) {
+        parts.push(text.substring(lastIndex, offset));
+      }
+      // Добавляем выделенный текст как компонент <Text>
+      parts.push(<Text style={[styles.orange, styles.font16]}>{p1.trim()}</Text>);
+      // Обновляем последний индекс
+      lastIndex = offset + match.length;
+    });
+  
+    // Добавляем оставшийся текст после последнего совпадения
+    if (lastIndex < text.length) {
+      parts.push(text.substring(lastIndex));
+    }
+  
+    return parts;
+  };
+
   useEffect(()=>{handleSubmit()},[theoryId])
 
   return(
     <View style={styles.profileContainer}>
-    <View style={[styles.orange,{width: "100%", height: 30}]}></View>
-    <ScrollView style={styles.scroll100}>
-      <View>
-        <Text>{theory.name}</Text>
+    <View style={[styles.orangeBG,{width: "100%", height: 30}]}></View>
+    <ScrollView style={[styles.scroll100,{padding: 10, marginBottom:90}]}>
+      <View style={[styles.theorySection, styles.theoryTitle]}>
+        <Text style={[styles.orange, styles.font40]}>{theory.name}</Text>
       </View>
       { sections &&
-        <View>
+        <View style={styles.theorySection}>
           { sections.map((section, idx) =>{
+            console.log(replaceHighlighting(section.text))
+            let highlightedText = replaceHighlighting(section.text);
             return(
-              <View key={idx}>
+              <View style={{gap: 15}} key={idx}>
                 { section.title &&
-                  <Text>{section.title}</Text>
+                  <Text style={[styles.orange, styles.font24]}>{section.title}</Text>
                 }
-                { section.text &&
-                  <Text>{section.text}</Text>
-                }
+                
+                <Text style={[styles.white, styles.font16,{width:"100%",wordBreak: "break-word"}]}>
+                  {highlightedText.map((part, index) => (
+                    typeof part === 'string' ? <Text>{part}</Text> : part
+                  ))}
+                </Text>
                 { section.imagePath &&
-                  <Image style={styles.lockImage} source={ section.imagePath }/>
+                  <FullWidthImage imageUrl={section.imagePath}/>
                 }
               </View>
             )
@@ -802,7 +848,9 @@ function Theory({ navigation, route }) {
 }
   
 function Media ({ navigation, route}){
-  console.log("media page is in production")
+  // console.log("media page is in production")
+  // console.log(route)
+  const [mediaUrl,setMediaUrl] = useState()
   const mediaId = route.params.id
   // const videoRef = useRef<VideoRef>(null)
 
@@ -817,34 +865,65 @@ function Media ({ navigation, route}){
     .then(
       async data => {
 
-        console.log(data)
+        console.log(data.data)
+        if (data.data.type == 'video'){
+          setMediaUrl(data.data.video)
+        } else if (data.data.type == 'audio'){
+          setMediaUrl(data.data.audio)
+        }
       }
     )
   }
 
   useEffect(()=>{handleSubmit()},[mediaId])
-  // /tasks/:tasksId
+
   return(
-    <View>
-      <Text>
-        jjdjdjdsfgh
-      </Text>
-      {/* <Video 
-    // Can be a URL or a local file.
-    source={{uri: "https://youtu.be/PgNhc9YiyJg"}}
-    // Store reference  
-    ref={videoRef}
-    // Callback when remote video is buffering                                      
-    onBuffer={onBuffer}
-    // Callback when video cannot be loaded              
-    onError={onError}               
-    // style={styles.backgroundVideo}
-   /> */}
+    <View style={styles.profileContainer}>
+
+      {/* <ScrollView> */}
+            <VideoScreen videoSource={mediaUrl}/>
+      {/* </ScrollView> */}
+      
       <NavigationPanel navigation={navigation}/>
     </View>
   )
 }
 
+
+
+function AudioPage({navigation, route}){
+
+  // console.log('audio')
+  const mediaAudioId = route.params.id
+  const [AudioSRC, setAudioSRC] = useState()
+
+  
+  async function handleSubmit() {
+    fetch(`${url}/tasks/${mediaAudioId}`,{
+      method: "GET",
+      headers:{
+        "token": await AsyncStorage.getItem('apikey')
+      }
+    })
+    .then(response => response.json())
+    .then(
+      async data => {
+        console.log(data.data.audio)
+        setAudioSRC(await data.data.audio)
+      }
+    )
+    
+  }
+  useEffect(()=>{handleSubmit()},[mediaAudioId])
+  
+
+  return(
+    <View>
+      <AudioBar url ={AudioSRC}/>
+      {/* <NavigationPanel navigation={navigation}/> */}
+    </View>
+  )
+}
 
 function Test ({ navigation, route}){
   console.log("test page is in production")
@@ -866,8 +945,9 @@ export default function App() {
       <Stack.Screen options={{headerShown: false}} name="Modules" component={Modules}/>
       <Stack.Screen options={{headerShown: false}} name="ModulePage" component={ModulePage}/>
       <Stack.Screen options={{headerShown: false}} name="Theory" component={Theory}/>
-      <Stack.Screen options={{headerShown: false}} name="Media" component={Media}/>
+      <Stack.Screen options={{headerShown: false}} name="AudioPage" component={AudioPage}/>
       <Stack.Screen options={{headerShown: false}} name="Test" component={Test}/>
+      <Stack.Screen options={{headerShown: false}} name="Media" component={Media}/>
     </Stack.Navigator>
   </NavigationContainer>
   );
@@ -880,6 +960,9 @@ const styles = StyleSheet.create({
   },
   blackLightBG:{
     backgroundColor:"#4F4F4F"
+  },
+  orangeBG:{
+    backgroundColor:"#E19A38"
   },
   white:{
     color:"#fff",
@@ -1260,5 +1343,20 @@ const styles = StyleSheet.create({
   completedTask:{
     backgroundColor:"#E19A38",
     border:"4px #252124 solid"
+  },
+
+  // theory
+  theorySection:{
+    width: "100%", 
+    display:"flex", 
+    direction:"column",
+    alignItems:"start", 
+    justifyContent:"start",
+    paddingVertical:10,
+    gap: 15
+  },
+  theoryTitle:{
+    borderBottomColor:"#fff",
+    borderBottomWidth: 2
   },
 });

@@ -438,7 +438,7 @@ router.get("/theories/:theoryId",async(req,res)=>{
                                 }
                             })
                             if (sections){
-                                return res.status(200).json({sections: sections, info: theory})
+                                return res.status(200).json({sections: sections.sort((a, b) => a.id - b.id), info: theory})
                             }else{
                                 return res.status(404).json({error: "Не знайшли секції для цієї теорії"})
                             }
@@ -493,6 +493,7 @@ router.get("/tasks/:tasksId",async(req,res)=>{
     if (!apikey){
         return res.status(403).json({error: "У вас немає API-ключа"})
     }
+
     try {
         let data = await User.findOne({
             where:{
@@ -516,6 +517,7 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                         homework: {[Op.contains]: [task.id] }
                     }
                     })
+                console.log(topicHomework)
                 if (topic){
                     let module = await Modules.findOne({
                         where:{

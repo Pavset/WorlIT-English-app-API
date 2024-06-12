@@ -126,7 +126,7 @@ const Sections = sequelize.define("Sections",{
     },
     title:{
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
         unique: false
     },
     imagePath:{
@@ -319,7 +319,7 @@ User.belongsToMany(Tasks, {through: TasksUsers})
 Tasks.belongsToMany(User, {through: TasksUsers})
 
 sequelize.authenticate()
-// sequelize.sync()
+sequelize.sync()
 
 
 module.exports = {
