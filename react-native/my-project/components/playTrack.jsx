@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { View, StyleSheet, Button } from 'react-native';
 import { Audio } from 'expo-av';
-
+import { Slidan, NativeBaseProvider } from 'native-base'
 let started = false
 
 export default function AudioBar({url}) {

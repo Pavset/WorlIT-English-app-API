@@ -4,7 +4,7 @@ import { NavigationContainer } from '@react-navigation/native'
 import { useState, useEffect } from 'react';
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import MaskInput from 'react-native-mask-input';
-// import Video, {VideoRef} from 'react-native-video';
+import NavigationPanelTest from "./components/navPanelTest"
 import NavigationPanel from "./components/navPanel"
 import FullWidthImage from "./components/fullWidthImage"
 import { Audio } from 'expo-av';
@@ -852,7 +852,7 @@ function Media ({ navigation, route}){
   // console.log(route)
   const [mediaUrl,setMediaUrl] = useState()
   const mediaId = route.params.id
-  // const videoRef = useRef<VideoRef>(null)
+  const [wordList, setWordList] = useState()
 
   async function handleSubmit() {
     fetch(`${url}/tasks/${mediaId}`,{
@@ -864,13 +864,17 @@ function Media ({ navigation, route}){
     .then(response => response.json())
     .then(
       async data => {
-
-        console.log(data.data)
-        if (data.data.type == 'video'){
-          setMediaUrl(data.data.video)
-        } else if (data.data.type == 'audio'){
-          setMediaUrl(data.data.audio)
+        if (!data.error){
+          console.log(data)
+          if (data.data.type == 'video'){
+            setMediaUrl(data.data.video)
+          } else if (data.data.type == 'audio'){
+            setMediaUrl(data.data.audio)
+          }
+          setWordList(data.words)
         }
+        // console.log(data.data)
+
       }
     )
   }
@@ -884,19 +888,27 @@ function Media ({ navigation, route}){
             <VideoScreen videoSource={mediaUrl}/>
       {/* </ScrollView> */}
       
-      <NavigationPanel navigation={navigation}/>
+      <NavigationPanelTest word={true} wordList={wordList} navigation={navigation}/>
     </View>
   )
 }
 
-
+function Words({navigation, route}) {
+  const words = route.params.words
+  return(
+    <View style={styles.profileContainer}>
+      <Text>{JSON.stringify(words)}</Text>
+      <NavigationPanel word={false} navigation={navigation}/>
+    </View>
+  )
+}
 
 function AudioPage({navigation, route}){
 
   // console.log('audio')
   const mediaAudioId = route.params.id
   const [AudioSRC, setAudioSRC] = useState()
-
+  const [wordList, setWordList] = useState()
   
   async function handleSubmit() {
     fetch(`${url}/tasks/${mediaAudioId}`,{
@@ -910,6 +922,7 @@ function AudioPage({navigation, route}){
       async data => {
         console.log(data.data.audio)
         setAudioSRC(await data.data.audio)
+        setWordList(data.words)
       }
     )
     
@@ -920,7 +933,7 @@ function AudioPage({navigation, route}){
   return(
     <View>
       <AudioBar url ={AudioSRC}/>
-      {/* <NavigationPanel navigation={navigation}/> */}
+      <NavigationPanelTest word={true} wordList={wordList} navigation={navigation}/>
     </View>
   )
 }
@@ -948,6 +961,7 @@ export default function App() {
       <Stack.Screen options={{headerShown: false}} name="AudioPage" component={AudioPage}/>
       <Stack.Screen options={{headerShown: false}} name="Test" component={Test}/>
       <Stack.Screen options={{headerShown: false}} name="Media" component={Media}/>
+      <Stack.Screen options={{headerShown: false}} name="Words" component={Words}/>
     </Stack.Navigator>
   </NavigationContainer>
   );

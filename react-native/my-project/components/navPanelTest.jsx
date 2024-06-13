@@ -1,16 +1,27 @@
 import { StyleSheet, Text, View, LogBox, Pressable , TextInput, Image, Link } from 'react-native';
 
-export default function NavigationPanelTest({navigation}){
+export default function NavigationPanelTest({word,navigation, wordList}){
+  if (word){
     return(
-        <View style={styles.navBar}>
-          <Pressable style={styles.button} onPress={()=>{navigation.navigate("Modules")}}>
-            <Image style={styles.buttonImage} source={ require("../assets/book.png") }/>
-          </Pressable >
-          <Pressable style={styles.button} onPress={()=>{navigation.navigate("Account")}}>
-            <Image style={styles.buttonImage} source={ require("../assets/profile.png") }/>
-          </Pressable >
-        </View>
-    )
+      <View style={styles.navBar}>
+        <Pressable style={styles.button} onPress={()=>{navigation.goBack()}}>
+          <Image style={styles.buttonImage} source={ require("../assets/book.png") }/>
+        </Pressable >
+        <Pressable style={styles.button} onPress={()=>{navigation.navigate("Words",{words : worldList})}}>
+          <Image style={styles.buttonImage} source={ require("../assets/profile.png") }/>
+        </Pressable >
+      </View>
+  )
+  }else{
+    return(
+      <View style={styles.navBar}>
+        <Pressable style={styles.button} onPress={()=>{navigation.goBack()}}>
+          <Image style={styles.buttonImage} source={ require("../assets/book.png") }/>
+        </Pressable >
+      </View>
+  )
+  }
+
 }
 
 const styles = StyleSheet.create({

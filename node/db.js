@@ -227,6 +227,11 @@ const Question = sequelize.define("Question",{
         allowNull: true,
         unique: false
     },
+    questionType:{
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: false
+    },
     imagePath:{
         type: DataTypes.STRING,
         allowNull: true,
@@ -319,7 +324,7 @@ User.belongsToMany(Tasks, {through: TasksUsers})
 Tasks.belongsToMany(User, {through: TasksUsers})
 
 sequelize.authenticate()
-sequelize.sync()
+// sequelize.sync()
 
 
 module.exports = {

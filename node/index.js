@@ -532,13 +532,38 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                         }
                     })
                     if (course)
+                    // var words = []
+                    // let wordList = []
+                    // // for (const val of task.dataValues.wordArray) {
+                    //     let question = await WordList.findOne({
+                    //         where:{
+                    //             id: val
+                    //         }
+                    //     })
+                    //     if (question){
+                    //         wordList.push(question.dataValues)
+                    //     }
+                    // // }
+                    // if (wordList.length > 0){
+                    //     for (const list of wordList) {
+                            // for (const val of list.array){
+                                var words = await Word.findAll({
+                                    where:{
+                                        list: task.wordArray
+                                    }
+                                })
+                                // if (question){
+                                //     words.push(question.dataValues)
+                                // }
+                            // }
 
+                        // }
+                    // }
                         if (task.type != 'question'){
-                            return res.status(200).json({data: task})
+                            return res.status(200).json({data: task, words: words})
                         }else{
                             let ques = []
-                            let words = []
-                            let wordList = []
+
                             for (const val of task.questions) {
                                 let question = await Question.findOne({
                                     where:{
@@ -549,31 +574,7 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                                     ques.push(question)
                                 }
                             }
-                            for (const val of task.wordArray) {
-                                let question = await WordList.findOne({
-                                    where:{
-                                        id: val
-                                    }
-                                })
-                                if (question){
-                                    wordList.push(question.dataValues)
-                                }
-                            }
-                            if (wordList.length > 0){
-                                for (const list of wordList) {
-                                    for (const val of list.array){
-                                        let question = await Word.findOne({
-                                            where:{
-                                                id: val
-                                            }
-                                        })
-                                        if (question){
-                                            words.push(question.dataValues)
-                                        }
-                                    }
 
-                                }
-                            }
                             if (ques.length > 0){
                                 return res.status(200).json({data: ques, task: task, words: words})
                             } else {
