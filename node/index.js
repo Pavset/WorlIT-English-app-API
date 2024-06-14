@@ -39,7 +39,8 @@ async function createTasksWithStatus(apikey) {
                 UserId: user.id,
                 TaskId: task.id,
                 blocked: block,
-                completed: false
+                completed: false,
+                progress: 1
             })
         }
     }
@@ -559,19 +560,19 @@ router.get("/tasks/:tasksId",async(req,res)=>{
 
                         // }
                     // }
-                        if (task.type != 'question'){
+                        if (task.type == 'audio' || task.type == 'video'){
                             return res.status(200).json({data: task, words: words})
                         }else{
                             let ques = []
+                            let questions = await Question.findAll({
+                                where:{
+                                    taskId: req.params.tasksId
+                                }
+                            })
 
-                            for (const val of task.questions) {
-                                let question = await Question.findOne({
-                                    where:{
-                                        id: val
-                                    }
-                                })
-                                if (question){
-                                    ques.push(question)
+                            if (questions){
+                                for (const val of questions) {
+                                    ques.push(val.dataValues)
                                 }
                             }
 
@@ -602,20 +603,33 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                         })
                         if (course){
 
-                            if (task.type != 'question'){
+                            if (task.type == 'audio' || task.type == 'video'){
                                 return res.status(200).json({data: task})
                             }else{
+
                                 let ques = []
-                                for (const val of task.questions) {
-                                    let question = await Question.findOne({
-                                        where:{
-                                            id: val
-                                        }
-                                    })
-                                    if (question){
-                                        ques.push(question)
+                                let questions = await Question.findAll({
+                                    where:{
+                                        taskId: req.params.tasksId
+                                    }
+                                })
+
+                                if (questions){
+                                    for (const val of questions) {
+                                        ques.push(val.dataValues)
                                     }
                                 }
+                                // let ques = []
+                                // for (const val of task.questions) {
+                                //     let question = await Question.findOne({
+                                //         where:{
+                                //             id: val
+                                //         }
+                                //     })
+                                //     if (question){
+                                //         ques.push(question)
+                                //     }
+                                // }
                                 if (ques.length > 0){
                                     return res.status(200).json({data: ques, task: task})
                                 } else {
@@ -659,6 +673,48 @@ router.get("/tasks/:tasksId",async(req,res)=>{
         return res.status(500).json({error: "Виникла помилка"})
     }
 })
+
+
+router.get("/taskProgress/:taskId", async (req, res) =>{
+    try{
+        let taskProgress = await TasksUsers.findOne({
+            where: {
+                TaskId: req.params.taskId
+            }
+        })
+        if(taskProgress){
+            return res.status(200).json({progress: taskProgress})
+        }
+    }catch(error){
+        console.error(error)
+        return res.status(500).json({error: "Виникла помилка"})
+    }
+})
+
+router.post("/taskProgress/:taskId/:newProgress", async (req, res) =>{
+    try{
+        let taskId = req.params.taskId
+        let newProgress = req.params.newProgress
+
+        let taskProgress = await TasksUsers.findOne({
+            where: {
+                TaskId: taskId
+            }
+        })
+        if(taskProgress){
+
+            taskProgress.update({ progress: newProgress })
+            await taskProgress.save();
+            return res.status(200).json({progress: taskProgress})
+        }
+    }catch(error){
+        console.error(error)
+        return res.status(500).json({error: "Виникла помилка"})
+    }
+})
+
+
+
 
 router.get('/complete/:taskId/:id', async (req, res)=>{
     try {

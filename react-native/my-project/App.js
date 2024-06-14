@@ -939,9 +939,71 @@ function AudioPage({navigation, route}){
 }
 
 function Test ({ navigation, route}){
-  console.log("test page is in production")
+
+  const testId = route.params.id
+  const [task, setTask] = useState()
+  const [questions, setQuestions] = useState()
+  const [wordList, setWordList] = useState()
+  const [questionProgress, setQuestionProgress] = useState()
+
+
+  async function getInfoOfTask() {
+    fetch(`${url}/tasks/${testId}`,{
+      method: "GET",
+      headers:{
+        "token": await AsyncStorage.getItem('apikey')
+      }
+    })
+    .then(response => response.json())
+    .then(
+      async data => {
+        console.log(data)
+        setTask(await data.task)
+        setQuestions(await data.data)
+        setWordList(await data.words)
+      }
+    )
+    
+  }
+
+  async function getProgresId() {
+    fetch(`${url}/taskProgress/${testId}`,{
+      method: "GET"
+    })
+    .then(response => response.json())
+    .then(
+      async data => {
+        console.log(await data)
+        setQuestionProgress(await data.progress)
+      }
+    )
+    
+  }
+
+  async function updateProgresId(newProg) {
+    fetch(`${url}/taskProgress/${testId}/${newProg}`,{
+      method: "POST"
+    })
+    .then(response => response.json())
+    .then(
+      async data => {
+        console.log(await data)
+        setQuestionProgress(await data.progress.progress)
+        getProgresId()
+        getInfoOfTask()
+      }
+    )
+    
+  }
+
+  useEffect(()=>{getInfoOfTask()},[testId])
+  useEffect(()=>{getProgresId()},[testId])
   return(
-    <View>
+    <View style={styles.profileContainer}>
+      {questions && questionProgress &&
+        <Text>{JSON.stringify(questions[questionProgress.progress-1])}</Text>
+      }
+      <TouchableOpacity style={styles.orangeButton} onPress={()=>{updateProgresId(questionProgress.progress+1)}}><Text style={[styles.black, styles.font24]}>Перейти дальше</Text></TouchableOpacity>
       <NavigationPanel navigation={navigation}/>
     </View>
   )

@@ -149,13 +149,7 @@ const Theories = sequelize.define("Theories",{
     }
 })
 
-const Tasks = sequelize.define("Tasks",{
-    questions:{
-        type: DataTypes.ARRAY(DataTypes.INTEGER),
-        allowNull: true,
-        unique: false
-    },
-    type:{
+const Tasks = sequelize.define("Tasks",{type:{
         type: DataTypes.STRING,
         allowNull: false,
         unique: false
@@ -179,6 +173,11 @@ const Tasks = sequelize.define("Tasks",{
         type: DataTypes.BOOLEAN,
         allowNull: false,
         unique: false
+    },
+    questionsCount:{
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        unique: false
     }
 })
 
@@ -191,6 +190,19 @@ const TasksUsers = sequelize.define("TasksUsers",{
     completed:{
         type: DataTypes.BOOLEAN,
         allowNull: false,
+        unique: false
+    },
+    progress:{
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        unique: false
+    },
+})
+
+const UsersWords = sequelize.define("UsersWords",{
+    counter:{
+        type: DataTypes.INTEGER,
+        allowNull: true,
         unique: false
     }
 })
@@ -251,6 +263,11 @@ const Question = sequelize.define("Question",{
         type: DataTypes.TEXT,
         allowNull: true,
         unique: false
+    },
+    taskId:{
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        unique: false
     }
 })
 
@@ -303,6 +320,10 @@ Word.belongsTo(WordList,{
     foreignKey: "list"
 })
 
+Question.belongsTo(Tasks,{
+    foreignKey: "taskId"
+})
+
 Theories.hasMany(Sections,{
     foreignKey: "theory"
 })
@@ -317,11 +338,17 @@ Topics.belongsTo(Modules,{
     foreignKey: "module"
 })
 
+
+
 Modules.belongsToMany(Courses, { through: ModuleCourse })
 Courses.belongsToMany(Modules, { through: ModuleCourse })
 
 User.belongsToMany(Tasks, {through: TasksUsers})
 Tasks.belongsToMany(User, {through: TasksUsers})
+
+User.belongsToMany(Word,{through:UsersWords})
+Word.belongsToMany(User,{through:UsersWords})
+
 
 sequelize.authenticate()
 // sequelize.sync()
@@ -340,5 +367,6 @@ module.exports = {
     Word: Word,
     WordList: WordList,
     ModuleCourse: ModuleCourse,
-    TasksUsers: TasksUsers
+    TasksUsers: TasksUsers,
+    UsersWords: UsersWords
 }
