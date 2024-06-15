@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
-import { View, StyleSheet, Button } from 'react-native';
+import { View, StyleSheet, Button, Text, TouchableOpacity, Image } from 'react-native';
 import { Audio } from 'expo-av';
-import { Slidan, NativeBaseProvider } from 'native-base'
+import { Slider, NativeBaseProvider, HStack } from 'native-base'
 let started = false
 
 export default function AudioBar({url}) {
   const [sound, setSound] = useState();
   const [position, setPosition] = useState(0)
   const [isPlay, setPlay] = useState(true)
-
+  const [progress, setProgress] = useState(0)
+  // const [onChangeValue, setOnChangeValue] = useState(0)
+  // const [onChangeEndValue, setOnChangeEndValue] = useState(100)
 
   async function playSound() {
     console.log('Loading Sound');
@@ -17,7 +19,7 @@ export default function AudioBar({url}) {
     setSound(sound);
     let status = await sound.getStatusAsync();
     setPosition(status.positionMillis)
-
+    // setOnChangeEndValue(sound.durationMillis/1000)
     console.log('Playing Sound');
     started = true
     await sound.playAsync();
@@ -65,7 +67,7 @@ export default function AudioBar({url}) {
     setPlay(!isPlay);
   }
 
-
+// durationMillis
   useEffect(() => {
     return sound
       ? () => {
@@ -74,14 +76,56 @@ export default function AudioBar({url}) {
         }
       : undefined;
   }, [sound]);
+
+  // var nowTime = sound.positionMillis
+  // var durationTime = sound.durationMillis
+
+
+
+  setInterval(async () => {
+    if (sound){
+      const status = await sound.getStatusAsync();
+      if (status){
+       var percent = status.durationMillis/100
+       var percentNow = Math.floor(status.positionMillis/percent)
+       console.log(percentNow)
+       setProgress(percentNow)
+      }
+      
+    }
+
+     
+  }, 1000);
+
+  
 // stopAsync()
   return (
-    <View style={styles.container}>
-      <Button title="To Beggining" onPress={stopSound} />
-      <Button title={isPlay ? "Pause":"Unpause"} onPress={!started ? playSound : pauseSound} />
-      <Button title="+15s" onPress={rewindForward} />
-      <Button title="-15s" onPress={rewindBack} />
-    </View>
+    <NativeBaseProvider>
+      <View >
+
+      <HStack space={4} justifyContent="center">
+        <TouchableOpacity onPress={rewindBack}>
+          <Image source = {require=("../assets/15back.png")} style = {styles.image} />
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={rewindForward} >
+          <Image source = {require=("../assets/15forward.png")} style = {styles.image} />
+        </TouchableOpacity>
+        {/* <Button title="-15s" onPress={rewindBack} /> */}
+        {/* <Button title="To Beggining" onPress={stopSound} /> */}
+        <Button title={isPlay ? "Pause":"Unpause"} onPress={!started ? playSound : pauseSound} />
+        <Button title="+15s" onPress={rewindForward} />
+      </HStack>
+
+        <Slider value={progress} minValue={0} maxValue={100} defaultValue={0}  step = {0} colorScheme="cyan">
+          <Slider.Track>
+            <Slider.FilledTrack bg = "warning.500"/>
+          </Slider.Track>
+     
+        </Slider>
+        
+      </View>
+    </NativeBaseProvider>
   );
 }
 
@@ -92,4 +136,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#ecf0f1',
     padding: 10,
   },
+  image: {
+    width: 50,
+    height: 50
+  }
 });

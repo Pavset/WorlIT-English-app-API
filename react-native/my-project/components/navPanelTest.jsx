@@ -5,10 +5,10 @@ export default function NavigationPanelTest({word,navigation, wordList}){
     return(
       <View style={styles.navBar}>
         <Pressable style={styles.button} onPress={()=>{navigation.goBack()}}>
-          <Image style={styles.buttonImage} source={ require("../assets/book.png") }/>
+          <Image style={styles.buttonImage} source={{ uri: "https://i.postimg.cc/yDjWf9xt/icons8-back-96.png" }}/>
         </Pressable >
-        <Pressable style={styles.button} onPress={()=>{navigation.navigate("Words",{words : worldList})}}>
-          <Image style={styles.buttonImage} source={ require("../assets/profile.png") }/>
+        <Pressable style={styles.button} onPress={()=>{navigation.navigate("Words",{words : wordList})}}>
+          <Image style={styles.buttonImage} source={{ uri: "https://i.postimg.cc/zVnyg4rJ/icons8-document-96.png" }}/>
         </Pressable >
       </View>
   )
@@ -16,7 +16,7 @@ export default function NavigationPanelTest({word,navigation, wordList}){
     return(
       <View style={styles.navBar}>
         <Pressable style={styles.button} onPress={()=>{navigation.goBack()}}>
-          <Image style={styles.buttonImage} source={ require("../assets/book.png") }/>
+          <Image style={styles.buttonImage} source={{ uri: "https://i.postimg.cc/yDjWf9xt/icons8-back-96.png" }}/>
         </Pressable >
       </View>
   )

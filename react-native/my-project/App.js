@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, LogBox, TouchableOpacity, TextInput, Image, Linking, ScrollView, StatusBar, } from 'react-native';
+import { StyleSheet, Text, View, LogBox, TouchableOpacity, TextInput, Image, Linking, ScrollView, StatusBar,ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native'
 import { useState, useEffect } from 'react';
@@ -10,6 +10,7 @@ import FullWidthImage from "./components/fullWidthImage"
 import { Audio } from 'expo-av';
 import VideoScreen from "./components/video"
 import AudioBar from './components/playTrack';
+// import { background, border } from 'native-base/lib/typescript/theme/styled-system';
 // import Video from 'react-native-video';
 // import TrackPlayer from 'react-native-track-player';
 const Stack = createNativeStackNavigator()
@@ -386,7 +387,11 @@ function Account({navigation}){
 
           <View style={styles.profileMid}>
             <Image style={styles.avatar} source={ require("./assets/account.png") }/>
-            <Text style={[styles.orange,styles.font24]}>{userData.name}</Text>
+            {/* <View style={{flexDirection: 'row', width: "100%", justifyContent: "space-evenly"}}> */}
+              <Text style={[styles.orange,styles.font24]}>{userData.name} {userData.surname}</Text>
+              {/* <Text style={[styles.orange,styles.font24]}>{userData.surname}</Text> */}
+            {/* </View> */}
+            
           </View>
           <View style={styles.profileDown}>
             <View style={[styles.profileSector,styles.blackBG]}>
@@ -447,7 +452,80 @@ function Account({navigation}){
         <NavigationPanel navigation={navigation}/>
       </View>
     )
-} 
+  } else{
+    return(
+
+      <View style={[styles.profileContainer,{justifyContent: "center", alignItems: "center"}]}>
+        {/* <View style={styles.profileUp}>
+          <Text style={[styles.white,styles.font32]}>Профіль</Text>
+        </View> */}
+        <ActivityIndicator size="large" color="#e19a38"/>
+        {/* <ScrollView style={styles.scroll100}>
+
+          <View style={styles.profileMid}>
+            <Image style={styles.avatar} source={ require("./assets/account.png") }/>
+            <Text style={[styles.orange,styles.font24]}>{userData.name}</Text>
+          </View>
+          <View style={styles.profileDown}>
+            <View style={[styles.profileSector,styles.blackBG]}>
+              <Text style={[styles.white,styles.font20]}>Курс:</Text>
+              <Text style={[styles.orange,styles.font20]}>{courseData.name}</Text>
+            </View>
+            <Text style={[styles.white,styles.font24]}>Ментор</Text>
+            <View style={styles.profileSector}>
+    
+              <Image style={styles.profileSectorImage} source={{uri: teacherData.image}}/>
+              <View style={styles.profileSectorRight}>
+    
+                <Text style={[styles.orange,styles.font20]}>{teacherData.name}</Text>
+                <Text style={[styles.white,styles.font16]}>{teacherData.phone}</Text>
+                <View style={styles.socialsDiv}>
+                    <Text onPress={() => Linking.openURL(teacherData.tg)}> 
+                      <Image style={styles.socials} source={ require("./assets/telegram.png") }/> 
+                    </Text>
+                    <Text onPress={() => Linking.openURL(teacherData.viber)}> 
+                      <Image style={styles.socials} source={ require("./assets/viber.png") } />
+                    </Text>
+                    
+                </View>
+    
+              </View>
+    
+            </View>
+    
+            <Text style={[styles.white,styles.font24]}>Менеджер</Text>
+            <View style={styles.profileSector}>
+    
+              <Image style={styles.profileSectorImage} source={{uri: managerData.image}}/>
+              <View style={styles.profileSectorRight} >
+    
+                <Text style={[styles.orange,styles.font20]}>{managerData.name}</Text>
+                <Text style={[styles.white,styles.font16]}>{managerData.phone}</Text>
+                <View style={styles.socialsDiv}>
+                    <Text onPress={() => Linking.openURL(managerData.tg)}> 
+                      <Image style={styles.socials} source={ require("./assets/telegram.png") }/> 
+                    </Text>
+                    <Text onPress={() => Linking.openURL(managerData.viber)}> 
+                      <Image style={styles.socials} source={ require("./assets/viber.png") } />
+                    </Text>
+                </View>
+    
+              </View>
+    
+            </View>
+
+          </View>
+          <View style={styles.forExitButton}>
+              <TouchableOpacity style={styles.exitButton} onPress={()=>{clearAsyncStorage()}}>
+                <Text style={[styles.white,styles.font20]}>Вийти</Text>
+              </TouchableOpacity>
+          </View>
+        </ScrollView>
+   */}
+        <NavigationPanel navigation={navigation}/>
+      </View>
+    )
+  }
 
 }
 
@@ -496,12 +574,13 @@ function Modules({ navigation }) {
   return(
     <ScrollView style={styles.modulesContainer} >
 
-       <Text style={[styles.orange,styles.font32,{width:"100%",display:"flex",justifyContent:"center"}]}>Модулі</Text>
-       {/* <Text>{JSON.stringify(listOfModules)}</Text>
-       <Text>Усі Модулі</Text>
-       <Text>{JSON.stringify(allModules.sort())}</Text> */}
-
-       {allModules && listOfModules &&
+      <Text style={[styles.orange,styles.font32,{width:"100%",display:"flex",justifyContent:"center"}]}>Модулі</Text>
+      {!allModules && !listOfModules &&
+        <View style={{height: "100%", width: "100%", alignItems: "center", justifyContent: "center"}}>
+        <ActivityIndicator size="large" color="#e19a38"/>
+        </View>
+      }
+      {allModules && listOfModules &&
         <View style={styles.modulesContainer}>
           {allModules.map((module, idx) =>{
             let idList = []
@@ -531,7 +610,7 @@ function Modules({ navigation }) {
           })
           }
         </View>
-       }
+      }
     </ScrollView> 
   )
 }
@@ -541,6 +620,13 @@ function ModulePage({ navigation, route }){
   const [moduleInfo, SetModuleInfo] = useState('')
   const [taskStatuses, SetTaskStatuses] = useState('')
   const [topics, SetTopics] = useState('')
+  const [modalOpened, SetModalOpened] = useState(false)
+
+  const [modalRedirect, SetModalRedirect] = useState("")
+  const [modalRedirectId, SetModalRedirectId] = useState("")
+
+
+
 
   const moduleId = route.params.moduleId;
 
@@ -561,16 +647,64 @@ function ModulePage({ navigation, route }){
       }
     )
   }
+
+  function modal(redirect,task){
+    SetModalRedirect(redirect)
+    SetModalRedirectId(task)
+    if(modalOpened){
+      SetModalOpened(false)
+    } else{
+      SetModalOpened(true)
+    }
+    console.log(modalOpened)
+  }
   
+  async function downgradeTask(task) {
+    fetch(`${url}/taskProgress/${task}/${1}`,{
+      method: "PUT",
+      headers:{
+        "token": await AsyncStorage.getItem('apikey')
+      }
+    })
+    .then(response => response.json())
+    .then(
+      async data => {
+        console.log(await data)
+      }
+    )
+    
+  }
+
+
   useEffect(()=>{getModuleInfo()},[])
 
   return(
     <View style={styles.profileContainer}>
-
+      {modalOpened &&
+      <TouchableOpacity style={styles.modalWraper} onPress={modal}>
+        <View style={styles.modal}>
+          <Text style={[styles.white,styles.font32]}>It is modal Wraper</Text>
+          <TouchableOpacity  onPress={()=>{
+            downgradeTask(modalRedirectId)
+            navigation.navigate( modalRedirect,{id: modalRedirectId} )
+            }}>
+              <Text style={[styles.white,styles.font32]}>Перепройти</Text>
+          </TouchableOpacity>
+          <TouchableOpacity  onPress={modal}>
+              <Text style={[styles.white,styles.font32]}>Не перепроходити</Text>
+          </TouchableOpacity>
+        </View>
+        
+      </TouchableOpacity>
+      }
       <View style={styles.header}>
         <Text style={[styles.white,styles.font32]}>{moduleInfo.name}</Text>
       </View>
-
+      {!topics &&
+          <View style={{height: "100%", width: "100%", alignItems: "center", justifyContent: "center"}}>
+          <ActivityIndicator size="large" color="#e19a38"/>
+          </View>
+      }
       { topics &&
         <ScrollView style={styles.scroll100}>
           {topics.map((topic,idx) =>{
@@ -606,6 +740,7 @@ function ModulePage({ navigation, route }){
                     let counter = 0
                     let completeStyle = styles.uncompletedTask
                     let redirect = "Test"
+                    let modalOp = false
 
                     if (task.type == "video"){
                       typeImage = require("./assets/video.png")
@@ -653,11 +788,11 @@ function ModulePage({ navigation, route }){
 
                     if(taskStatuses.completed.includes(task.id)){
                       completeStyle = styles.completedTask
+                      modalOp = true
                     }
-
                     return(
                       
-                        <TouchableOpacity style={[styles.taskButton,styles.antiIndexMargin]} key={idx} onPress={()=>{navigation.navigate( redirect,{id: task.id} )}}>
+                        <TouchableOpacity style={[styles.taskButton,styles.antiIndexMargin]} key={idx} onPress={modalOp ? ()=>{modal(redirect,task.id)} : ()=>{navigation.navigate( redirect,{id: task.id} )}}>
                           <Text style={[styles.black, styles.font20,styles.taskIndex]}>{counter}</Text>
                           <View style={[styles.taskButtonView, completeStyle]}>
                             <Image style={styles.taskButtonImg} source={ typeImage }/>
@@ -816,6 +951,11 @@ function Theory({ navigation, route }) {
       <View style={[styles.theorySection, styles.theoryTitle]}>
         <Text style={[styles.orange, styles.font40]}>{theory.name}</Text>
       </View>
+      { !sections &&
+        <View style={{height: "100%", width: "100%", alignItems: "center", justifyContent: "center"}}>
+        <ActivityIndicator size="large" color="#e19a38"/>
+        </View>
+      }
       { sections &&
         <View style={styles.theorySection}>
           { sections.map((section, idx) =>{
@@ -842,7 +982,7 @@ function Theory({ navigation, route }) {
       }
     </ScrollView>
 
-    <NavigationPanel navigation={navigation}/>
+    <NavigationPanelTest word={false} navigation={navigation}/>
   </View>
   )
 }
@@ -883,8 +1023,15 @@ function Media ({ navigation, route}){
 
   return(
     <View style={styles.profileContainer}>
-
-      {/* <ScrollView> */}
+      
+      {!mediaUrl &&
+                <View style={{height: "100%", width: "100%", alignItems: "center", justifyContent: "center"}}>
+                <ActivityIndicator size="large" color="#e19a38"/>
+                </View>
+      }
+      {/* {mediaUrl &&
+      
+      } */}
             <VideoScreen videoSource={mediaUrl}/>
       {/* </ScrollView> */}
       
@@ -897,8 +1044,13 @@ function Words({navigation, route}) {
   const words = route.params.words
   return(
     <View style={styles.profileContainer}>
+      {!words &&
+                <View style={{height: "100%", width: "100%", alignItems: "center", justifyContent: "center"}}>
+                <ActivityIndicator size="large" color="#e19a38"/>
+                </View>
+      }
       <Text>{JSON.stringify(words)}</Text>
-      <NavigationPanel word={false} navigation={navigation}/>
+      <NavigationPanelTest word={false} navigation={navigation}/>
     </View>
   )
 }
@@ -931,7 +1083,12 @@ function AudioPage({navigation, route}){
   
 
   return(
-    <View>
+    <View style={styles.profileContainer}>
+      {!AudioSRC &&
+                <View style={{height: "100%", width: "100%", alignItems: "center", justifyContent: "center"}}>
+                <ActivityIndicator size="large" color="#e19a38"/>
+                </View>
+      }
       <AudioBar url ={AudioSRC}/>
       <NavigationPanelTest word={true} wordList={wordList} navigation={navigation}/>
     </View>
@@ -945,6 +1102,17 @@ function Test ({ navigation, route}){
   const [questions, setQuestions] = useState()
   const [wordList, setWordList] = useState()
   const [questionProgress, setQuestionProgress] = useState()
+  const [module, setModule] = useState()
+  const [completed, setCompleted] = useState(false)
+  const [answers, setAnswers] = useState()
+  let answersList = []
+
+
+  function shuffleAnswers(arr) {
+    // arr = wrongAnswers
+    console.log(arr)
+    arr.sort(() => Math.random() - 0.5);
+  }
 
 
   async function getInfoOfTask() {
@@ -957,24 +1125,29 @@ function Test ({ navigation, route}){
     .then(response => response.json())
     .then(
       async data => {
-        console.log(data)
+        // console.log(data)
+        // console.log("kl;sadkl;sakd;lsakd;sad")
         setTask(await data.task)
         setQuestions(await data.data)
         setWordList(await data.words)
-      }
-    )
-    
-  }
-
-  async function getProgresId() {
-    fetch(`${url}/taskProgress/${testId}`,{
-      method: "GET"
-    })
-    .then(response => response.json())
-    .then(
-      async data => {
-        console.log(await data)
+        setModule(await data.module)
         setQuestionProgress(await data.progress)
+        setCompleted(await data.progress.completed)
+
+        // let trueAns = await data.data[data.progress.progress-1].trueAnswers[0]
+        // let wrongAns = await data.data[data.progress.progress-1].wrongAnswers
+        // console.log(trueAns,wrongAns)
+        // setAnswers(await shuffleAnswers(trueAns, wrongAns))
+        // console.log(await shuffleAnswers(trueAns, wrongAns))
+
+        if(data.progress.progress > data.data.length){
+          console.log("kl;sadkl;sakd;lsakd;sad")
+          completeTask()
+          // if (completed || await data.progress.completed){
+          console.log(`Navigation to module ${data.module.name}`)
+          navigation.navigate( "ModulePage",{moduleId: await data.module.id} )
+          // }
+        }
       }
     )
     
@@ -982,29 +1155,83 @@ function Test ({ navigation, route}){
 
   async function updateProgresId(newProg) {
     fetch(`${url}/taskProgress/${testId}/${newProg}`,{
-      method: "POST"
+      method: "PUT",
+      headers:{
+        "token": await AsyncStorage.getItem('apikey')
+      }
     })
     .then(response => response.json())
     .then(
       async data => {
         console.log(await data)
         setQuestionProgress(await data.progress.progress)
-        getProgresId()
         getInfoOfTask()
+        
+        if(await questionProgress.progress > await questions.length){
+          navigation.navigate( "ModulePage",{moduleId: module.id} )
+        }
       }
     )
     
   }
 
+  async function completeTask(){
+    fetch(`${url}/complete/${testId}`,{
+      method: "PUT",
+      headers:{
+        "token": await AsyncStorage.getItem('apikey')
+      }
+    })
+    .then(response => response.json())
+    .then(
+      async data => {
+        console.log(await data)
+        setCompleted(true)
+      }
+    )
+  }
+
+  
+  
+
+
+
   useEffect(()=>{getInfoOfTask()},[testId])
-  useEffect(()=>{getProgresId()},[testId])
   return(
     <View style={styles.profileContainer}>
-      {questions && questionProgress &&
-        <Text>{JSON.stringify(questions[questionProgress.progress-1])}</Text>
+      {!questions && !questionProgress &&
+      
+        <View style={{height: "100%", width: "100%", alignItems: "center", justifyContent: "center"}}>
+          <ActivityIndicator size="large" color="#e19a38"/>
+        </View>
       }
-      <TouchableOpacity style={styles.orangeButton} onPress={()=>{updateProgresId(questionProgress.progress+1)}}><Text style={[styles.black, styles.font24]}>Перейти дальше</Text></TouchableOpacity>
-      <NavigationPanel navigation={navigation}/>
+
+      {questions && questionProgress && questions[questionProgress.progress-1] &&
+      <View>
+        <Text>{questions[questionProgress.progress-1].question}</Text>
+        {/* <Text>{JSON.stringify(questions[questionProgress.progress-1])}</Text> */}
+        { questions[questionProgress.progress-1].wrongAnswers.map((answer, idx) =>{
+          answersList.push(answer)
+          if (!answersList.includes(questions[questionProgress.progress-1].trueAnswers[0])){
+            answersList.push(questions[questionProgress.progress-1].trueAnswers[0])
+          }
+          shuffleAnswers(answersList)
+        }
+        )}
+        {
+          answersList.map((ans, idx) =>{
+            return(
+            <TouchableOpacity key={idx} style={styles.orangeButton} onPress={()=>{updateProgresId(questionProgress.progress+1)}}>
+              <Text style={[styles.black, styles.font24]}>{ans}</Text>
+            </TouchableOpacity>
+            )
+          })
+        }
+      </View>
+      }
+
+      
+      <NavigationPanelTest word={true} wordList={wordList} navigation={navigation}/>
     </View>
   )
 }
@@ -1419,6 +1646,30 @@ const styles = StyleSheet.create({
   completedTask:{
     backgroundColor:"#E19A38",
     border:"4px #252124 solid"
+  },
+  
+  modalWraper:{
+    position:"absolute",
+    top:0,
+    left:0,
+    width:"100vw",
+    height:"100vh",
+    display:"flex",
+    direction:"column",
+    alignItems:"center", 
+    justifyContent:"center",
+    backgroundColor:"#25212457",
+    zIndex:3
+  },
+  modal:{
+    display:"flex",
+    direction:"column",
+    alignItems:"center", 
+    justifyContent:"center",
+    width:"90%",
+    backgroundColor:"#3B3B3B",
+    borderRadius:10,
+    border:"3px #252124 solid"
   },
 
   // theory

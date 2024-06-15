@@ -518,7 +518,7 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                         homework: {[Op.contains]: [task.id] }
                     }
                     })
-                console.log(topicHomework)
+                // console.log(topicHomework)
                 if (topic){
                     let module = await Modules.findOne({
                         where:{
@@ -561,7 +561,7 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                         // }
                     // }
                         if (task.type == 'audio' || task.type == 'video'){
-                            return res.status(200).json({data: task, words: words})
+                            return res.status(200).json({data: task, words: words, module: module})
                         }else{
                             let ques = []
                             let questions = await Question.findAll({
@@ -575,9 +575,15 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                                     ques.push(val.dataValues)
                                 }
                             }
+                            let taskProgress = await TasksUsers.findOne({
+                                where: {
+                                    TaskId: req.params.tasksId,
+                                    UserId: data.id
+                                }
+                            })
 
                             if (ques.length > 0){
-                                return res.status(200).json({data: ques, task: task, words: words})
+                                return res.status(200).json({data: ques, task: task, words: words, module: module,progress: taskProgress})
                             } else {
                                 return res.status(404).json({error: "Немає питань"})
                             }
@@ -604,7 +610,7 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                         if (course){
 
                             if (task.type == 'audio' || task.type == 'video'){
-                                return res.status(200).json({data: task})
+                                return res.status(200).json({data: task, module: module})
                             }else{
 
                                 let ques = []
@@ -619,6 +625,15 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                                         ques.push(val.dataValues)
                                     }
                                 }
+                                let taskProgress = await TasksUsers.findOne({
+                                    where: {
+                                        TaskId: req.params.tasksId,
+                                        UserId: data.id
+                                    }
+                                })
+                                // if(taskProgress){
+                                //     return res.status(200).json({progress: taskProgress})
+                                // }
                                 // let ques = []
                                 // for (const val of task.questions) {
                                 //     let question = await Question.findOne({
@@ -631,7 +646,7 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                                 //     }
                                 // }
                                 if (ques.length > 0){
-                                    return res.status(200).json({data: ques, task: task})
+                                    return res.status(200).json({data: ques, task: task, module: module,progress: taskProgress})
                                 } else {
                                     return res.status(404).json({error: "Немає питань"})
                                 }
@@ -691,103 +706,230 @@ router.get("/taskProgress/:taskId", async (req, res) =>{
     }
 })
 
-router.post("/taskProgress/:taskId/:newProgress", async (req, res) =>{
-    try{
-        let taskId = req.params.taskId
-        let newProgress = req.params.newProgress
+// router.put("/taskProgress/:taskId/:newProgress", async (req, res) =>{
+//     let apikey = req.headers.token
+//     if (!apikey){
+//         return res.status(403).json({error: "У вас немає API-ключа"})
+//     }
+//     try{
+//         let user = await User.findOne({
+//             where:{
+//                 apikey: apikey
+//             }
+//         })
+//         if(user){
+//             let taskId = req.params.taskId
+//             let newProgress = req.params.newProgress
+    
+//             let taskProgress = await TasksUsers.findOne({
+//                 where: {
+//                     TaskId: taskId,
+//                     UserId: user.id
+//                 }
+//             })
 
-        let taskProgress = await TasksUsers.findOne({
-            where: {
-                TaskId: taskId
+//             // console.log(taskProgress)
+            
+//             if(taskProgress){
+//                 console.log("HAHAHAHAHHAHAHAHHAHAHHAHAHAHHAHAHAHHAHAHAHHAH")
+//                 let questions = await Question.findAll({
+//                     where:{
+//                         taskId: taskId
+//                     }
+//                 })
+//                 console.log(questions.length)
+//                 console.log(newProgress)
+//                 if(questions.length > 0){
+//                     if (newProgress > 1){
+//                         if (newProgress <= questions.length+1){
+//                             taskProgress.update({ progress: newProgress})
+//                             await taskProgress.save();
+//                             return res.status(200).json({progress: taskProgress, questionsLength:questions.length})
+//                         } else if (newProgress > questions.length+1){
+//                             taskProgress.update({ progress: newProgress, completed: true })
+//                             await taskProgress.save();
+//                             return res.status(200).json({progress: taskProgress, questionsLength:questions.length})
+//                         }
+//                     }
+//                     else{
+//                         taskProgress.update({ progress: 1, completed: false })
+//                         await taskProgress.save();
+//                         return res.status(200).json({progress: taskProgress, questionsLength:questions.length})
+//                     }
+//                 } else{
+//                     return res.status(404).json({error: "В цієї таски немає питань"})
+//                 }
+
+//             } else{
+//                 return res.status(404).json({error: "Такої таски не існує"})
+//             }
+//         } else{
+//             return res.status(500).json({error: "Немаэ такого юзера"})
+//         }
+//     }catch(error){
+//         console.log("HHHHHHHHHHHHHHHHHHHHHHUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
+//         console.error(error)
+//         return res.status(500).json({error: "Виникла помилка"})
+//     }
+// })
+
+router.put("/taskProgress/:taskId/:newProgress", async (req, res) =>{
+    let apikey = req.headers.token
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    }
+    try{
+        let user = await User.findOne({
+            where:{
+                apikey: apikey
             }
         })
-        if(taskProgress){
-
-            taskProgress.update({ progress: newProgress })
-            await taskProgress.save();
-            return res.status(200).json({progress: taskProgress})
+        if(user){
+            let taskId = req.params.taskId
+            let newProgress = req.params.newProgress
+    
+            let taskProgress = await TasksUsers.findOne({
+                where: {
+                    TaskId: taskId,
+                    UserId: user.id
+                }
+            })
+            console.log("HAHAHAHAHHAHAHAHHAHAHHAHAHAHHAHAHAHHAHAHAHHAH")
+            if(taskProgress){
+                if(newProgress > 1){
+                    taskProgress.update({ progress: newProgress })
+                    await taskProgress.save();
+                    return res.status(200).json({progress: taskProgress})
+                } else{
+                    taskProgress.update({ progress: 1, completed: false })
+                    await taskProgress.save();
+                    return res.status(200).json({progress: taskProgress})
+                }
+            } else{
+                return res.status(500).json({error: "Такої таски не існує"})
+            }
+        } else{
+            return res.status(500).json({error: "Немаэ такого юзера"})
         }
     }catch(error){
+        console.log("HHHHHHHHHHHHHHHHHHHHHHUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
+        console.error(error)
+        return res.status(500).json({error: "Виникла помилка"})
+    }
+})
+
+router.put("/complete/:taskId", async (req,res)=>{
+    let apikey = req.headers.token
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    }
+    try{
+        let user = await User.findOne({
+            where:{
+                apikey: apikey
+            }
+        })
+        if(user){
+            let taskId = req.params.taskId
+    
+            let taskCompleted = await TasksUsers.findOne({
+                where: {
+                    TaskId: taskId,
+                    UserId: user.id
+                }
+            })
+            // console.log("HAHAHAHAHHAHAHAHHAHAHHAHAHAHHAHAHAHHAHAHAHHAH")
+            if(taskCompleted){
+                
+                taskCompleted.update({progress: taskCompleted.progress-1, completed: true })
+                await taskCompleted.save();
+                return res.status(200).json({taskCompleted: taskCompleted})
+            } else{
+                return res.status(500).json({error: "Такої таски не існує"})
+            }
+        } else{
+            return res.status(500).json({error: "Немаэ такого юзера"})
+        }
+    }catch(error){
+        console.log("HHHHHHHHHHHHHHHHHHHHHHUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
         console.error(error)
         return res.status(500).json({error: "Виникла помилка"})
     }
 })
 
 
-
-
-router.get('/complete/:taskId/:id', async (req, res)=>{
-    try {
-        let apikey = await User.findOne({
-            where:{
-                apikey: req.headers.token
-            }
-        })
-        if (apikey){
-            let task = await Tasks.findOne({
-                where:{
-                    id: req.params.taskId,
-                    type: "question"
-                }
-            })
-            if (task){
-                let question = await Question.findOne({
-                    where:{
-                        id: req.params.id
-                    }
-                })
-                if (question){
-                    if (task.questions[task.questions.length - 1] == question.id){
-                        if (apikey.completedTasks){
-                            let isUserHas = await User.findOne({
-                                where:{
-                                    apikey: req.headers.token,
-                                    completedTasks: {[Op.contains] : [task.id]}
-                                }
-                            })
-                            let list = apikey.completedTasks
-                            if (!isUserHas){
-                                list.push(task.id)
-                                let user = await User.update(
-                                    {
-                                        completedTasks: list
-                                    },
-                                    {
-                                        where:{
-                                            apikey: req.headers.token
-                                        }
-                                    }
-                                )
-                            }
-                        }else{
-                            let user = await User.update(
-                                {
-                                    completedTasks: [task.id]
-                                },
-                                {
-                                    where:{
-                                        apikey: req.headers.token
-                                    }
-                                }
-                            )
-                        }
-                        return res.status(200).json({data: "Ви пройшли завдання!"})
-                    }else{
-                        return res.status(200).json({data: "Продовжте проходити."})
-                    }
-                }else{
-                    return res.status(404).json({error: "Немає питання"})
-                }
-            }else{
-                return res.status(404).json({error: "Немає завдання"})
-            }
-        }else{
-            return res.status(403).json({error: "Ви не увійшли в акаунт"})
-        }
-    }catch(err){
-        console.error(err)
-    }
-})
+// router.get('/complete/:taskId/:id', async (req, res)=>{
+//     try {
+//         let apikey = await User.findOne({
+//             where:{
+//                 apikey: req.headers.token
+//             }
+//         })
+//         if (apikey){
+//             let task = await Tasks.findOne({
+//                 where:{
+//                     id: req.params.taskId,
+//                     type: "question"
+//                 }
+//             })
+//             if (task){
+//                 let question = await Question.findOne({
+//                     where:{
+//                         id: req.params.id
+//                     }
+//                 })
+//                 if (question){
+//                     if (task.questions[task.questions.length - 1] == question.id){
+//                         if (apikey.completedTasks){
+//                             let isUserHas = await User.findOne({
+//                                 where:{
+//                                     apikey: req.headers.token,
+//                                     completedTasks: {[Op.contains] : [task.id]}
+//                                 }
+//                             })
+//                             let list = apikey.completedTasks
+//                             if (!isUserHas){
+//                                 list.push(task.id)
+//                                 let user = await User.update(
+//                                     {
+//                                         completedTasks: list
+//                                     },
+//                                     {
+//                                         where:{
+//                                             apikey: req.headers.token
+//                                         }
+//                                     }
+//                                 )
+//                             }
+//                         }else{
+//                             let user = await User.update(
+//                                 {
+//                                     completedTasks: [task.id]
+//                                 },
+//                                 {
+//                                     where:{
+//                                         apikey: req.headers.token
+//                                     }
+//                                 }
+//                             )
+//                         }
+//                         return res.status(200).json({data: "Ви пройшли завдання!"})
+//                     }else{
+//                         return res.status(200).json({data: "Продовжте проходити."})
+//                     }
+//                 }else{
+//                     return res.status(404).json({error: "Немає питання"})
+//                 }
+//             }else{
+//                 return res.status(404).json({error: "Немає завдання"})
+//             }
+//         }else{
+//             return res.status(403).json({error: "Ви не увійшли в акаунт"})
+//         }
+//     }catch(err){
+//         console.error(err)
+//     }
+// })
 
 router.get("/account",async (req, res)=>{
         let apikey = req.headers.token

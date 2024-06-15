@@ -4,7 +4,7 @@ export default function NavigationPanel({navigation}){
     return(
         <View style={styles.navBar}>
           <Pressable style={styles.button} onPress={()=>{navigation.navigate("Modules")}}>
-            <Image style={styles.buttonImage} source={ require("../assets/book.png") }/>
+            <Image style={styles.buttonImage} source={{ uri: "https://i.postimg.cc/68tyLzWC/icons8-book-96.png" }}/>
           </Pressable >
           <Pressable style={styles.button} onPress={()=>{navigation.navigate("Account")}}>
             <Image style={styles.buttonImage} source={ require("../assets/profile.png") }/>
