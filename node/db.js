@@ -174,10 +174,10 @@ const Tasks = sequelize.define("Tasks",{type:{
         allowNull: false,
         unique: false
     },
-    questionsCount:{
+    unlockingTaskId:{
         type: DataTypes.INTEGER,
         allowNull: true,
-        unique: false
+        unique: true
     }
 })
 

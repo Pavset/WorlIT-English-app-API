@@ -1220,6 +1220,12 @@ function Test ({ navigation, route}){
 
   let [answerStyle, setAnswerStyle] = useState([styles.black, styles.font24])
 
+  // let [multipleAnswersLists, setMultipleAnswersLists] = useState([])
+
+  // let [tempArr,setTempArr] = useState([])
+  
+  let arrayOfQuestionSections =  {}
+
   // input question
   const [completed, setCompleted] = useState(false)
   const [answer, setAnswer] = useState()
@@ -1231,6 +1237,18 @@ function Test ({ navigation, route}){
     arr.sort(() => Math.random() - 0.5);
   }
 
+  //createAnswersForMultiple(questions[questionProgress.progress-1].wrongAnswers, idx)
+  function createAnswersForMultiple(truAns,answersArr, idx){
+    let tempArr = []
+    answersArr.push(truAns)
+    shuffleAnswers(answersArr)
+    for (let ans of answersArr){
+      if(!tempArr.includes(ans)){
+        tempArr.push(ans)
+      }
+    }
+    arrayOfQuestionSections[idx] = tempArr
+  }
 
   async function getInfoOfTask() {
     fetch(`${url}/tasks/${testId}`,{
@@ -1285,6 +1303,9 @@ function Test ({ navigation, route}){
     )
   }
 
+
+
+
   async function completeTask(){
     fetch(`${url}/complete/${testId}`,{
       method: "PUT",
@@ -1301,7 +1322,6 @@ function Test ({ navigation, route}){
     )
   }
 
-  
   
 
   useEffect(()=>{getInfoOfTask()},[testId])
@@ -1391,13 +1411,14 @@ function Test ({ navigation, route}){
           </View>
           
         }
-        {/* { questions[questionProgress.progress-1].questionType == "multiple" &&
+        { questions[questionProgress.progress-1].questionType == "multiple" &&
           <View>
-
+            {questions[questionProgress.progress-1].trueAnswers.map((truAns, idx) =>{
+                createAnswersForMultiple(truAns, questions[questionProgress.progress-1].wrongAnswers, idx)
+            })}
+            <Text>{JSON.stringify(arrayOfQuestionSections)}</Text>
           </View>
-          
-        } */}
-
+        }
       </View>
       }
 

@@ -935,14 +935,41 @@ router.put("/complete/:taskId", async (req,res)=>{
                     UserId: user.id
                 }
             })
+
+            let unlockingTask = null
             // console.log("HAHAHAHAHHAHAHAHHAHAHHAHAHAHHAHAHAHHAHAHAHHAH")
             if(taskCompleted){
-                
                 taskCompleted.update({progress: taskCompleted.progress-1, completed: true })
                 await taskCompleted.save();
-                return res.status(200).json({taskCompleted: taskCompleted})
+
+                let task = await Tasks.findOne({
+                    where:{
+                        id: taskId
+                    }
+                })
+
+                if (task){
+                    if(task.unlockingTaskId){
+                        unlockingTask = await TasksUsers.findOne({
+                            where:{
+                                TaskId: task.unlockingTaskId,
+                                UserId: user.id
+                            }
+                        })
+                        console.log(unlockingTask)
+                        if(unlockingTask){
+                            unlockingTask.update({blocked: false})
+                            await unlockingTask.save();
+                        } else{
+                            return res.status(404).json({error: "Такої таски для розблокування не існує"})
+                        }
+                    }     
+                    return res.status(200).json({taskCompleted: taskCompleted, unlockingTask: unlockingTask})               
+                } else{
+                    return res.status(404).json({error: "Такої таски не існує"})
+                }
             } else{
-                return res.status(500).json({error: "Такої таски не існує"})
+                return res.status(500).json({error: "Такої таски не існує у юзера, помилка при створені у дб"})
             }
         } else{
             return res.status(500).json({error: "Немаэ такого юзера"})
