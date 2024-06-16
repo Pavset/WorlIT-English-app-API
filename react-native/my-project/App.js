@@ -627,7 +627,6 @@ function ModulePage({ navigation, route }){
 
 
 
-
   const moduleId = route.params.moduleId;
 
   async function getModuleInfo(){
@@ -660,7 +659,7 @@ function ModulePage({ navigation, route }){
   }
   
   async function downgradeTask(task) {
-    fetch(`${url}/taskProgress/${task}/${1}`,{
+    fetch(`${url}/taskProgress/${task}/${1}/false`,{
       method: "PUT",
       headers:{
         "token": await AsyncStorage.getItem('apikey')
@@ -686,7 +685,7 @@ function ModulePage({ navigation, route }){
           <Text style={[styles.white,styles.font32]}>It is modal Wraper</Text>
           <TouchableOpacity  onPress={()=>{
             downgradeTask(modalRedirectId)
-            navigation.navigate( modalRedirect,{id: modalRedirectId} )
+              navigation.navigate( modalRedirect,{id: modalRedirectId,moduleName: moduleInfo.name} )
             }}>
               <Text style={[styles.white,styles.font32]}>Перепройти</Text>
           </TouchableOpacity>
@@ -792,7 +791,7 @@ function ModulePage({ navigation, route }){
                     }
                     return(
                       
-                        <TouchableOpacity style={[styles.taskButton,styles.antiIndexMargin]} key={idx} onPress={modalOp ? ()=>{modal(redirect,task.id)} : ()=>{navigation.navigate( redirect,{id: task.id} )}}>
+                        <TouchableOpacity style={[styles.taskButton,styles.antiIndexMargin]} key={idx} onPress={modalOp ? ()=>{modal(redirect,task.id)} : ()=>{navigation.navigate( redirect,{id: task.id,moduleName: moduleInfo.name} )}}>
                           <Text style={[styles.black, styles.font20,styles.taskIndex]}>{counter}</Text>
                           <View style={[styles.taskButtonView, completeStyle]}>
                             <Image style={styles.taskButtonImg} source={ typeImage }/>
@@ -871,7 +870,7 @@ function ModulePage({ navigation, route }){
 
 
                     return(
-                        <TouchableOpacity style={[styles.taskButton,styles.antiIndexMargin]} key={idx} onPress={()=>{navigation.navigate( redirect,{id: word.id} )}}>
+                        <TouchableOpacity style={[styles.taskButton,styles.antiIndexMargin]} key={idx} onPress={()=>{navigation.navigate( redirect,{id: work.id,moduleName: moduleInfo.name} )}}>
                           <Text style={[styles.black, styles.font20,styles.taskIndex]}>{counter}</Text>
                           <View style={[styles.taskButtonView, completeStyle]}>
                             <Image style={styles.taskButtonImg} source={ typeImage }/>
@@ -995,6 +994,7 @@ function Media ({ navigation, route}){
   const [wordList, setWordList] = useState()
 
   async function handleSubmit() {
+    console.log(route.params.moduleName)
     fetch(`${url}/tasks/${mediaId}`,{
       method: "GET",
       headers:{
@@ -1029,27 +1029,131 @@ function Media ({ navigation, route}){
                 <ActivityIndicator size="large" color="#e19a38"/>
                 </View>
       }
-      {/* {mediaUrl &&
-      
-      } */}
-            <VideoScreen videoSource={mediaUrl}/>
+      {mediaUrl &&
+         <VideoScreen videoSource={mediaUrl}/>
+         
+      }
+           
       {/* </ScrollView> */}
+      <NavigationPanelTest word={true} module={route.params.moduleName} wordList={wordList} navigation={navigation}/>
       
-      <NavigationPanelTest word={true} wordList={wordList} navigation={navigation}/>
     </View>
   )
 }
 
 function Words({navigation, route}) {
   const words = route.params.words
+  const moduleName = route.params.moduleName
+  const [noun, setNouns] = useState([])
+  const [adj, setAdjs] = useState([])
+  const [verb, setVerbs] = useState([])
+  const [other, setOthers] = useState([])
+
+  useEffect(()=>{
+    
+    words.map((v,i)=>{
+      if (v.role == 'Іменник'){
+        // console.log(1)
+        setNouns(noun => [...noun, [v.word, v.translated]]);
+      }else if (v.role == 'Прикметник'){
+        // console.log(2)
+        setAdjs(adj => [...adj, [v.word, v.translated]]);
+      }else if (v.role == "Дієслово"){
+        // console.log(3)
+        setVerbs(verb => [...verb, [v.word, v.translated]]);
+      }else{
+        // console.log(4)
+        setOthers(other => [...other, [v.word, v.translated]]);
+      }
+    })
+    // console.log("Words", noun, adj, verb, other)
+  },[words])
   return(
     <View style={styles.profileContainer}>
+      <View style={{backgroundColor: "#252124", width: '100%', height: 50, justifyContent: 'center', alignItems: "center"}}>
+        <Text style={{color: "white", fontSize: 24}}>{moduleName}</Text>
+      </View>
       {!words &&
                 <View style={{height: "100%", width: "100%", alignItems: "center", justifyContent: "center"}}>
-                <ActivityIndicator size="large" color="#e19a38"/>
+                  <ActivityIndicator size="large" color="#e19a38"/>
                 </View>
       }
-      <Text>{JSON.stringify(words)}</Text>
+      {words && 
+      
+        
+      
+      
+      <ScrollView style={styles.scroll100}>
+        <View style={{width: "100%", height: '100%', flexDirection: 'column', alignItems: 'center', paddingTop: 10, gap: 20}}>
+      {noun.length > 0 &&
+        <View style={{width: "90%", flexDirection: "column", alignItems: 'center', justifyContent: 'center', gap: 20}}>
+
+        <View style={styles.roleBorder}>
+            <Text style={styles.roleText}>Іменник</Text>
+        </View>
+        {noun.map((v,i)=>(
+          <View style={styles.roleExample}>
+            <Text style={{color: 'white', fontSize: 16, width: '30%', textAlign: 'left'}}>{v[0]}</Text>
+            <View style={{flexDirection: 'row', gap: 10}}>
+              <Image source={{ uri:"https://i.postimg.cc/x1GJ8qSr/Ellipse-5.png"}} style={{width: 16, height: 16}}/>
+              <Image source={{ uri:"https://i.postimg.cc/x1GJ8qSr/Ellipse-5.png"}} style={{width: 16, height: 16}}/>
+              <Image source={{ uri:"https://i.postimg.cc/x1GJ8qSr/Ellipse-5.png"}} style={{width: 16, height: 16}}/>
+              <Image source={{ uri:"https://i.postimg.cc/x1GJ8qSr/Ellipse-5.png"}} style={{width: 16, height: 16}}/>
+              <Image source={{ uri:"https://i.postimg.cc/x1GJ8qSr/Ellipse-5.png"}} style={{width: 16, height: 16}}/>
+            </View>
+            <Text style={{color: 'white', fontSize: 16, width: '30%', textAlign: "right"}}>{v[1]}</Text>
+          </View>
+        ))}
+        </View>
+      }
+            {adj.length > 0 &&
+        <View style={{width: "90%", flexDirection: "column", alignItems: 'center', justifyContent: 'center', gap: 20}}>
+
+        <View style={styles.roleBorder}>
+            <Text style={styles.roleText}>Прикметник</Text>
+        </View>
+        {adj.map((v,i)=>(
+          <View style={styles.roleExample}>
+            <Text style={{color: 'white', fontSize: 16, width: '30%', textAlign: 'left'}}>{v[0]}</Text>
+            <View style={{flexDirection: 'row', gap: 10}}>
+              <Image source={{ uri:"https://i.postimg.cc/x1GJ8qSr/Ellipse-5.png"}} style={{width: 16, height: 16}}/>
+              <Image source={{ uri:"https://i.postimg.cc/x1GJ8qSr/Ellipse-5.png"}} style={{width: 16, height: 16}}/>
+              <Image source={{ uri:"https://i.postimg.cc/x1GJ8qSr/Ellipse-5.png"}} style={{width: 16, height: 16}}/>
+              <Image source={{ uri:"https://i.postimg.cc/x1GJ8qSr/Ellipse-5.png"}} style={{width: 16, height: 16}}/>
+              <Image source={{ uri:"https://i.postimg.cc/x1GJ8qSr/Ellipse-5.png"}} style={{width: 16, height: 16}}/>
+            </View>
+            <Text style={{color: 'white', fontSize: 16, width: '30%', textAlign: "right"}}>{v[1]}</Text>
+          </View>
+        ))}
+        </View>
+      }
+            {verb.length > 0 &&
+        <View style={{width: "90%", flexDirection: "column", alignItems: 'center', justifyContent: 'center', gap: 20}}>
+
+        <View style={styles.roleBorder}>
+            <Text style={styles.roleText}>Дієслово</Text>
+        </View>
+        {verb.map((v,i)=>(
+          <View style={styles.roleExample}>
+            <Text style={{color: 'white', fontSize: 16, width: '30%', textAlign: 'left'}}>{v[0]}</Text>
+            <View style={{flexDirection: 'row', gap: 10}}>
+              <Image source={{ uri:"https://i.postimg.cc/x1GJ8qSr/Ellipse-5.png"}} style={{width: 16, height: 16}}/>
+              <Image source={{ uri:"https://i.postimg.cc/x1GJ8qSr/Ellipse-5.png"}} style={{width: 16, height: 16}}/>
+              <Image source={{ uri:"https://i.postimg.cc/x1GJ8qSr/Ellipse-5.png"}} style={{width: 16, height: 16}}/>
+              <Image source={{ uri:"https://i.postimg.cc/x1GJ8qSr/Ellipse-5.png"}} style={{width: 16, height: 16}}/>
+              <Image source={{ uri:"https://i.postimg.cc/x1GJ8qSr/Ellipse-5.png"}} style={{width: 16, height: 16}}/>
+            </View>
+            <Text style={{color: 'white', fontSize: 16, width: '30%', textAlign: "right"}}>{v[1]}</Text>
+          </View>
+        ))}
+        </View>
+      }
+      </View>
+      </ScrollView>
+      
+      }
+
+      {/* <Text>{JSON.stringify(words)}</Text> */}
       <NavigationPanelTest word={false} navigation={navigation}/>
     </View>
   )
@@ -1063,6 +1167,7 @@ function AudioPage({navigation, route}){
   const [wordList, setWordList] = useState()
   
   async function handleSubmit() {
+    console.log(route.params.moduleName)
     fetch(`${url}/tasks/${mediaAudioId}`,{
       method: "GET",
       headers:{
@@ -1090,7 +1195,7 @@ function AudioPage({navigation, route}){
                 </View>
       }
       <AudioBar url ={AudioSRC}/>
-      <NavigationPanelTest word={true} wordList={wordList} navigation={navigation}/>
+      <NavigationPanelTest word={true} module={route.params.moduleName} wordList={wordList} navigation={navigation}/>
     </View>
   )
 }
@@ -1103,13 +1208,15 @@ function Test ({ navigation, route}){
   const [wordList, setWordList] = useState()
   const [questionProgress, setQuestionProgress] = useState()
   const [module, setModule] = useState()
+  const [questionStatuses, setQuestionStatuses] = useState()
+
+  let [answerStyle, setAnswerStyle] = useState([styles.black, styles.font24])
   const [completed, setCompleted] = useState(false)
   const [answers, setAnswers] = useState()
   let answersList = []
 
 
   function shuffleAnswers(arr) {
-    // arr = wrongAnswers
     console.log(arr)
     arr.sort(() => Math.random() - 0.5);
   }
@@ -1125,36 +1232,30 @@ function Test ({ navigation, route}){
     .then(response => response.json())
     .then(
       async data => {
-        // console.log(data)
-        // console.log("kl;sadkl;sakd;lsakd;sad")
+        console.log(data)
+        console.log("kl;sadkl;sakd;lsakd;sad")
         setTask(await data.task)
         setQuestions(await data.data)
         setWordList(await data.words)
         setModule(await data.module)
         setQuestionProgress(await data.progress)
         setCompleted(await data.progress.completed)
-
-        // let trueAns = await data.data[data.progress.progress-1].trueAnswers[0]
-        // let wrongAns = await data.data[data.progress.progress-1].wrongAnswers
-        // console.log(trueAns,wrongAns)
-        // setAnswers(await shuffleAnswers(trueAns, wrongAns))
-        // console.log(await shuffleAnswers(trueAns, wrongAns))
+        setQuestionStatuses(await data.questionsStatuses)
+        setAnswerStyle([styles.black, styles.font24])
 
         if(data.progress.progress > data.data.length){
           console.log("kl;sadkl;sakd;lsakd;sad")
           completeTask()
-          // if (completed || await data.progress.completed){
           console.log(`Navigation to module ${data.module.name}`)
           navigation.navigate( "ModulePage",{moduleId: await data.module.id} )
-          // }
         }
       }
     )
     
   }
 
-  async function updateProgresId(newProg) {
-    fetch(`${url}/taskProgress/${testId}/${newProg}`,{
+  async function updateProgresId(newProg, correct) {
+    fetch(`${url}/taskProgress/${testId}/${newProg}/${correct}`,{
       method: "PUT",
       headers:{
         "token": await AsyncStorage.getItem('apikey')
@@ -1172,7 +1273,6 @@ function Test ({ navigation, route}){
         }
       }
     )
-    
   }
 
   async function completeTask(){
@@ -1194,12 +1294,11 @@ function Test ({ navigation, route}){
   
   
 
-
-
   useEffect(()=>{getInfoOfTask()},[testId])
   return(
     <View style={styles.profileContainer}>
-      {!questions && !questionProgress &&
+      <View style={[styles.orangeBG,{width: "100%", height: 30}]}></View>
+      {!questions && !questionProgress && 
       
         <View style={{height: "100%", width: "100%", alignItems: "center", justifyContent: "center"}}>
           <ActivityIndicator size="large" color="#e19a38"/>
@@ -1208,7 +1307,19 @@ function Test ({ navigation, route}){
 
       {questions && questionProgress && questions[questionProgress.progress-1] &&
       <View>
-        <Text>{questions[questionProgress.progress-1].question}</Text>
+        { questionStatuses &&
+          <Text>{questionProgress.progress}/{questionStatuses.length}</Text>
+        }
+        {/* <Text>{questions[questionProgress.progress-1].question}</Text> */}
+        { questions[questionProgress.progress-1].extraQuestionText &&
+          <Text>{questions[questionProgress.progress-1].extraQuestionText}</Text>
+        }
+        { questions[questionProgress.progress-1].imagePath &&
+          <FullWidthImage imageUrl={questions[questionProgress.progress-1].imagePath}/>
+        }
+        { questions[questionProgress.progress-1].question &&
+          <Text>{questions[questionProgress.progress-1].question}</Text>
+        }
         {/* <Text>{JSON.stringify(questions[questionProgress.progress-1])}</Text> */}
         { questions[questionProgress.progress-1].wrongAnswers.map((answer, idx) =>{
           answersList.push(answer)
@@ -1220,9 +1331,28 @@ function Test ({ navigation, route}){
         )}
         {
           answersList.map((ans, idx) =>{
+            let answerStyleExtra = []
+            if (questions[questionProgress.progress-1].trueAnswers[0] == ans){
+              answerStyleExtra = answerStyle
+            } else{
+              answerStyleExtra = [styles.black, styles.font24]
+            }
             return(
-            <TouchableOpacity key={idx} style={styles.orangeButton} onPress={()=>{updateProgresId(questionProgress.progress+1)}}>
-              <Text style={[styles.black, styles.font24]}>{ans}</Text>
+            <TouchableOpacity value={ans} key={idx} style={styles.orangeButton} onPress={()=>{
+              correct = false
+              setAnswerStyle([styles.red, styles.font24])
+              console.log(questions[questionProgress.progress-1].trueAnswers[0])
+              console.log("ans", ans)
+              if (ans == questions[questionProgress.progress-1].trueAnswers[0]){
+                correct = true
+                setAnswerStyle([styles.orange, styles.font24])
+              }
+              setTimeout(() => {
+                updateProgresId(questionProgress.progress+1,correct)
+              }, 1000);
+              
+              }}>
+              <Text style={answerStyleExtra}>{ans}</Text>
             </TouchableOpacity>
             )
           })
@@ -1231,7 +1361,7 @@ function Test ({ navigation, route}){
       }
 
       
-      <NavigationPanelTest word={true} wordList={wordList} navigation={navigation}/>
+      <NavigationPanelTest word={true} module={route.params.moduleName} wordList={wordList} navigation={navigation}/>
     </View>
   )
 }
@@ -1686,4 +1816,32 @@ const styles = StyleSheet.create({
     borderBottomColor:"#fff",
     borderBottomWidth: 2
   },
+
+  // Words
+
+  roleBorder:{
+    // borderColor: '#FFFFFF',
+    // // borderStyle: 'solid', // Not supported in React Native
+    // borderTopWidth: 2,
+    // borderBottomWidth: 2,
+    // borderLeftWidth: 0,
+    // borderRightWidth: 0,
+    width: "100%",
+    height: 30,
+    justifyContent: "center",
+    alignItems: 'center'
+  },
+  roleText:{
+    color: "white",
+    fontSize: 20,
+    textAlign: 'center'
+  },
+  roleExample:{
+    width: '100%',
+    borderBottomWidth: 2,
+    borderColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: "space-between",
+    flexDirection: 'row'
+  }
 });

@@ -196,7 +196,15 @@ const TasksUsers = sequelize.define("TasksUsers",{
         type: DataTypes.INTEGER,
         allowNull: true,
         unique: false
-    },
+    }
+})
+
+const QuestionUsers = sequelize.define("QuestionUsers",{
+    correct: {
+        type: DataTypes.BOOLEAN,
+        allowNull: true,
+        unique: false
+    }
 })
 
 const UsersWords = sequelize.define("UsersWords",{
@@ -230,7 +238,12 @@ const Word = sequelize.define("Word",{
         type: DataTypes.INTEGER,
         allowNull: false,
         unique: false
-    }
+    },
+    role:{
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: false
+    },
 })
 
 const Question = sequelize.define("Question",{
@@ -346,6 +359,9 @@ Courses.belongsToMany(Modules, { through: ModuleCourse })
 User.belongsToMany(Tasks, {through: TasksUsers})
 Tasks.belongsToMany(User, {through: TasksUsers})
 
+User.belongsToMany(Question,{through:QuestionUsers})
+Question.belongsToMany(User,{through:QuestionUsers})
+
 User.belongsToMany(Word,{through:UsersWords})
 Word.belongsToMany(User,{through:UsersWords})
 
@@ -368,5 +384,6 @@ module.exports = {
     WordList: WordList,
     ModuleCourse: ModuleCourse,
     TasksUsers: TasksUsers,
-    UsersWords: UsersWords
+    UsersWords: UsersWords,
+    QuestionUsers: QuestionUsers
 }

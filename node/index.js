@@ -2,7 +2,7 @@
 
 const express = require('express')
 const cors = require('cors');
-const { User,Courses,Modules,Topics,Theories,Tasks,Question,Staff,Word,WordList,Sections,ModuleCourse,TasksUsers } = require("./db.js")
+const { User,Courses,Modules,Topics,Theories,Tasks,Question,Staff,Word,WordList,Sections,ModuleCourse,TasksUsers, QuestionUsers } = require("./db.js")
 const { v4: uuidv4 } = require('uuid');
 const { Op } = require("sequelize");
 
@@ -18,6 +18,7 @@ router.use(express.static('public'))
 
 async function createTasksWithStatus(apikey) {
     let tasks = await Tasks.findAll()
+    let questions = await Question.findAll()
     let user = await User.findOne({
         where: {
             apikey: apikey
@@ -43,6 +44,23 @@ async function createTasksWithStatus(apikey) {
                 progress: 1
             })
         }
+    }
+    for (let question of questions){
+        let data = await QuestionUsers.findAll({
+            where:{
+                UserId: user.id,
+                QuestionId: question.id,
+            }
+        })
+
+        if (data.length <= 0){
+            let QuQ = await QuestionUsers.create({
+                UserId: user.id,
+                QuestionId: question.id,
+                correct: null
+            })
+        }
+
     }
 }
 
@@ -564,6 +582,7 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                             return res.status(200).json({data: task, words: words, module: module})
                         }else{
                             let ques = []
+                            
                             let questions = await Question.findAll({
                                 where:{
                                     taskId: req.params.tasksId
@@ -583,7 +602,25 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                             })
 
                             if (ques.length > 0){
-                                return res.status(200).json({data: ques, task: task, words: words, module: module,progress: taskProgress})
+                                let questionsStatuses = []
+                                let queStat = await QuestionUsers.findAll({
+                                    where:{
+                                        UserId: data.id
+                                    }
+                                })
+                                // console.log(queStat)
+                                // console.log("dsfghsfdkghfsdkhgfhksghfhsgkjfsdghkjlfsdhglkfdshlkax;sjdk;alhbdsjfklbdhvjkfslkjvfdlqueStat")
+                                // console.log(ques)
+
+                                for(let stat of queStat){
+                                    for (let question of ques){
+                                        if (stat.dataValues.QuestionId == question.id){
+                                            questionsStatuses.push(stat)
+                                        }
+                                    }
+                                }
+
+                                return res.status(200).json({data: ques, task: task, words: words, module: module,progress: taskProgress, questionsStatuses: questionsStatuses})
                             } else {
                                 return res.status(404).json({error: "Немає питань"})
                             }
@@ -646,7 +683,24 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                                 //     }
                                 // }
                                 if (ques.length > 0){
-                                    return res.status(200).json({data: ques, task: task, module: module,progress: taskProgress})
+                                    let questionsStatuses = []
+                                    let queStat = await QuestionUsers.findAll({
+                                        where:{
+                                            UserId: data.id
+                                        }
+                                    })
+                                    // console.log(queStat)
+                                    // console.log("dsfghsfdkghfsdkhgfhksghfhsgkjfsdghkjlfsdhglkfdshlkax;sjdk;alhbdsjfklbdhvjkfslkjvfdlqueStat")
+                                    // console.log(ques)
+    
+                                    for(let stat of queStat){
+                                        for (let question of ques){
+                                            if (stat.dataValues.QuestionId == question.id){
+                                                questionsStatuses.push(stat)
+                                            }
+                                        }
+                                    }
+                                    return res.status(200).json({data: ques, task: task, module: module,progress: taskProgress, questionsStatuses: questionsStatuses})
                                 } else {
                                     return res.status(404).json({error: "Немає питань"})
                                 }
@@ -773,7 +827,7 @@ router.get("/taskProgress/:taskId", async (req, res) =>{
 //     }
 // })
 
-router.put("/taskProgress/:taskId/:newProgress", async (req, res) =>{
+router.put("/taskProgress/:taskId/:newProgress/:correct", async (req, res) =>{
     let apikey = req.headers.token
     if (!apikey){
         return res.status(403).json({error: "У вас немає API-ключа"})
@@ -787,6 +841,18 @@ router.put("/taskProgress/:taskId/:newProgress", async (req, res) =>{
         if(user){
             let taskId = req.params.taskId
             let newProgress = req.params.newProgress
+            let correct = req.params.correct
+
+            if (correct.toLowerCase() == "true" ){
+                correct = true
+            } else if (correct.toLowerCase() == "false"){
+                correct = false
+            } else{
+                return res.status(400).json({error: "Статус питання задан невірно"})
+            }
+
+            // console.log("HAHAHAHAHHAHAHAHHAHAHHAHAHAHHAHAHAHHAHAHAHHAH")
+            // console.log(correct)
     
             let taskProgress = await TasksUsers.findOne({
                 where: {
@@ -794,22 +860,53 @@ router.put("/taskProgress/:taskId/:newProgress", async (req, res) =>{
                     UserId: user.id
                 }
             })
-            console.log("HAHAHAHAHHAHAHAHHAHAHHAHAHAHHAHAHAHHAHAHAHHAH")
+            let questions = await Question.findAll({
+                where:{
+                    taskId: taskId
+                }
+            })
+            // console.log(questions)
+            
+            // ujjjl = taskProgress.progress
+            // console.log(question[ujjjl-1].dataValues.id)
+            let quesUs = await QuestionUsers.findOne({
+                where:{
+                    UserId: user.id,
+                    QuestionId: questions[taskProgress.progress-1].dataValues.id
+                }
+            })
+            // console.log(quesUs)
             if(taskProgress){
-                if(newProgress > 1){
-                    taskProgress.update({ progress: newProgress })
-                    await taskProgress.save();
-                    return res.status(200).json({progress: taskProgress})
+                if(quesUs){
+                    if(newProgress > 1){
+                        quesUs.update({ correct: correct })
+                        taskProgress.update({ progress: newProgress })
+                        await taskProgress.save();
+                        return res.status(200).json({progress: taskProgress})
+                    } else{
+                        for(let question of questions){
+                            let questionUserToChange = await QuestionUsers.findOne({
+                                where:{
+                                    UserId: user.id,
+                                    QuestionId: question.id
+                                }
+                            })
+                            if(questionUserToChange){
+                                questionUserToChange.update({correct: null})
+                            }
+                        }
+                        taskProgress.update({ progress: 1, completed: false })
+                        await taskProgress.save();
+                        return res.status(200).json({progress: taskProgress})
+                    }
                 } else{
-                    taskProgress.update({ progress: 1, completed: false })
-                    await taskProgress.save();
-                    return res.status(200).json({progress: taskProgress})
+                    return res.status(500).json({error: "Помилка була здійснена на стороні сервера"})
                 }
             } else{
-                return res.status(500).json({error: "Такої таски не існує"})
+                return res.status(404).json({error: "Такої таски не існує"})
             }
         } else{
-            return res.status(500).json({error: "Немаэ такого юзера"})
+            return res.status(404).json({error: "Немаэ такого юзера"})
         }
     }catch(error){
         console.log("HHHHHHHHHHHHHHHHHHHHHHUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")

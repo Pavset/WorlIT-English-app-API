@@ -17,9 +17,8 @@ export default function AudioBar({url}) {
     
     const { sound } = await Audio.Sound.createAsync({ uri: url });
     setSound(sound);
-    let status = await sound.getStatusAsync();
-    setPosition(status.positionMillis)
-    // setOnChangeEndValue(sound.durationMillis/1000)
+
+    
     console.log('Playing Sound');
     started = true
     await sound.playAsync();
@@ -68,11 +67,33 @@ export default function AudioBar({url}) {
   }
 
 // durationMillis
-  useEffect(() => {
+
+// durationMillis
+   useEffect(() => {
+    var timer = setInterval(async () => {
+      if (sound){
+        const status = await sound.getStatusAsync();
+        
+        if (status){
+         var percent = status.durationMillis/100
+         var percentNow = Math.floor(status.positionMillis/percent)
+         console.log(percentNow)
+         setProgress(percentNow)
+        } 
+      }
+    }, 1000);
+    //  return sound
+    //   ? () => {
+    //       console.log('Unloading Sound');
+    //       sound.unloadAsync();
+    //       clearInterval(timer)
+    //     }
+    //   : sound.loadAsync({ uri: url });
     return sound
       ? () => {
           console.log('Unloading Sound');
           sound.unloadAsync();
+          clearInterval(timer)
         }
       : undefined;
   }, [sound]);
@@ -82,26 +103,12 @@ export default function AudioBar({url}) {
 
 
 
-  setInterval(async () => {
-    if (sound){
-      const status = await sound.getStatusAsync();
-      if (status){
-       var percent = status.durationMillis/100
-       var percentNow = Math.floor(status.positionMillis/percent)
-       console.log(percentNow)
-       setProgress(percentNow)
-      }
-      
-    }
-
-     
-  }, 1000);
 
   
 // stopAsync()
   return (
     <NativeBaseProvider>
-      <View >
+      <View>
 
       <HStack space={4} justifyContent="center">
         <TouchableOpacity onPress={rewindBack}>
@@ -111,10 +118,17 @@ export default function AudioBar({url}) {
         <TouchableOpacity onPress={rewindForward} >
           <Image source = {require=("../assets/15forward.png")} style = {styles.image} />
         </TouchableOpacity>
-        {/* <Button title="-15s" onPress={rewindBack} /> */}
-        {/* <Button title="To Beggining" onPress={stopSound} /> */}
-        <Button title={isPlay ? "Pause":"Unpause"} onPress={!started ? playSound : pauseSound} />
-        <Button title="+15s" onPress={rewindForward} />
+
+        <TouchableOpacity onPress={stopSound} >
+          <Image source = {require=("../assets/toBeggining.png")} style = {styles.image} />
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={!started ? playSound : pauseSound} >
+          <Image source = { isPlay ? require=("../assets/pause.png"):require=("../assets/unpause.png")} style = {styles.image} />
+        </TouchableOpacity>
+
+        {/* <Button title={isPlay ? "Pause":"Unpause"} onPress={!started ? playSound : pauseSound} /> */}
+        {/* <Button title="+15s" onPress={rewindForward} /> */}
       </HStack>
 
         <Slider value={progress} minValue={0} maxValue={100} defaultValue={0}  step = {0} colorScheme="cyan">
