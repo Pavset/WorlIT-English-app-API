@@ -655,7 +655,7 @@ function ModulePage({ navigation, route }){
     } else{
       SetModalOpened(true)
     }
-    console.log(modalOpened)
+    console.log(modalRedirectId)
   }
   
   async function downgradeTask(task) {
@@ -668,7 +668,9 @@ function ModulePage({ navigation, route }){
     .then(response => response.json())
     .then(
       async data => {
+        console.log("gkjhghkjgjkhgjkhg")
         console.log(await data)
+        navigation.navigate( modalRedirect,{id: modalRedirectId,moduleName: moduleInfo.name} )
       }
     )
     
@@ -685,7 +687,6 @@ function ModulePage({ navigation, route }){
           <Text style={[styles.white,styles.font32]}>It is modal Wraper</Text>
           <TouchableOpacity  onPress={()=>{
             downgradeTask(modalRedirectId)
-              navigation.navigate( modalRedirect,{id: modalRedirectId,moduleName: moduleInfo.name} )
             }}>
               <Text style={[styles.white,styles.font32]}>Перепройти</Text>
           </TouchableOpacity>
@@ -992,6 +993,8 @@ function Media ({ navigation, route}){
   const [mediaUrl,setMediaUrl] = useState()
   const mediaId = route.params.id
   const [wordList, setWordList] = useState()
+  const [module, setModule] = useState()
+
 
   async function handleSubmit() {
     console.log(route.params.moduleName)
@@ -1012,6 +1015,7 @@ function Media ({ navigation, route}){
             setMediaUrl(data.data.audio)
           }
           setWordList(data.words)
+          setModule(await data.module)
         }
         // console.log(data.data)
 
@@ -1165,6 +1169,7 @@ function AudioPage({navigation, route}){
   const mediaAudioId = route.params.id
   const [AudioSRC, setAudioSRC] = useState()
   const [wordList, setWordList] = useState()
+  const [module, setModule] = useState()
   
   async function handleSubmit() {
     console.log(route.params.moduleName)
@@ -1180,6 +1185,7 @@ function AudioPage({navigation, route}){
         console.log(data.data.audio)
         setAudioSRC(await data.data.audio)
         setWordList(data.words)
+        setModule(await data.module)
       }
     )
     
@@ -1209,15 +1215,19 @@ function Test ({ navigation, route}){
   const [questionProgress, setQuestionProgress] = useState()
   const [module, setModule] = useState()
   const [questionStatuses, setQuestionStatuses] = useState()
+  // const [questionType, setQuestionType] = useState()
+
 
   let [answerStyle, setAnswerStyle] = useState([styles.black, styles.font24])
+
+  // input question
   const [completed, setCompleted] = useState(false)
-  const [answers, setAnswers] = useState()
+  const [answer, setAnswer] = useState()
   let answersList = []
 
 
   function shuffleAnswers(arr) {
-    console.log(arr)
+    // console.log(arr)
     arr.sort(() => Math.random() - 0.5);
   }
 
@@ -1247,7 +1257,7 @@ function Test ({ navigation, route}){
           console.log("kl;sadkl;sakd;lsakd;sad")
           completeTask()
           console.log(`Navigation to module ${data.module.name}`)
-          navigation.navigate( "ModulePage",{moduleId: await data.module.id} )
+          navigation.navigate("Modules")
         }
       }
     )
@@ -1269,7 +1279,7 @@ function Test ({ navigation, route}){
         getInfoOfTask()
         
         if(await questionProgress.progress > await questions.length){
-          navigation.navigate( "ModulePage",{moduleId: module.id} )
+          navigation.navigate("Modules")
         }
       }
     )
@@ -1305,7 +1315,7 @@ function Test ({ navigation, route}){
         </View>
       }
 
-      {questions && questionProgress && questions[questionProgress.progress-1] &&
+      {questions && questionProgress && questionProgress.progress &&
       <View>
         { questionStatuses &&
           <Text>{questionProgress.progress}/{questionStatuses.length}</Text>
@@ -1320,43 +1330,74 @@ function Test ({ navigation, route}){
         { questions[questionProgress.progress-1].question &&
           <Text>{questions[questionProgress.progress-1].question}</Text>
         }
-        {/* <Text>{JSON.stringify(questions[questionProgress.progress-1])}</Text> */}
-        { questions[questionProgress.progress-1].wrongAnswers.map((answer, idx) =>{
-          answersList.push(answer)
-          if (!answersList.includes(questions[questionProgress.progress-1].trueAnswers[0])){
-            answersList.push(questions[questionProgress.progress-1].trueAnswers[0])
-          }
-          shuffleAnswers(answersList)
-        }
-        )}
-        {
-          answersList.map((ans, idx) =>{
-            let answerStyleExtra = []
-            if (questions[questionProgress.progress-1].trueAnswers[0] == ans){
-              answerStyleExtra = answerStyle
-            } else{
-              answerStyleExtra = [styles.black, styles.font24]
-            }
-            return(
-            <TouchableOpacity value={ans} key={idx} style={styles.orangeButton} onPress={()=>{
-              correct = false
-              setAnswerStyle([styles.red, styles.font24])
-              console.log(questions[questionProgress.progress-1].trueAnswers[0])
-              console.log("ans", ans)
-              if (ans == questions[questionProgress.progress-1].trueAnswers[0]){
-                correct = true
-                setAnswerStyle([styles.orange, styles.font24])
+        { questions[questionProgress.progress-1].questionType == "word" &&
+          <View>
+            { questions[questionProgress.progress-1].wrongAnswers.map((answer, idx) =>{
+              answersList.push(answer)
+              if (!answersList.includes(questions[questionProgress.progress-1].trueAnswers[0])){
+                answersList.push(questions[questionProgress.progress-1].trueAnswers[0])
               }
-              setTimeout(() => {
-                updateProgresId(questionProgress.progress+1,correct)
-              }, 1000);
-              
-              }}>
-              <Text style={answerStyleExtra}>{ans}</Text>
-            </TouchableOpacity>
-            )
-          })
+              shuffleAnswers(answersList)
+            })}
+            {answersList.map((ans, idx) =>{
+                let answerStyleExtra = []
+                if (questions[questionProgress.progress-1].trueAnswers[0] == ans){
+                  answerStyleExtra = answerStyle
+                } else{
+                  answerStyleExtra = [styles.black, styles.font24]
+                }
+                return(
+                <TouchableOpacity value={ans} key={idx} style={styles.orangeButton} onPress={()=>{
+                  correct = false
+                  setAnswerStyle([styles.red, styles.font24])
+                  console.log(questions[questionProgress.progress-1].trueAnswers[0])
+                  console.log("ans", ans)
+                  if (ans == questions[questionProgress.progress-1].trueAnswers[0]){
+                    correct = true
+                    setAnswerStyle([styles.orange, styles.font24])
+                  }
+
+                  updateProgresId(questionProgress.progress+1,correct)
+                  }}>
+                  <Text style={answerStyleExtra}>{ans}</Text>
+                </TouchableOpacity>
+                )
+              })
+            }
+          </View>
         }
+        { questions[questionProgress.progress-1].questionType == "input" &&
+          <View>
+            <Text>Уведіть відповідь</Text>
+            <TextInput 
+              style={styles.input}
+              value={answer}
+              onChangeText={setAnswer}
+            />
+            <TouchableOpacity style={styles.orangeButton} onPress={ ()=>{
+              let correct = false
+              if(answer){
+                if(answer.toLowerCase() == questions[questionProgress.progress-1].trueAnswers[0]){
+                  correct = true
+                }
+              }
+              console.log(answer)
+
+              updateProgresId(questionProgress.progress+1,correct)
+            }
+            }>
+              <Text style={[styles.black, styles.font24]}>Відповісти</Text>
+            </TouchableOpacity>
+          </View>
+          
+        }
+        {/* { questions[questionProgress.progress-1].questionType == "multiple" &&
+          <View>
+
+          </View>
+          
+        } */}
+
       </View>
       }
 

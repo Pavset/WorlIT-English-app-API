@@ -4,7 +4,7 @@ export default function NavigationPanelTest({word,navigation, wordList,module}){
   if (word){
     return(
       <View style={styles.navBar}>
-        <Pressable style={styles.button} onPress={()=>{navigation.goBack()}}>
+        <Pressable style={styles.button} onPress={()=>{navigation.navigate("Modules")}}>
           <Image style={styles.buttonImage} source={{ uri: "https://i.postimg.cc/yDjWf9xt/icons8-back-96.png" }}/>
         </Pressable >
         <Pressable style={styles.button} onPress={()=>{navigation.navigate("Words",{words : wordList, moduleName: module})}}>
