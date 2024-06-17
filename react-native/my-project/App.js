@@ -1217,37 +1217,60 @@ function Test ({ navigation, route}){
   const [questionStatuses, setQuestionStatuses] = useState()
   // const [questionType, setQuestionType] = useState()
 
-
   let [answerStyle, setAnswerStyle] = useState([styles.black, styles.font24])
 
-  // let [multipleAnswersLists, setMultipleAnswersLists] = useState([])
-
-  // let [tempArr,setTempArr] = useState([])
-  
+  // for type "multiple" question
+  let [sectionCounter,setSectionCounter] = useState(1)
+  let [multipleAnswer, setMultipleAnswer] = useState([])
   let arrayOfQuestionSections =  {}
 
-  // input question
+  // for type "input" question
   const [completed, setCompleted] = useState(false)
   const [answer, setAnswer] = useState()
   let answersList = []
-
-
   function shuffleAnswers(arr) {
     // console.log(arr)
     arr.sort(() => Math.random() - 0.5);
   }
 
+
   //createAnswersForMultiple(questions[questionProgress.progress-1].wrongAnswers, idx)
-  function createAnswersForMultiple(truAns,answersArr, idx){
+  function createAnswersForMultiple(trueArr,trueAns,answersArr,idx){
+    // let l = trueArr.length
+    // тру ответы, но по новой
+    let trueExtra = []
+    for (let trueAnswer of trueArr){
+      trueExtra.push(trueAnswer)
+    }
+  
+    // выводим доп рандом ответ который будет получаться из правильных но не будет таковым в данный момент
+    let trueIdx = trueExtra.indexOf(trueAns)
+    trueExtra.splice(trueIdx, 1)
+    let extraFromTrue = trueExtra[Math.floor(Math.random()*trueExtra.length)]
+  
+    // прост ответы, но по новой
+    let ansArr = []
+    for (let answer of answersArr){
+      ansArr.push(answer)
+    }
+  
+    // тот который в итоге выводим
     let tempArr = []
-    answersArr.push(truAns)
-    shuffleAnswers(answersArr)
-    for (let ans of answersArr){
+    ansArr.push(trueAns)
+    ansArr.push(extraFromTrue)
+    shuffleAnswers(ansArr)
+    for (let ans of ansArr){
+      
       if(!tempArr.includes(ans)){
         tempArr.push(ans)
       }
     }
-    arrayOfQuestionSections[idx] = tempArr
+    // console.log(trueArr)
+    // console.log(trueAns)
+    // console.log(answersArr)
+    // console.log(tempArr)
+    console.log("jghsakdla;'dkfjghbljiosdl;akjfnhuiospl;,kjfn")
+    return tempArr
   }
 
   async function getInfoOfTask() {
@@ -1272,7 +1295,7 @@ function Test ({ navigation, route}){
         setAnswerStyle([styles.black, styles.font24])
 
         if(data.progress.progress > data.data.length){
-          console.log("kl;sadkl;sakd;lsakd;sad")
+          // console.log("kl;sadkl;sakd;lsakd;sad")
           completeTask()
           console.log(`Navigation to module ${data.module.name}`)
           navigation.navigate("Modules")
@@ -1414,8 +1437,41 @@ function Test ({ navigation, route}){
         { questions[questionProgress.progress-1].questionType == "multiple" &&
           <View>
             {questions[questionProgress.progress-1].trueAnswers.map((truAns, idx) =>{
-                createAnswersForMultiple(truAns, questions[questionProgress.progress-1].wrongAnswers, idx)
+                arrayOfQuestionSections[idx] = createAnswersForMultiple(questions[questionProgress.progress-1].trueAnswers, truAns, questions[questionProgress.progress-1].wrongAnswers, idx)
             })}
+            { arrayOfQuestionSections && sectionCounter &&          
+              <View>
+                {arrayOfQuestionSections[sectionCounter-1].map((answer, idx)=>{
+                  return(
+                    <TouchableOpacity key={idx} style={styles.orangeButton} onPress={()=>{
+                      let multipleTemp = []
+                      for (let temp of multipleAnswer){
+                        multipleTemp.push(temp)
+                      }
+                      multipleTemp.push(answer)
+                      console.log(multipleTemp)
+                      setMultipleAnswer(multipleTemp)
+                      if(multipleAnswer.length < questions[questionProgress.progress-1].trueAnswers.length-1){
+                        setSectionCounter(sectionCounter+1)
+                      } else{
+                        let correct = false
+                        console.log("yoyoyoyoyoyoyoyoyoyoyoyoyo")
+                        console.log(multipleTemp)
+                        console.log(questions[questionProgress.progress-1].trueAnswers)
+                        if (toString(multipleTemp) == toString(questions[questionProgress.progress-1].trueAnswers)){
+                          correct = true
+                        }
+                        console.log(correct)
+                        updateProgresId(questionProgress.progress+1,correct)
+                      }
+                      }}>
+                      <Text style={[styles.black, styles.font24]}>{answer}</Text>
+                    </TouchableOpacity>
+                    )
+                })}
+              </View>
+            }
+            <Text>{multipleAnswer}</Text>
             <Text>{JSON.stringify(arrayOfQuestionSections)}</Text>
           </View>
         }
