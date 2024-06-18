@@ -15,7 +15,7 @@ import AudioBar from './components/playTrack';
 // import TrackPlayer from 'react-native-track-player';
 const Stack = createNativeStackNavigator()
 const port = 8000
-const ip = "localhost" //192.168.80.57
+const ip = "192.168.0.105" //192.168.80.57 // localhost
 const url = `http://${ip}:${port}`
 LogBox.ignoreAllLogs();
 
@@ -683,16 +683,20 @@ function ModulePage({ navigation, route }){
     <View style={styles.profileContainer}>
       {modalOpened &&
       <TouchableOpacity style={styles.modalWraper} onPress={modal}>
-        <View style={styles.modal}>
-          <Text style={[styles.white,styles.font32]}>It is modal Wraper</Text>
+        <View style={[styles.modal,{justifyContent: 'space-around'}]}>
+          <Text style={[styles.white,styles.font24]}>Чи перепроходити завдання?</Text>
+          <View style={{width: '100%', flexDirection: "row", justifyContent: 'space-around', alignItems: 'center', height: 50}}>
           <TouchableOpacity  onPress={()=>{
             downgradeTask(modalRedirectId)
             }}>
-              <Text style={[styles.white,styles.font32]}>Перепройти</Text>
+              <Text style={[styles.white,styles.font20]}>Так</Text>
           </TouchableOpacity>
           <TouchableOpacity  onPress={modal}>
-              <Text style={[styles.white,styles.font32]}>Не перепроходити</Text>
+              <Text style={[styles.white,styles.font20]}>Ні</Text>
           </TouchableOpacity>
+          </View>
+          
+
         </View>
         
       </TouchableOpacity>
@@ -700,12 +704,12 @@ function ModulePage({ navigation, route }){
       <View style={styles.header}>
         <Text style={[styles.white,styles.font32]}>{moduleInfo.name}</Text>
       </View>
-      {!topics &&
+      {!topics && !taskStatuses &&
           <View style={{height: "100%", width: "100%", alignItems: "center", justifyContent: "center"}}>
           <ActivityIndicator size="large" color="#e19a38"/>
           </View>
       }
-      { topics &&
+      { topics && taskStatuses &&
         <ScrollView style={styles.scroll100}>
           {topics.map((topic,idx) =>{
             let videoCounter = 0
@@ -1039,7 +1043,10 @@ function Media ({ navigation, route}){
       }
            
       {/* </ScrollView> */}
-      <NavigationPanelTest word={true} module={route.params.moduleName} wordList={wordList} navigation={navigation}/>
+      {mediaUrl &&
+        <NavigationPanelTest word={true} module={route.params.moduleName} wordList={wordList} navigation={navigation}/>
+      }
+      
       
     </View>
   )
@@ -1194,20 +1201,27 @@ function AudioPage({navigation, route}){
   
 
   return(
-    <View style={styles.profileContainer}>
+    <View style={styles.audioContainer}>
       {!AudioSRC &&
                 <View style={{height: "100%", width: "100%", alignItems: "center", justifyContent: "center"}}>
                 <ActivityIndicator size="large" color="#e19a38"/>
                 </View>
       }
+
+      {AudioSRC &&
       <AudioBar url ={AudioSRC}/>
+      }
+      
+      {AudioSRC &&
       <NavigationPanelTest word={true} module={route.params.moduleName} wordList={wordList} navigation={navigation}/>
+      }
+      
     </View>
   )
 }
 
 function Test ({ navigation, route}){
-
+  const [error, setError] = useState()
   const testId = route.params.id
   const [task, setTask] = useState()
   const [questions, setQuestions] = useState()
@@ -1217,7 +1231,7 @@ function Test ({ navigation, route}){
   const [questionStatuses, setQuestionStatuses] = useState()
   // const [questionType, setQuestionType] = useState()
 
-  let [answerStyle, setAnswerStyle] = useState([styles.black, styles.font24])
+  let [answerStyle, setAnswerStyle] = useState([{color: 'white'}, styles.font24])
 
   // for type "multiple" question
   let [sectionCounter,setSectionCounter] = useState(1)
@@ -1285,21 +1299,26 @@ function Test ({ navigation, route}){
       async data => {
         console.log(data)
         console.log("kl;sadkl;sakd;lsakd;sad")
-        setTask(await data.task)
-        setQuestions(await data.data)
-        setWordList(await data.words)
-        setModule(await data.module)
-        setQuestionProgress(await data.progress)
-        setCompleted(await data.progress.completed)
-        setQuestionStatuses(await data.questionsStatuses)
-        setAnswerStyle([styles.black, styles.font24])
-
-        if(data.progress.progress > data.data.length){
-          // console.log("kl;sadkl;sakd;lsakd;sad")
-          completeTask()
-          console.log(`Navigation to module ${data.module.name}`)
-          navigation.navigate("Modules")
+        if (!data.error){
+          setTask(await data.task)
+          setQuestions(await data.data)
+          setWordList(await data.words)
+          setModule(await data.module)
+          setQuestionProgress(await data.progress)
+          setCompleted(await data.progress.completed)
+          setQuestionStatuses(await data.questionsStatuses)
+          setAnswerStyle([{color: "white"}, styles.font24])
+  
+          if(data.progress.progress > data.data.length){
+            // console.log("kl;sadkl;sakd;lsakd;sad")
+            completeTask()
+            console.log(`Navigation to module ${data.module.name}`)
+            navigation.navigate("Modules")
+          }
+        }else{
+          setError(data.error)
         }
+
       }
     )
     
@@ -1351,17 +1370,29 @@ function Test ({ navigation, route}){
   return(
     <View style={styles.profileContainer}>
       <View style={[styles.orangeBG,{width: "100%", height: 30}]}></View>
-      {!questions && !questionProgress && 
+      {!questions && !questionProgress && !error &&
       
         <View style={{height: "100%", width: "100%", alignItems: "center", justifyContent: "center"}}>
           <ActivityIndicator size="large" color="#e19a38"/>
         </View>
       }
 
+      {error &&
+        <View style={{height: '100%',width: "100%", alignItems: "center", justifyContent: "center"}}>
+          <View style={{width: '90%', height: "20%", backgroundColor: '#252124',borderColor: '#E19A38',borderWidth: 2,borderRadius: 15, justifyContent: 'space-evenly',alignItems: 'center'}}>
+            <Text style={{fontSize: 24, color: "#E19A38"}}>Виникла помилка!</Text>
+            <Text style={{color: 'white', fontSize: 20}}>{error}</Text>
+            <TouchableOpacity style={{width: '90%',height:'30%',backgroundColor: '#3B3B3B',borderColor: '#4F4F4F',borderWidth: 2,borderRadius: 15,justifyContent: 'center', alignItems: 'center'}} onPress={()=>{navigation.goBack()}}>
+              <Text style={{color: 'white', fontSize: 20}}>Повернутися назад</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      }
+
       {questions && questionProgress && questionProgress.progress &&
-      <View>
+      <View style={{width: '100%', height: '90%', justifyContent: 'space-around', alignItems: 'center'}}>
         { questionStatuses &&
-          <Text>{questionProgress.progress}/{questionStatuses.length}</Text>
+          <Text style={{color: 'white', textAlign: 'center', fontSize: 32}}>{questionProgress.progress}/{questionStatuses.length}</Text>
         }
         {/* <Text>{questions[questionProgress.progress-1].question}</Text> */}
         { questions[questionProgress.progress-1].extraQuestionText &&
@@ -1374,7 +1405,16 @@ function Test ({ navigation, route}){
           <Text>{questions[questionProgress.progress-1].question}</Text>
         }
         { questions[questionProgress.progress-1].questionType == "word" &&
-          <View>
+          <View style={{
+          width: '100%', 
+          // height: "50%", 
+          padding: 10, 
+          gap: 10,    
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+          alignItems: 'center',
+          alignContent: 'center',}}>
             { questions[questionProgress.progress-1].wrongAnswers.map((answer, idx) =>{
               answersList.push(answer)
               if (!answersList.includes(questions[questionProgress.progress-1].trueAnswers[0])){
@@ -1387,10 +1427,10 @@ function Test ({ navigation, route}){
                 if (questions[questionProgress.progress-1].trueAnswers[0] == ans){
                   answerStyleExtra = answerStyle
                 } else{
-                  answerStyleExtra = [styles.black, styles.font24]
+                  answerStyleExtra = [{color: 'white'}, styles.font24]
                 }
                 return(
-                <TouchableOpacity value={ans} key={idx} style={styles.orangeButton} onPress={()=>{
+                <TouchableOpacity value={ans} key={idx} style={styles.buttonAnswer} onPress={()=>{
                   correct = false
                   setAnswerStyle([styles.red, styles.font24])
                   console.log(questions[questionProgress.progress-1].trueAnswers[0])
@@ -1402,7 +1442,7 @@ function Test ({ navigation, route}){
 
                   updateProgresId(questionProgress.progress+1,correct)
                   }}>
-                  <Text style={answerStyleExtra}>{ans}</Text>
+                  <Text style={[{color:'white'},answerStyleExtra]}>{ans}</Text>
                 </TouchableOpacity>
                 )
               })
@@ -1417,7 +1457,7 @@ function Test ({ navigation, route}){
               value={answer}
               onChangeText={setAnswer}
             />
-            <TouchableOpacity style={styles.orangeButton} onPress={ ()=>{
+            <TouchableOpacity style={styles.buttonAnswer} onPress={ ()=>{
               let correct = false
               if(answer){
                 if(answer.toLowerCase() == questions[questionProgress.progress-1].trueAnswers[0]){
@@ -1429,7 +1469,7 @@ function Test ({ navigation, route}){
               updateProgresId(questionProgress.progress+1,correct)
             }
             }>
-              <Text style={[styles.black, styles.font24]}>Відповісти</Text>
+              <Text style={[{color: 'white'}, styles.font24]}>Відповісти</Text>
             </TouchableOpacity>
           </View>
           
@@ -1443,7 +1483,7 @@ function Test ({ navigation, route}){
               <View>
                 {arrayOfQuestionSections[sectionCounter-1].map((answer, idx)=>{
                   return(
-                    <TouchableOpacity key={idx} style={styles.orangeButton} onPress={()=>{
+                    <TouchableOpacity key={idx} style={styles.buttonAnswer} onPress={()=>{
                       let multipleTemp = []
                       for (let temp of multipleAnswer){
                         multipleTemp.push(temp)
@@ -1465,7 +1505,7 @@ function Test ({ navigation, route}){
                         updateProgresId(questionProgress.progress+1,correct)
                       }
                       }}>
-                      <Text style={[styles.black, styles.font24]}>{answer}</Text>
+                      <Text style={[{color: 'white'}, styles.font24]}>{answer}</Text>
                     </TouchableOpacity>
                     )
                 })}
@@ -1478,8 +1518,9 @@ function Test ({ navigation, route}){
       </View>
       }
 
-      
-      <NavigationPanelTest word={true} module={route.params.moduleName} wordList={wordList} navigation={navigation}/>
+      {questions && questionProgress && questionProgress.progress &&
+        <NavigationPanelTest word={true} module={route.params.moduleName} wordList={wordList} navigation={navigation}/>
+      }
     </View>
   )
 }
@@ -1661,6 +1702,19 @@ const styles = StyleSheet.create({
     padding: 0,
     margin:0,
   },
+  audioContainer:{
+    display: "flex",
+    flexDirection:"column",
+    backgroundColor: '#3B3B3B',
+    alignItems: 'center',
+    justifyContent: 'center',
+    // padding: "0 0 10px 0",
+
+    width:"100%",
+    height: "100%",
+    padding: 0,
+    margin:0,
+  },
   profileUp:{
     display: "flex",
     flexDirection:"column",
@@ -1712,10 +1766,10 @@ const styles = StyleSheet.create({
     alignItems: 'start',
     justifyContent: 'start',
     width: "100%",
-    gap: "5%",
+    gap: 10,
     padding: "2%",
     boxSizing: "border-box",
-    borderRadius: "10px"
+    borderRadius: 10
   },
   profileSectorImage:{
     width: 100,
@@ -1885,7 +1939,8 @@ const styles = StyleSheet.create({
     backgroundColor:"#E19A38",
     top: 46,
     right: -50,
-    zIndex: 2
+    zIndex: 2,
+    verticalAlign: 'middle',
   },
   uncompletedTask:{
     backgroundColor:"#D1D8DB",
@@ -1961,5 +2016,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: "space-between",
     flexDirection: 'row'
+  },
+  buttonAnswer:{
+    // flex: 1, // Ensure the component fills available space
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    paddingLeft: 10,
+    paddingRight: 10,
+    gap: 10,
+    position: 'relative',
+    backgroundColor: '#252124',
+    borderWidth: 2,
+    borderColor: '#E8F0FE',
+    borderRadius: 15,
+    width: "40vw",
+    height: "20vh"
   }
 });

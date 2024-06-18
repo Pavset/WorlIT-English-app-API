@@ -3,11 +3,15 @@
 # dependencies
 /react-native/my-project/node_modules/
 /node/node_modules/
+/node/package-lock.json
+/node/public/person
+/node/public/photo
+/node/public/video
 # Expo
 /react-native/my-project/.expo/
 /react-native/my-project/dist/
 /react-native/my-project/web-build/
-
+/react-native/my-project/package-lock.json
 # Native
 *.orig.*
 *.jks
