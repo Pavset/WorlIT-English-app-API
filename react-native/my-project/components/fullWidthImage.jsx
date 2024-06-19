@@ -30,6 +30,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   image: {
-    width: "95vw", // Ваша желаемая ширина
+    width: "90vw", // Ваша желаемая ширина
   },
 });
