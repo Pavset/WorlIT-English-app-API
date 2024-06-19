@@ -160,7 +160,7 @@ export default function ModulePage({ navigation, route }){
                         counter = sentencesCounter
                       } else if (task.type == "audio"){
                         typeText = "audio"
-                        typeImage = {uri: "https://img.icons8.com/?size=100&id=80743&format=png&color=000000"}
+                        typeImage = {uri: "https://img.icons8.com/ios/100/high-volume--v1.png"}
                         media = true
                         redirect = "AudioPage"
                         audioCounter += 1

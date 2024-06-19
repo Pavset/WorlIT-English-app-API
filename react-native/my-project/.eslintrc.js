@@ -1,8 +1,12 @@
 module.exports = {
-    root: true,
-    extends: '@react-native-community',
-    "plugins": [
-           "react",
-           "react-native"
-     ]
+    parser: 'babel-eslint',
+    plugins: ['react', 'react-native'],
+    env: {
+        'react-native/react-native': true,
+    },
+    extends: ['eslint:recommended', 'plugin:react/recommended', 'plugin:react-native/all'],
+    rules: {
+        "avoidEscape": true,
+        "allowTemplateLiterals": true
+    }
 };

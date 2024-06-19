@@ -1,57 +1,30 @@
-import { useVideoPlayer, VideoView } from 'expo-video';
-import { useEffect, useRef, useState } from 'react';
-import { PixelRatio, StyleSheet, View, Button, TouchableOpacity, Text, ScrollView } from 'react-native';
+import { Video, ResizeMode } from 'expo-av';
+import { useRef } from 'react';
+import { StyleSheet, View } from 'react-native';
 
 
 
 export default function VideoScreen({videoSource}) {
-  const ref = useRef(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const player = useVideoPlayer(videoSource, player => {
-    player.loop = true;
-    // player.show
-    // player.play();
-  });
-
-  useEffect(() => {
-    const subscription = player.addListener('playingChange', isPlaying => {
-      setIsPlaying(isPlaying);
-    });
-
-    return () => {
-      subscription.remove();
-    };
-  }, [player]);
-
-  // setInterval(async () => {
-  //   console.log(await player.currentTime)
-  // }, 1000);
+  const video = useRef(null);
 
   return (
 
     <View style={styles.contentContainer}>
-      <VideoView
-        ref={ref}
+      <Video
+        ref={video}
         style={styles.video}
-        player={player}
-        allowsFullscreen
-        allowsPictureInPicture
-        nativeControls={true}
+        source={{
+          uri: videoSource,
+        }}
+        useNativeControls
+        isLooping
+        resizeMode='stretch'
+        onReadyForDisplay={videoData => {
+          videoData.srcElement.style.position = "initial";
+          videoData.srcElement.style.width = "100%";
+          videoData.srcElement.style.height = "100%";
+        }}
       />
-      {/* <View style={styles.controlsContainer}>
-        <TouchableOpacity
-          // title={isPlaying ? 'Pause' : 'Play'}
-          style={styles.button}
-          onPress={() => {
-            if (isPlaying) {
-              player.pause();
-            } else {
-              player.play();
-            }
-            setIsPlaying(!isPlaying);
-          }}
-        ><Text style={{fontSize: 20, fontWeight: 'bold'}}>{isPlaying ? 'Pause' : 'Play'}</Text></TouchableOpacity>
-      </View> */}
     </View>
   );
 }
@@ -59,10 +32,8 @@ export default function VideoScreen({videoSource}) {
 const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
-    // padding: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    // paddingHorizontal: 50,
   },
   video: {
     width: 320,

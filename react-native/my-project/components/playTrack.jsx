@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, StyleSheet, Button, Text, TouchableOpacity, Image } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Audio } from 'expo-av';
 import { Slider, NativeBaseProvider, HStack } from 'native-base'
 let started = false
@@ -9,20 +9,12 @@ export default function AudioBar({url}) {
   const [position, setPosition] = useState(0)
   const [isPlay, setPlay] = useState(true)
   const [progress, setProgress] = useState(0)
-  // const [onChangeValue, setOnChangeValue] = useState(0)
-  // const [onChangeEndValue, setOnChangeEndValue] = useState(100)
-
+  
   async function playSound() {
-    console.log('Loading Sound');
-    
     const { sound } = await Audio.Sound.createAsync({ uri: url });
     setSound(sound);
-
-    
-    console.log('Playing Sound');
     started = true
     await sound.playAsync();
-    console.log(position)
   }
 
   async function stopSound(){
@@ -31,9 +23,7 @@ export default function AudioBar({url}) {
   }
   async function rewindForward(){
     let status = await sound.getStatusAsync();
-
     await sound.playFromPositionAsync(status.positionMillis+15000)
-    console.log(status.positionMillis)
   }
   
   async function rewindBack(){
@@ -45,30 +35,27 @@ export default function AudioBar({url}) {
     }
     setPosition(newPos)
     await sound.playFromPositionAsync(status.positionMillis-15000)
-    console.log(status.positionMillis)
+
   }
 
   async function pauseSound(){
 
-    console.log(isPlay)
+
     if (isPlay){
         const status = await sound.getStatusAsync();
         setPosition(status.positionMillis);
-        console.log(position)
+
         await sound.pauseAsync()
     }
     else{
         await sound.playFromPositionAsync(position)
         const status = await sound.getStatusAsync();
         setPosition(status.positionMillis);
-        console.log(position)
+
     }
     setPlay(!isPlay);
   }
 
-// durationMillis
-
-// durationMillis
    useEffect(() => {
     var timer = setInterval(async () => {
       if (sound){
@@ -82,13 +69,7 @@ export default function AudioBar({url}) {
         } 
       }
     }, 1000);
-    //  return sound
-    //   ? () => {
-    //       console.log('Unloading Sound');
-    //       sound.unloadAsync();
-    //       clearInterval(timer)
-    //     }
-    //   : sound.loadAsync({ uri: url });
+
     return sound
       ? () => {
           console.log('Unloading Sound');
@@ -98,17 +79,9 @@ export default function AudioBar({url}) {
       : undefined;
   }, [sound]);
 
-  // var nowTime = sound.positionMillis
-  // var durationTime = sound.durationMillis
-
-
-
-
-  
-// stopAsync()
   return (
     <NativeBaseProvider>
-      <View>
+      <View style={styles.container}>
 
       <HStack space={4} justifyContent="center">
         <TouchableOpacity onPress={rewindBack}>
@@ -127,8 +100,6 @@ export default function AudioBar({url}) {
           <Image source = { isPlay ? require=("../assets/pause.png"):require=("../assets/unpause.png")} style = {styles.image} />
         </TouchableOpacity>
 
-        {/* <Button title={isPlay ? "Pause":"Unpause"} onPress={!started ? playSound : pauseSound} /> */}
-        {/* <Button title="+15s" onPress={rewindForward} /> */}
       </HStack>
 
         <Slider value={progress} minValue={0} maxValue={100} defaultValue={0}  step = {0} colorScheme="cyan">
@@ -147,7 +118,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor: '#ecf0f1',
     padding: 10,
   },
   image: {

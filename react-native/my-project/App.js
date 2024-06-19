@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, LogBox, TouchableOpacity, TextInput, Image, Linking, ScrollView, StatusBar,ActivityIndicator } from 'react-native';
+import { StyleSheet, LogBox } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import Account from './pages/account';
@@ -12,18 +12,10 @@ import Register from './pages/register';
 import Test from './pages/test';
 import Theory from './pages/theory';
 import Words from './pages/words';
-// import { background } from 'native-base/lib/typescript/theme/styled-system';
-import { background, border } from 'native-base';
-
-// require('dotenv').config()
-
 const Stack = createNativeStackNavigator()
-// const port = process.env.EXPO_PUBLIC_PORT;
-// const ip = process.env.EXPO_PUBLIC_IP;
-export const url = process.env.EXPO_PUBLIC_URL
+
+export const url = `http://localhost:8000`//process.env.EXPO_PUBLIC_URL
 LogBox.ignoreAllLogs();
-
-
 
 export default function App() {
   return (
@@ -117,8 +109,6 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 10,
     paddingTop: 40,
-    // height:"10%",
-    // maxHeight:100,
     width:"100%"
   },
   mainRegLog:{
@@ -155,25 +145,16 @@ export const styles = StyleSheet.create({
     color:"#fff",
     borderRadius:5,
     fontSize: 20,
-    // height: 100
-    // outlineColor: "#3B3B3B",
-    // outlineStyle: "solid",
-    // outlineWidth: 4,
   },
   inputPass:{
     display: "flex",
     flexDirection:"row",
-    // backgroundColor: '#4F4F4F',
     alignItems: 'center',
     justifyContent: 'start',
-    // padding: 10,
-    width:"100%",
+    width:"90%",
     color:"#fff",
     borderRadius:5,
     fontSize: 20,
-    // outlineColor: "#3B3B3B",
-    // outlineStyle: "solid",
-    // outlineWidth: 4,
   },
   eye:{
     width: 35,
@@ -195,7 +176,6 @@ export const styles = StyleSheet.create({
     backgroundColor: '#3B3B3B',
     alignItems: 'center',
     justifyContent: 'start',
-    // padding: "0 0 10px 0",
 
     width:"100%",
     height: "100%",
@@ -208,7 +188,6 @@ export const styles = StyleSheet.create({
     backgroundColor: '#3B3B3B',
     alignItems: 'center',
     justifyContent: 'center',
-    // padding: "0 0 10px 0",
 
     width:"100%",
     height: "100%",
@@ -283,10 +262,8 @@ export const styles = StyleSheet.create({
     alignItems: 'start',
     justifyContent: 'start',
     width: "70%",
-    // height:"100%",
     gap: 10,
     padding: 10,
-    // paddingHorizontal: 10,
     borderRadius: 10,
     boxSizing: "border-box",
     backgroundColor: "#252124"
@@ -322,11 +299,7 @@ export const styles = StyleSheet.create({
   // modules
 
   modulesContainer:{
-    // display: "flex",
-    // flexDirection:"column",
     backgroundColor: '#252124',
-    // alignItems: 'center',
-    // justifyContent: 'start',
     paddingHorizontal: 15,
     paddingVertical: 40,
     margin:0,
@@ -399,7 +372,6 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
     flexWrap:"wrap",
     width:"80%",
-    // gap: 20
   },
   antiIndexMargin:{
     marginTop: -50
@@ -493,12 +465,6 @@ export const styles = StyleSheet.create({
   // Words
 
   roleBorder:{
-    // borderColor: '#FFFFFF',
-    // // borderStyle: 'solid', // Not supported in React Native
-    // borderTopWidth: 2,
-    // borderBottomWidth: 2,
-    // borderLeftWidth: 0,
-    // borderRightWidth: 0,
     width: "100%",
     height: 30,
     justifyContent: "center",

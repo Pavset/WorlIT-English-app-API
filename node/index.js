@@ -5,10 +5,12 @@ const cors = require('cors');
 const { User,Courses,Modules,Topics,Theories,Tasks,Question,Staff,Word,WordList,Sections,ModuleCourse,TasksUsers, QuestionUsers } = require("./db.js")
 const { v4: uuidv4 } = require('uuid');
 const { Op } = require("sequelize");
+require('dotenv').config();
 
 // Router
 
 const router = express()
+const port = process.env.PORT
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 router.use(cors());
@@ -130,11 +132,6 @@ router.post("/signup", async (req, res) => {
             phoneNumber: body.phone,
             apikey: apikey
         })
-        // if (data.name.length < 0){
-        //     return res.status(400).json({error: "Ви не увели ім'я"})
-        // } else if(data.surname.length < 0) {
-        //     return res.status(400).json({error: "Ви не увели прізвище"})
-        // } else{
             createTasksWithStatus(data.apikey)
 
         return res.status(201).json({apikey: data.apikey})
@@ -171,11 +168,7 @@ router.get("/course", async (req, res) => {
                         CourseId: course.id
                     }
                 })
-                // console.log("xxxxxxxxxxxxxxxuuuuuuuuuuuuuuuuuuiiiiiiiiii")
-                // console.log(moduleList[1]["dataValues"]["ModuleId"])
                 for (let key of moduleList) {
-                    // console.log(key["dataValues"]["ModuleId"])
-                    
                     const module = await Modules.findOne({
                         where:{
                             id: key["dataValues"]["ModuleId"]
@@ -185,10 +178,7 @@ router.get("/course", async (req, res) => {
                       modules.push(module.dataValues);
                     }
                 }
-                // console.log(modules)
-
                 if (modules.length > 0){
-                    // console.log("SUCCES")
                     return res.status(200).json({course: course, modules: modules})
                 }else{
                     return res.status(404).json({error: "Немає модулів"})
@@ -237,8 +227,7 @@ router.get("/modules/:moduleId", async (req, res) => {
 
                 let course = await Courses.findOne({
                     where: { 
-                        id: data.course,
-                        // modules: {[Op.contains]: [req.params.moduleId]}
+                        id: data.course
                     }
                 })
 
@@ -248,13 +237,9 @@ router.get("/modules/:moduleId", async (req, res) => {
                             module: module.dataValues.id
                         }
                     })
-                    // console.log("HHHHHHHHHHHHHUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
-
-                    // console.log(foundTopics)
                     if (foundTopics.length > 0){
                         let topics = []
                         for (const val of foundTopics) {
-                            // console.log(val.dataValues)
                             const topic = await Topics.findOne({
                               where: {
                                 id: val.dataValues.id,
@@ -264,7 +249,6 @@ router.get("/modules/:moduleId", async (req, res) => {
                                 topics.push(topic.dataValues);
                             }
                         }
-                        // console.log(topics)
                         if (topics.length > 0){
                             
                             const blockedTasks = await TasksUsers.findAll({
@@ -313,10 +297,6 @@ router.get("/modules/:moduleId", async (req, res) => {
                                 let homeworks = []
                                 let tasks = []
 
-                                // console.log(topic.tasks)
-                                // console.log("sfkjfhdbvkhdfvkjhfd")
-
-
                                 for (const val of topic.tasks) {
                                     let task = await Tasks.findOne({
                                         where:{
@@ -327,8 +307,6 @@ router.get("/modules/:moduleId", async (req, res) => {
                                         tasks.push(task.dataValues)
                                     }
                                 }
-                                // console.log(tasks)
-                                // if (tasks.length > 0){
                                 for (const val of topic.theories) {
                                     let theory = await Theories.findOne({
                                         where:{
@@ -350,21 +328,7 @@ router.get("/modules/:moduleId", async (req, res) => {
                                         homeworks.push(home.dataValues)
                                     }
                                 }
-                                    // return res.status(200).json({module: module, topic: topic, tasks: tasks, theories: theories, homework: homeworks})
-                                    // } else {
-                                    //     return res.status(404).json({error: "Немає завдань"})
-                                    // }
-                                // return res.status(200).json({module: module, topics: topics})
-                                // }
-                                // let thisTopicId = topic.id
-                                // console.log("HHHHHHHHHHHHHUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
-                                // console.log(thisTopicId)
-                                // let thisTopic = {
-                                //     thisTopicId : {
-                                //         tasks: tasks, theories: theories, homework: homeworks
-                                //     }
-                                // }
-                                // let thisTopic = {}
+
                                 let thisTopic = {
                                     topicId: topic.id ,
                                     name: topic.name, 
@@ -466,22 +430,7 @@ router.get("/theories/:theoryId",async(req,res)=>{
                         }else{
                             return res.status(403).json({error: "Ця теорія вам не доступна"})
                         }
-                        // let tasks = []
-                        // for (const val of topic.tasks) {
-                        //     let task = await Tasks.findOne({
-                        //         where:{
-                        //             id: val
-                        //         }
-                        //     })
-                        //     if (task){
-                        //         tasks.push(task)
-                        //     }
-                        // }
-                        // if (tasks.length > 0){
 
-                        // } else {
-                        //     return res.status(404).json({error: "Немає завдань"})
-                        // }
                     } else {
                         return res.status(403).json({error: "Ви не увійшли в акаунт"})
                     }
@@ -536,7 +485,7 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                         homework: {[Op.contains]: [task.id] }
                     }
                     })
-                // console.log(topicHomework)
+
                 if (topic){
                     let module = await Modules.findOne({
                         where:{
@@ -551,33 +500,11 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                         }
                     })
                     if (course)
-                    // var words = []
-                    // let wordList = []
-                    // // for (const val of task.dataValues.wordArray) {
-                    //     let question = await WordList.findOne({
-                    //         where:{
-                    //             id: val
-                    //         }
-                    //     })
-                    //     if (question){
-                    //         wordList.push(question.dataValues)
-                    //     }
-                    // // }
-                    // if (wordList.length > 0){
-                    //     for (const list of wordList) {
-                            // for (const val of list.array){
                                 var words = await Word.findAll({
                                     where:{
                                         list: task.wordArray
                                     }
                                 })
-                                // if (question){
-                                //     words.push(question.dataValues)
-                                // }
-                            // }
-
-                        // }
-                    // }
                         if (task.type == 'audio' || task.type == 'video'){
                             return res.status(200).json({data: task, words: words, module: module})
                         }else{
@@ -608,9 +535,7 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                                         UserId: data.id
                                     }
                                 })
-                                // console.log(queStat)
-                                // console.log("dsfghsfdkghfsdkhgfhksghfhsgkjfsdghkjlfsdhglkfdshlkax;sjdk;alhbdsjfklbdhvjkfslkjvfdlqueStat")
-                                // console.log(ques)
+  
 
                                 for(let stat of queStat){
                                     for (let question of ques){
@@ -668,20 +593,7 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                                         UserId: data.id
                                     }
                                 })
-                                // if(taskProgress){
-                                //     return res.status(200).json({progress: taskProgress})
-                                // }
-                                // let ques = []
-                                // for (const val of task.questions) {
-                                //     let question = await Question.findOne({
-                                //         where:{
-                                //             id: val
-                                //         }
-                                //     })
-                                //     if (question){
-                                //         ques.push(question)
-                                //     }
-                                // }
+
                                 if (ques.length > 0){
                                     let questionsStatuses = []
                                     let queStat = await QuestionUsers.findAll({
@@ -689,9 +601,7 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                                             UserId: data.id
                                         }
                                     })
-                                    // console.log(queStat)
-                                    // console.log("dsfghsfdkghfsdkhgfhksghfhsgkjfsdghkjlfsdhglkfdshlkax;sjdk;alhbdsjfklbdhvjkfslkjvfdlqueStat")
-                                    // console.log(ques)
+
     
                                     for(let stat of queStat){
                                         for (let question of ques){
@@ -705,22 +615,6 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                                     return res.status(404).json({error: "Немає питань"})
                                 }
                             }
-                            // let ques = []
-                            // for (const val of task.questions) {
-                            //     let question = await Question.findOne({
-                            //         where:{
-                            //             id: val
-                            //         }
-                            //     })
-                            //     if (question){
-                            //         ques.push(question)
-                            //     }
-                            // }
-                            // if (ques.length > 0){
-                            //     return res.status(200).json({data: ques})
-                            // } else {
-                            //     return res.status(404).json({error: "Немає завдань"})
-                            // }
                         } else {
                             return res.status(403).json({error: "Ви не увійшли в акаунт"})
                         }
@@ -760,73 +654,6 @@ router.get("/taskProgress/:taskId", async (req, res) =>{
     }
 })
 
-// router.put("/taskProgress/:taskId/:newProgress", async (req, res) =>{
-//     let apikey = req.headers.token
-//     if (!apikey){
-//         return res.status(403).json({error: "У вас немає API-ключа"})
-//     }
-//     try{
-//         let user = await User.findOne({
-//             where:{
-//                 apikey: apikey
-//             }
-//         })
-//         if(user){
-//             let taskId = req.params.taskId
-//             let newProgress = req.params.newProgress
-    
-//             let taskProgress = await TasksUsers.findOne({
-//                 where: {
-//                     TaskId: taskId,
-//                     UserId: user.id
-//                 }
-//             })
-
-//             // console.log(taskProgress)
-            
-//             if(taskProgress){
-//                 console.log("HAHAHAHAHHAHAHAHHAHAHHAHAHAHHAHAHAHHAHAHAHHAH")
-//                 let questions = await Question.findAll({
-//                     where:{
-//                         taskId: taskId
-//                     }
-//                 })
-//                 console.log(questions.length)
-//                 console.log(newProgress)
-//                 if(questions.length > 0){
-//                     if (newProgress > 1){
-//                         if (newProgress <= questions.length+1){
-//                             taskProgress.update({ progress: newProgress})
-//                             await taskProgress.save();
-//                             return res.status(200).json({progress: taskProgress, questionsLength:questions.length})
-//                         } else if (newProgress > questions.length+1){
-//                             taskProgress.update({ progress: newProgress, completed: true })
-//                             await taskProgress.save();
-//                             return res.status(200).json({progress: taskProgress, questionsLength:questions.length})
-//                         }
-//                     }
-//                     else{
-//                         taskProgress.update({ progress: 1, completed: false })
-//                         await taskProgress.save();
-//                         return res.status(200).json({progress: taskProgress, questionsLength:questions.length})
-//                     }
-//                 } else{
-//                     return res.status(404).json({error: "В цієї таски немає питань"})
-//                 }
-
-//             } else{
-//                 return res.status(404).json({error: "Такої таски не існує"})
-//             }
-//         } else{
-//             return res.status(500).json({error: "Немаэ такого юзера"})
-//         }
-//     }catch(error){
-//         console.log("HHHHHHHHHHHHHHHHHHHHHHUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
-//         console.error(error)
-//         return res.status(500).json({error: "Виникла помилка"})
-//     }
-// })
-
 router.put("/taskProgress/:taskId/:newProgress/:correct", async (req, res) =>{
     let apikey = req.headers.token
     if (!apikey){
@@ -850,10 +677,6 @@ router.put("/taskProgress/:taskId/:newProgress/:correct", async (req, res) =>{
             } else{
                 return res.status(400).json({error: "Статус питання задан невірно"})
             }
-
-            // console.log("HAHAHAHAHHAHAHAHHAHAHHAHAHAHHAHAHAHHAHAHAHHAH")
-            // console.log(correct)
-    
             let taskProgress = await TasksUsers.findOne({
                 where: {
                     TaskId: taskId,
@@ -865,17 +688,12 @@ router.put("/taskProgress/:taskId/:newProgress/:correct", async (req, res) =>{
                     taskId: taskId
                 }
             })
-            // console.log(questions)
-            
-            // ujjjl = taskProgress.progress
-            // console.log(question[ujjjl-1].dataValues.id)
             let quesUs = await QuestionUsers.findOne({
                 where:{
                     UserId: user.id,
                     QuestionId: questions[taskProgress.progress-1].dataValues.id
                 }
             })
-            // console.log(quesUs)
             if(taskProgress){
                 if(quesUs){
                     if(newProgress > 1){
@@ -909,7 +727,6 @@ router.put("/taskProgress/:taskId/:newProgress/:correct", async (req, res) =>{
             return res.status(404).json({error: "Немаэ такого юзера"})
         }
     }catch(error){
-        console.log("HHHHHHHHHHHHHHHHHHHHHHUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
         console.error(error)
         return res.status(500).json({error: "Виникла помилка"})
     }
@@ -937,7 +754,6 @@ router.put("/complete/:taskId", async (req,res)=>{
             })
 
             let unlockingTask = null
-            // console.log("HAHAHAHAHHAHAHAHHAHAHHAHAHAHHAHAHAHHAHAHAHHAH")
             if(taskCompleted){
                 taskCompleted.update({progress: taskCompleted.progress-1, completed: true })
                 await taskCompleted.save();
@@ -956,7 +772,6 @@ router.put("/complete/:taskId", async (req,res)=>{
                                 UserId: user.id
                             }
                         })
-                        console.log(unlockingTask)
                         if(unlockingTask){
                             unlockingTask.update({blocked: false})
                             await unlockingTask.save();
@@ -975,85 +790,10 @@ router.put("/complete/:taskId", async (req,res)=>{
             return res.status(500).json({error: "Немаэ такого юзера"})
         }
     }catch(error){
-        console.log("HHHHHHHHHHHHHHHHHHHHHHUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
         console.error(error)
         return res.status(500).json({error: "Виникла помилка"})
     }
 })
-
-
-// router.get('/complete/:taskId/:id', async (req, res)=>{
-//     try {
-//         let apikey = await User.findOne({
-//             where:{
-//                 apikey: req.headers.token
-//             }
-//         })
-//         if (apikey){
-//             let task = await Tasks.findOne({
-//                 where:{
-//                     id: req.params.taskId,
-//                     type: "question"
-//                 }
-//             })
-//             if (task){
-//                 let question = await Question.findOne({
-//                     where:{
-//                         id: req.params.id
-//                     }
-//                 })
-//                 if (question){
-//                     if (task.questions[task.questions.length - 1] == question.id){
-//                         if (apikey.completedTasks){
-//                             let isUserHas = await User.findOne({
-//                                 where:{
-//                                     apikey: req.headers.token,
-//                                     completedTasks: {[Op.contains] : [task.id]}
-//                                 }
-//                             })
-//                             let list = apikey.completedTasks
-//                             if (!isUserHas){
-//                                 list.push(task.id)
-//                                 let user = await User.update(
-//                                     {
-//                                         completedTasks: list
-//                                     },
-//                                     {
-//                                         where:{
-//                                             apikey: req.headers.token
-//                                         }
-//                                     }
-//                                 )
-//                             }
-//                         }else{
-//                             let user = await User.update(
-//                                 {
-//                                     completedTasks: [task.id]
-//                                 },
-//                                 {
-//                                     where:{
-//                                         apikey: req.headers.token
-//                                     }
-//                                 }
-//                             )
-//                         }
-//                         return res.status(200).json({data: "Ви пройшли завдання!"})
-//                     }else{
-//                         return res.status(200).json({data: "Продовжте проходити."})
-//                     }
-//                 }else{
-//                     return res.status(404).json({error: "Немає питання"})
-//                 }
-//             }else{
-//                 return res.status(404).json({error: "Немає завдання"})
-//             }
-//         }else{
-//             return res.status(403).json({error: "Ви не увійшли в акаунт"})
-//         }
-//     }catch(err){
-//         console.error(err)
-//     }
-// })
 
 router.get("/account",async (req, res)=>{
         let apikey = req.headers.token
@@ -1072,7 +812,6 @@ router.get("/account",async (req, res)=>{
                     id: data.course,
                 }
             })
-            // console.log(data.dataValues)
             if (course){
                 let teacher = await Staff.findOne({
                     where:{
@@ -1099,4 +838,4 @@ router.get("/account",async (req, res)=>{
 
 // Start Server
 
-router.listen('8000', () => {console.log('Server is running')})
+router.listen(port, () => {console.log('Server is running on',port)})

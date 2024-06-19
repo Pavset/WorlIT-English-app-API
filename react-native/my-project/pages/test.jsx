@@ -22,6 +22,8 @@ export default function Test ({ navigation, route}){
     let [sectionCounter,setSectionCounter] = useState(1)
     let [multipleAnswer, setMultipleAnswer] = useState([])
     let arrayOfQuestionSections =  {}
+    let [dotsCounter,setDotsCounter] = useState(0)
+    let [multipleString, setMultipleString] = useState("")
   
     // for type "input" question
     const [completed, setCompleted] = useState(false)
@@ -115,6 +117,8 @@ export default function Test ({ navigation, route}){
         async data => {
           setQuestionProgress(await data.progress.progress)
           getInfoOfTask()
+
+          console.log(data.progress.progress)
           
           if(await questionProgress.progress > await questions.length){
             navigation.navigate("Modules")
@@ -178,23 +182,48 @@ export default function Test ({ navigation, route}){
           { questions[questionProgress.progress-1].imagePath &&
             <FullWidthImage imageUrl={questions[questionProgress.progress-1].imagePath}/>
           }
-          { questions[questionProgress.progress-1].question &&
-            <Text style={[styles.white, styles.font24]}>{questions[questionProgress.progress-1].question}</Text>
-          }
-          { multipleAnswer && questions[questionProgress.progress-1].questionType == "multiple" &&
+          { questions[questionProgress.progress-1].question && dotsCounter > 0 &&
             <View>
-              <Text style={[styles.white, styles.font24]}>{multipleAnswer.join(' ')}</Text>
+              <Text style={[styles.white, styles.font24]}>{multipleString}</Text>
               <TouchableOpacity onPress={()=>{
+                let word = multipleAnswer.slice(-1)
                 multipleAnswer.pop()
                 let multipleTemp = []
                 for (let temp of multipleAnswer){
                   multipleTemp.push(temp)
                 }
+                let cc = multipleString.replace(word,"...")
                 setSectionCounter(sectionCounter-1)
-                setMultipleAnswer(multipleTemp)         
+                setMultipleAnswer(multipleTemp)      
+                setMultipleString(cc)   
+                console.log("FURFUR")
               }}>
                 Remove
               </TouchableOpacity>
+            </View> 
+          }
+          { questions[questionProgress.progress-1].question && dotsCounter <= 0 &&
+              <Text style={[styles.white, styles.font24]}>{questions[questionProgress.progress-1].question}</Text>
+          }
+          { multipleAnswer && questions[questionProgress.progress-1].questionType == "multiple" && !questions[questionProgress.progress-1].question && 
+            <View>
+              <Text style={[styles.white, styles.font24]}>{multipleAnswer.join(' ')}</Text>
+              {multipleAnswer.length > 0 &&
+              <TouchableOpacity onPress={()=>{
+                let word = multipleAnswer.slice(-1)
+                multipleAnswer.pop()
+                let multipleTemp = []
+                for (let temp of multipleAnswer){
+                  multipleTemp.push(temp)
+                }
+                let cc = multipleString.replace(word,"...")
+                setSectionCounter(sectionCounter-1)
+                setMultipleAnswer(multipleTemp)      
+                setMultipleString(cc)   
+              }}>
+                Remove
+              </TouchableOpacity>
+              }
             </View> 
           }
           { questions[questionProgress.progress-1].questionType == "word" &&
@@ -260,18 +289,36 @@ export default function Test ({ navigation, route}){
             <View style={styles.viewForAnswers}>
               {questions[questionProgress.progress-1].trueAnswers.map((truAns, idx) =>{
                   arrayOfQuestionSections[idx] = createAnswersForMultiple(questions[questionProgress.progress-1].trueAnswers, truAns, questions[questionProgress.progress-1].wrongAnswers, idx)
+  
               })}
               {arrayOfQuestionSections[sectionCounter-1].map((answer, idx)=>{
                 return(
                   <TouchableOpacity key={idx} style={styles.buttonAnswer} onPress={()=>{
+                    if (dotsCounter == 0){
+                      setMultipleString(questions[questionProgress.progress-1].question)
+                    }
                     let multipleTemp = []
                     for (let temp of multipleAnswer){
                       multipleTemp.push(temp)
                     }
                     multipleTemp.push(answer)
                     setMultipleAnswer(multipleTemp)
+
+                    if(questions[questionProgress.progress-1].question){
+                      let cc
+                      if (multipleString.length < 1){
+                        cc  = questions[questionProgress.progress-1].question
+                      } else{
+                        cc = multipleString
+                      }
+                      setDotsCounter(dotsCounter+1)
+                      let newString = cc.replace("...", answer)
+                      setMultipleString(newString)
+                    }
+
                     if(multipleAnswer.length < questions[questionProgress.progress-1].trueAnswers.length-1){
                       setSectionCounter(sectionCounter+1)
+
                     } else{
                       let correct = false
                       if (arraysEqual(multipleTemp,questions[questionProgress.progress-1].trueAnswers)){

@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, LogBox, Pressable , TextInput, Image, Link } from 'react-native';
+import { StyleSheet, View, Pressable, Image} from 'react-native';
 
 export default function NavigationPanel({navigation}){
     return(
@@ -31,8 +31,6 @@ const styles = StyleSheet.create({
       borderTopWidth:3
     },
     button:{
-      // flex: 1,
-      // display: "flex",
       backgroundColor: '#E19A38',
       alignItems: 'center',
       justifyContent: 'center',

@@ -100,7 +100,6 @@ export default function Register({navigation}) {
       })
     }
   
-    //https://i.ibb.co/pQSP6Hw/Frame-67.png
     return(
       <View style={styles.container}>
         
