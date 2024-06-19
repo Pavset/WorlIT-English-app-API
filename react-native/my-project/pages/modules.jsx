@@ -44,7 +44,7 @@ export default function Modules({ navigation }) {
     useEffect(()=>{getModule()},[])
     return(
       <ScrollView style={styles.modulesContainer} >
-  
+        
         <Text style={[styles.orange,styles.font32,{width:"100%",display:"flex",justifyContent:"center"}]}>Модулі</Text>
         {!allModules && !listOfModules &&
           <View style={{height: "100%", width: "100%", alignItems: "center", justifyContent: "center"}}>

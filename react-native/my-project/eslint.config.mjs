@@ -1,6 +1,7 @@
+import { fixupConfigRules, fixupPluginRules } from "@eslint/compat";
 import react from "eslint-plugin-react";
 import reactNative from "eslint-plugin-react-native";
-import { fixupPluginRules } from "@eslint/compat";
+import babelParser from "babel-eslint";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import js from "@eslint/js";
@@ -14,9 +15,21 @@ const compat = new FlatCompat({
     allConfig: js.configs.all
 });
 
-export default [...compat.extends("@react-native-community"), {
+export default [...fixupConfigRules(compat.extends(
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:react-native/all",
+)), {
     plugins: {
-        // react: fixupPluginRules(react),
-        "react-native": reactNative,
+        react: fixupPluginRules(react),
+        "react-native": fixupPluginRules(reactNative),
+    },
+
+    languageOptions: {
+        globals: {
+            ...reactNative.environments["react-native"]["react-native"],
+        },
+
+        parser: babelParser,
     },
 }];
