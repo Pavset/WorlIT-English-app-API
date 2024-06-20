@@ -145,6 +145,7 @@ export default function ModulePage({ navigation, route }){
                         counter = testCounter
                       } else if (task.type == "words"){
                         typeImage = require("../assets/words.png")
+                        redirect = "WordTest"
                         typeText = "words"
                         wordsCounter += 1
                         counter = wordsCounter

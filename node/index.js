@@ -2,7 +2,7 @@
 
 const express = require('express')
 const cors = require('cors');
-const { User,Courses,Modules,Topics,Theories,Tasks,Question,Staff,Word,WordList,Sections,ModuleCourse,TasksUsers, QuestionUsers } = require("./db.js")
+const { User,Courses,Modules,Topics,Theories,Tasks,Question,Staff,Word,WordList,Sections,ModuleCourse,TasksUsers, QuestionUsers, UsersWords } = require("./db.js")
 const { v4: uuidv4 } = require('uuid');
 const { Op } = require("sequelize");
 require('dotenv').config();
@@ -21,6 +21,7 @@ router.use(express.static('public'))
 async function createTasksWithStatus(apikey) {
     let tasks = await Tasks.findAll()
     let questions = await Question.findAll()
+    let words = await Word.findAll()
     let user = await User.findOne({
         where: {
             apikey: apikey
@@ -63,6 +64,22 @@ async function createTasksWithStatus(apikey) {
             })
         }
 
+    }
+    for(let word of words){
+        let data = await UsersWords.findAll({
+            where:{
+                UserId: user.id,
+                WordId: word.id,
+            }
+        })
+
+        if (data.length <= 0){
+            let QuQ = await UsersWords.create({
+                UserId: user.id,
+                WordId: word.id,
+                counter: 0
+            })
+        }
     }
 }
 
@@ -829,6 +846,38 @@ router.get("/account",async (req, res)=>{
             }
         }else{
             return res.status(403).json({error: "Ви не увійшли в акаунт"})
+        }
+    }catch(err){
+        console.error(err)
+        return res.status(500).json({error: "Виникла помилка"})
+    }
+})
+
+router.get("/wordCounters", async (req, res)=>{
+    let apikey = req.headers.token
+
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    }
+    try {
+        let user = await User.findOne({
+            where:{
+                apikey: apikey
+            }
+        })
+        if(user){
+            let usersWords = await UsersWords.findAll({
+                where:{
+                    UserId: user.id
+                }
+            })
+            if (usersWords.length > 0){
+                return res.status(200).json({usersWords: usersWords})
+            } else{
+                return res.status(404).json({error: "Немаэ зв'язків даного юзера зі словами у базі данних"})
+            }
+        } else{
+            return res.status(404).json({error: "Такого юзера немаэ"})
         }
     }catch(err){
         console.error(err)

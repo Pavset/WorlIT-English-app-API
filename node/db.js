@@ -266,7 +266,7 @@ const Question = sequelize.define("Question",{
     },
     trueAnswers:{
         type: DataTypes.ARRAY(DataTypes.TEXT),
-        allowNull: false,
+        allowNull: true,
         unique: false
     },
     wrongAnswers:{
@@ -282,6 +282,11 @@ const Question = sequelize.define("Question",{
     taskId:{
         type: DataTypes.INTEGER,
         allowNull: false,
+        unique: false
+    },
+    wordId:{
+        type: DataTypes.INTEGER,
+        allowNull: true,
         unique: false
     }
 })

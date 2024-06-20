@@ -5,6 +5,7 @@ import NavigationPanel from "../components/navPanel"
 import {url, styles} from "../App.js"
 
 
+
 export default function Account({navigation}){
     const [userData, setUserData] = useState("")
     const [teacherData, setTeacherData] = useState("")

@@ -91,7 +91,9 @@ export default function Test ({ navigation, route}){
             setCompleted(await data.progress.completed)
             setQuestionStatuses(await data.questionsStatuses)
             setAnswerStyle([styles.white, styles.font20])
-    
+
+            console.log(data)
+            
             if(data.progress.progress > data.data.length){
               completeTask()
               navigation.navigate("Modules")
@@ -192,11 +194,10 @@ export default function Test ({ navigation, route}){
                 for (let temp of multipleAnswer){
                   multipleTemp.push(temp)
                 }
-                let cc = multipleString.replace(word,"...")
+                let tempString = multipleString.replace(word,"...")
                 setSectionCounter(sectionCounter-1)
                 setMultipleAnswer(multipleTemp)      
-                setMultipleString(cc)   
-                console.log("FURFUR")
+                setMultipleString(tempString)
               }}>
                 Remove
               </TouchableOpacity>
@@ -216,10 +217,10 @@ export default function Test ({ navigation, route}){
                 for (let temp of multipleAnswer){
                   multipleTemp.push(temp)
                 }
-                let cc = multipleString.replace(word,"...")
+                let tempString = multipleString.replace(word,"...")
                 setSectionCounter(sectionCounter-1)
                 setMultipleAnswer(multipleTemp)      
-                setMultipleString(cc)   
+                setMultipleString(tempString)   
               }}>
                 Remove
               </TouchableOpacity>
@@ -305,14 +306,14 @@ export default function Test ({ navigation, route}){
                     setMultipleAnswer(multipleTemp)
 
                     if(questions[questionProgress.progress-1].question){
-                      let cc
+                      let tempString
                       if (multipleString.length < 1){
-                        cc  = questions[questionProgress.progress-1].question
+                        tempString  = questions[questionProgress.progress-1].question
                       } else{
-                        cc = multipleString
+                        tempString = multipleString
                       }
                       setDotsCounter(dotsCounter+1)
-                      let newString = cc.replace("...", answer)
+                      let newString = tempString.replace("...", answer)
                       setMultipleString(newString)
                     }
 

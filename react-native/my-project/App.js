@@ -12,6 +12,7 @@ import Register from './pages/register';
 import Test from './pages/test';
 import Theory from './pages/theory';
 import Words from './pages/words';
+import WordTest from "./pages/wordTest"
 const Stack = createNativeStackNavigator()
 
 export const url = `http://localhost:8000`//process.env.EXPO_PUBLIC_URL
@@ -32,6 +33,7 @@ export default function App() {
       <Stack.Screen options={{headerShown: false}} name="Test" component={Test}/>
       <Stack.Screen options={{headerShown: false}} name="Media" component={Media}/>
       <Stack.Screen options={{headerShown: false}} name="Words" component={Words}/>
+      <Stack.Screen options={{headerShown: false}} name="WordTest" component={WordTest}/>
     </Stack.Navigator>
   </NavigationContainer>
   );
