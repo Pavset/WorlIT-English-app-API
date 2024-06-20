@@ -40,7 +40,7 @@ router.listen(YOUR_PORT, () => {console.log('Server is running on',port)})
 5. Run your project
 
 ```bash
- node index.js
+ node index.js  # Or you can use nodemon index.js
 ```
 
 ## API Reference ***(ONLY IMPORTANT REQUESTS)***
