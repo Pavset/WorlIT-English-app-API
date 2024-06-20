@@ -45,7 +45,7 @@ router.listen(YOUR_PORT, () => {console.log('Server is running on',port)})
 
 ## API Reference ***(ONLY IMPORTANT REQUESTS)***
 
-#### Get your account and your course information
+#### Get your account and course information
 
 ```http
   GET /account
