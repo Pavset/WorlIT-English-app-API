@@ -3,12 +3,12 @@
 
 
 # API For World IT English
-### React Native [here](myLib/README.md)
+### React Native [here](https://github.com/Pavset/WorlIT-English-app-ReactNative)
 World IT English — is an API for managing World IT's English course. The API is developed using Node.js and Express. The database is developed using Node.js and Sequelize 
 
 ## Table of Contents
 - [Installation](#installation)
-- [API Reference](#apireference)
+- [API Reference](#api-reference-(only-important-requests))
 - [Authors](#authors)
 ## Installation
 1. Clone the repository:
