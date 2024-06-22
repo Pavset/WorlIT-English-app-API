@@ -23,6 +23,9 @@ export default function Theory({ navigation, route }) {
           setSections(await data.sections)
         }
       )
+      .catch(async (err)=>{
+        await navigation.navigate("Error")
+      })
     }
   
     function replaceHighlighting(text){

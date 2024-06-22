@@ -13,6 +13,7 @@ import Test from './pages/test';
 import Theory from './pages/theory';
 import Words from './pages/words';
 import WordTest from "./pages/wordTest"
+import Error from "./pages/error"
 const Stack = createNativeStackNavigator()
 
 export const url = `http://localhost:8000`//process.env.EXPO_PUBLIC_URL
@@ -34,6 +35,7 @@ export default function App() {
       <Stack.Screen options={{headerShown: false}} name="Media" component={Media}/>
       <Stack.Screen options={{headerShown: false}} name="Words" component={Words}/>
       <Stack.Screen options={{headerShown: false}} name="WordTest" component={WordTest}/>
+      <Stack.Screen options={{headerShown: false}} name="Error" component={Error}/>
     </Stack.Navigator>
   </NavigationContainer>
   );
@@ -306,7 +308,6 @@ export const styles = StyleSheet.create({
     paddingVertical: 40,
     margin:0,
     gap: 15,
-    width: "100%",
     height: "100%",
     width: "100%"
   },
@@ -498,6 +499,23 @@ export const styles = StyleSheet.create({
     borderColor: '#E8F0FE',
     borderRadius: 15,
     minWidth: "40%",
+    marginHorizontal: 10,
+    marginVertical: 20
+  },
+  removeButton:{
+    // flex: 1, 
+    display:"flex",
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    // width: 250,
+    // height: 200,
+    paddingVertical: 10,
+    paddingHorizontal: 40,
+    backgroundColor: '#252124',
+    borderWidth: 2,
+    borderColor: '#E8F0FE',
+    borderRadius: 10,
   },
   viewForAnswers:{
     width: '90%', 

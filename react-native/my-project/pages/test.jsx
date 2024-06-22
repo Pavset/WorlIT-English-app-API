@@ -14,7 +14,6 @@ export default function Test ({ navigation, route}){
     const [questionProgress, setQuestionProgress] = useState()
     const [module, setModule] = useState()
     const [questionStatuses, setQuestionStatuses] = useState()
-    // const [questionType, setQuestionType] = useState()
   
     let [answerStyle, setAnswerStyle] = useState([styles.white, styles.font20])
   
@@ -32,29 +31,26 @@ export default function Test ({ navigation, route}){
     function shuffleAnswers(arr) {
       arr.sort(() => Math.random() - 0.5);
     }
-  
-  
-    //createAnswersForMultiple(questions[questionProgress.progress-1].wrongAnswers, idx)
     function createAnswersForMultiple(trueArr,trueAns,answersArr,idx){
-      // let l = trueArr.length
-      // тру ответы, но по новой
+
+      // correct answers array
       let trueExtra = []
       for (let trueAnswer of trueArr){
         trueExtra.push(trueAnswer)
       }
     
-      // выводим доп рандом ответ который будет получаться из правильных но не будет таковым в данный момент
+      // output an additional random answer, which will be obtained from the correct ones but will not be so at the moment
       let trueIdx = trueExtra.indexOf(trueAns)
       trueExtra.splice(trueIdx, 1)
       let extraFromTrue = trueExtra[Math.floor(Math.random()*trueExtra.length)]
     
-      // прост ответы, но по новой
+      // answers array
       let ansArr = []
       for (let answer of answersArr){
         ansArr.push(answer)
       }
     
-      // тот который в итоге выводим
+      // output answers
       let tempArr = []
       ansArr.push(trueAns)
       ansArr.push(extraFromTrue)
@@ -104,7 +100,9 @@ export default function Test ({ navigation, route}){
   
         }
       )
-      
+      .catch(async (err)=>{
+        await navigation.navigate("Error")
+      })
     }
   
     async function updateProgresId(newProg, correct) {
@@ -127,6 +125,9 @@ export default function Test ({ navigation, route}){
           }
         }
       )
+      .catch(async (err)=>{
+        await navigation.navigate("Error")
+      })
     }
   
   
@@ -145,6 +146,9 @@ export default function Test ({ navigation, route}){
           setCompleted(true)
         }
       )
+      .catch(async (err)=>{
+        await navigation.navigate("Error")
+      })
     }
   
     
@@ -177,7 +181,6 @@ export default function Test ({ navigation, route}){
           { questionStatuses &&
             <Text style={{color: 'white', textAlign: 'center', fontSize: 32}}>{questionProgress.progress}/{questionStatuses.length}</Text>
           }
-          {/* <Text>{questions[questionProgress.progress-1].question}</Text> */}
           { questions[questionProgress.progress-1].extraQuestionText &&
             <Text style={[styles.white, styles.font20]}>{questions[questionProgress.progress-1].extraQuestionText}</Text>
           }
@@ -185,44 +188,44 @@ export default function Test ({ navigation, route}){
             <FullWidthImage imageUrl={questions[questionProgress.progress-1].imagePath}/>
           }
           { questions[questionProgress.progress-1].question && dotsCounter > 0 &&
-            <View>
+            <View style={{width: '100%', justifyContent: 'space-between', alignItems: "center", flexDirection: 'column'}}>
               <Text style={[styles.white, styles.font24]}>{multipleString}</Text>
-              <TouchableOpacity onPress={()=>{
+              <TouchableOpacity style={styles.removeButton} onPress={()=>{
                 let word = multipleAnswer.slice(-1)
                 multipleAnswer.pop()
                 let multipleTemp = []
                 for (let temp of multipleAnswer){
                   multipleTemp.push(temp)
                 }
+                setDotsCounter(dotsCounter-1)
                 let tempString = multipleString.replace(word,"...")
                 setSectionCounter(sectionCounter-1)
                 setMultipleAnswer(multipleTemp)      
                 setMultipleString(tempString)
               }}>
-                Remove
+                <Text style={[styles.white, styles.font20]}>Remove</Text>
               </TouchableOpacity>
-            </View> 
+            </View>
           }
           { questions[questionProgress.progress-1].question && dotsCounter <= 0 &&
               <Text style={[styles.white, styles.font24]}>{questions[questionProgress.progress-1].question}</Text>
           }
           { multipleAnswer && questions[questionProgress.progress-1].questionType == "multiple" && !questions[questionProgress.progress-1].question && 
-            <View>
+            <View style={{width: '100%', justifyContent: 'space-between', alignItems: "center", flexDirection: 'column'}}>
               <Text style={[styles.white, styles.font24]}>{multipleAnswer.join(' ')}</Text>
               {multipleAnswer.length > 0 &&
-              <TouchableOpacity onPress={()=>{
+              <TouchableOpacity style={styles.removeButton} onPress={()=>{
                 let word = multipleAnswer.slice(-1)
                 multipleAnswer.pop()
                 let multipleTemp = []
                 for (let temp of multipleAnswer){
                   multipleTemp.push(temp)
                 }
-                let tempString = multipleString.replace(word,"...")
                 setSectionCounter(sectionCounter-1)
                 setMultipleAnswer(multipleTemp)      
                 setMultipleString(tempString)   
               }}>
-                Remove
+                <Text style={[styles.white, styles.font20]}>Remove</Text>
               </TouchableOpacity>
               }
             </View> 
@@ -263,12 +266,11 @@ export default function Test ({ navigation, route}){
           }
           { questions[questionProgress.progress-1].questionType == "input" &&
             <View style={styles.viewForAnswers}>
-              <Text>Уведіть відповідь</Text>
+              <Text style={[styles.white, styles.font24]}>Уведіть відповідь</Text>
               <TextInput 
                 style={styles.input}
                 value={answer}
                 onChangeText={setAnswer}
-                
               />
               <TouchableOpacity style={styles.buttonAnswer} onPress={ ()=>{
                 let correct = false

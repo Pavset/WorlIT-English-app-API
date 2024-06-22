@@ -34,6 +34,9 @@ export default function Media ({ navigation, route}){
   
         }
       )
+      .catch(async (err)=>{
+        await navigation.navigate("Error")
+      })
     }
   
     useEffect(()=>{handleSubmit()},[mediaId])

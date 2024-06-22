@@ -92,7 +92,9 @@ export default function WordTest ({ navigation, route}){
   
         }
       )
-      
+      .catch(async (err)=>{
+        await navigation.navigate("Error")
+      })
     }
   
     async function updateProgresId(newProg, correct) {
@@ -116,6 +118,9 @@ export default function WordTest ({ navigation, route}){
               }
             }
           )
+          .catch(async (err)=>{
+            await navigation.navigate("Error")
+          })
       }
       aaad = Number(getRandomElement(listOfIdKeys))
       setRandomWordList(Number(getRandomElement(listOfIdKeys)))
@@ -139,6 +144,9 @@ export default function WordTest ({ navigation, route}){
             // console.log(groupedQuestions[aaad])
           }
         )
+        .catch(async (err)=>{
+          await navigation.navigate("Error")
+        })
       }
   
     async function completeTask(){
@@ -154,11 +162,13 @@ export default function WordTest ({ navigation, route}){
           setCompleted(true)
         }
       )
+      .catch(async (err)=>{
+        await navigation.navigate("Error")
+      })
     }
-  
     
     useEffect(()=>{getInfoOfTask()},[testId])
-    // useEffect(()=>{getWordCounters()},[])
+
     return(
       <View style={styles.profileContainer}>
         <View style={[styles.orangeBG,{width: "100%", height: 30}]}></View>

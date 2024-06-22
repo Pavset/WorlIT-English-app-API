@@ -28,7 +28,9 @@ export default function AudioPage({navigation, route}){
           setModule(await data.module)
         }
       )
-      
+      .catch(async (err)=>{
+        await navigation.navigate("Error")
+      })
     }
     useEffect(()=>{handleSubmit()},[mediaAudioId])
     

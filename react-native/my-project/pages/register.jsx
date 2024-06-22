@@ -15,7 +15,7 @@ export default function Register({navigation}) {
     const [error, setError] = useState("")
     const [passwordVisible, setPasswordVisible] = useState(true);
     const [img, changeImg] = useState("https://i.ibb.co/ByNtG9X/Frame-66.png")
-  
+    const [loading, setLoading] = useState(false)
     const handleChangeAge = (text) => { 
       const numericValue = text.replace(/[^0-9]/g, ""); 
       setAge(numericValue); 
@@ -66,7 +66,7 @@ export default function Register({navigation}) {
         setError("Ви не увели адресу")
         return
       } 
-  
+      setLoading(true)
       fetch(`${url}/signup`, {
         method: 'POST',
         headers: {
@@ -86,17 +86,24 @@ export default function Register({navigation}) {
       .then(response => response.json())
       .then(async data => {
         if (data.error) {
+          setLoading(false)
           setError(data.error)
         } else {
           try {
             await AsyncStorage.setItem('apikey', `${data.apikey}`);
           } catch (error) {
+            setLoading(false)
             setError("Не вдалося зберегти токен у сховищі")
           } finally {
+            setLoading(false)
             setError("")
             navigation.navigate("Account")
           }
         }
+      })
+      .catch(async (err)=>{
+        setLoading(false)
+        await navigation.navigate("Error")
       })
     }
   
@@ -164,7 +171,13 @@ export default function Register({navigation}) {
               onChangeText={setCountryregioncity}
             />
             <Text style={[styles.orange, styles.font24]}>{error}</Text>
-            <TouchableOpacity style={styles.orangeButton} onPress={()=>{handleSubmit()}}><Text style={[styles.black, styles.font24]}>Реєстрація</Text></TouchableOpacity>
+            {!loading &&
+              <TouchableOpacity style={styles.orangeButton} onPress={()=>{handleSubmit()}}><Text style={[styles.black, styles.font24]}>Реєстрація</Text></TouchableOpacity>
+            }
+            {loading &&
+              <TouchableOpacity style={styles.orangeButton} disabled={loading} onPress={()=>{handleSubmit()}}><ActivityIndicator size="large" color="#000000"/></TouchableOpacity>
+            }
+            
           </View>
   
           <TouchableOpacity style={styles.goToRegLog} onPress={()=>{navigation.navigate("Login")}}><Text style={[styles.white, styles.font20]}>Є акаунт?</Text></TouchableOpacity>

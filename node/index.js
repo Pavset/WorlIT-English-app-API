@@ -185,6 +185,7 @@ router.get("/course", async (req, res) => {
                         CourseId: course.id
                     }
                 })
+                let modulePercentageList = []
                 for (let key of moduleList) {
                     const module = await Modules.findOne({
                         where:{
@@ -192,11 +193,76 @@ router.get("/course", async (req, res) => {
                         }
                     })
                     if (module) {
-                      modules.push(module.dataValues);
+                        const topics = await Topics.findAll({
+                            where:{
+                                module: module.dataValues.id
+                            }
+                        })
+                        if (topics.length > 0){
+                            console.log(topics.length)
+                            let moduleTasks = []
+                            for (let topic of topics){
+                                for(let task of topic.dataValues.tasks){
+                                    moduleTasks.push(task)
+                                }
+                                for(let hw of topic.dataValues.homework){
+                                    moduleTasks.push(hw)
+                                }
+                            }
+                            if (moduleTasks.length > 0){
+                                let noMediaTasks = []
+                                for (let task of moduleTasks){
+                                    const notMediaTasks = await Tasks.findOne({
+                                        where:{
+                                            id: task,
+                                            audio: null,
+                                            video: null
+                                        }
+                                    })
+                                    if (notMediaTasks){
+                                        noMediaTasks.push(task)
+                                    }
+                                }
+                                if (noMediaTasks.length > 0){
+                                    let allTasksList = []
+                                    for (let taskUs of noMediaTasks){
+                                        const usersTasks = await TasksUsers.findOne({
+                                            where:{
+                                                UserId: data.id,
+                                                TaskId: taskUs,
+                                            }
+                                        })
+                                        if(usersTasks){
+                                            allTasksList.push(usersTasks)
+                                        }
+
+                                    }
+                                    if (allTasksList){
+                                        let completedTasksList = []
+                                        let modulePercentage = 0
+                                        for (let task of allTasksList){
+                                            if(task.dataValues.completed == true){
+                                                completedTasksList.push(task)
+                                            }
+                                        }
+                                        console.log(completedTasksList)
+                                        if (completedTasksList.length > 0){
+                                            console.log(allTasksList.length)
+                                            console.log(completedTasksList.length)
+                                            modulePercentage = (completedTasksList.length/allTasksList.length)*100
+                                        }
+                                        modulePercentageList.push(modulePercentage)
+                                    }
+                                }
+                            }
+                        } else{
+                            modulePercentageList.push(0)
+                        }
+                        modules.push(module.dataValues);
                     }
                 }
                 if (modules.length > 0){
-                    return res.status(200).json({course: course, modules: modules})
+                    return res.status(200).json({course: course, modules: modules, modulePercentageList:modulePercentageList})
                 }else{
                     return res.status(404).json({error: "Немає модулів"})
                 }
@@ -211,6 +277,57 @@ router.get("/course", async (req, res) => {
         return res.status(500).json({error: "Виникла помилка"})
     }
 })
+
+// router.get("/course", async (req, res) => {
+//     let apikey = req.headers.token
+// if (!apikey){
+//     return res.status(403).json({error: "У вас немає API-ключа"})
+// }
+// try {
+//     let data = await User.findOne({
+//         where:{
+//             apikey: apikey
+//         }
+//     })
+//     if (data){
+//         let course = await Courses.findOne({
+//             where: { 
+//                 id: data.course,
+//             }
+//         })
+//         if (course){
+//             let modules = []
+//             const moduleList = await ModuleCourse.findAll({
+//                 where:{
+//                     CourseId: course.id
+//                 }
+//             })
+//             for (let key of moduleList) {
+//                 const module = await Modules.findOne({
+//                     where:{
+//                         id: key["dataValues"]["ModuleId"]
+//                     }
+//                 })
+//                 if (module) {
+//                   modules.push(module.dataValues);
+//                 }
+//             }
+//             if (modules.length > 0){
+//                 return res.status(200).json({course: course, modules: modules})
+//             }else{
+//                 return res.status(404).json({error: "Немає модулів"})
+//             }
+//         }else{
+//             return res.status(404).json({error: "Вас немає у курсі"})
+//         }
+//     }else{
+//         return res.status(403).json({error: "Ви не увійшли в акаунт"})
+//     }
+// } catch(err){
+//     console.error(err)
+//     return res.status(500).json({error: "Виникла помилка"})
+// }
+// })
 
 router.get("/modules", async (req, res)=>{
     let allModules = await Modules.findAll()

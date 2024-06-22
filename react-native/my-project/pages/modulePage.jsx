@@ -33,6 +33,9 @@ export default function ModulePage({ navigation, route }){
           SetTaskStatuses(await data.taskStatusesList)
         }
       )
+      .catch(async (err)=>{
+        await navigation.navigate("Error")
+      })
     }
   
     function modal(redirect,task){
@@ -58,7 +61,9 @@ export default function ModulePage({ navigation, route }){
           navigation.navigate( modalRedirect,{id: modalRedirectId,moduleName: moduleInfo.name} )
         }
       )
-      
+      .catch(async (err)=>{
+        await navigation.navigate("Error")
+      })
     }
   
   

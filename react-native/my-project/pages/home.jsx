@@ -21,6 +21,9 @@ export default function Home({navigation}){
           SetListOfTaskId(await data)
         }
       )
+      .catch(async (err)=>{
+        await navigation.navigate("Error")
+      })
     }
     async function getModule(){
       fetch(`${url}/course`, {
@@ -35,6 +38,9 @@ export default function Home({navigation}){
          SetListOfTopicsId(await data)
         }
       )
+      .catch(async (err)=>{
+        await navigation.navigate("Error")
+      })
     }
   
   

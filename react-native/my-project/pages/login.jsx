@@ -7,6 +7,7 @@ export default function Login({navigation}) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState("")
+    const [loading, setLoading] = useState(false)
     const [passwordVisible, setPasswordVisible] = useState(true);
     const [img, changeImg] = useState("https://i.ibb.co/ByNtG9X/Frame-66.png")
     const toggleShowPassword = () => {
@@ -26,6 +27,7 @@ export default function Login({navigation}) {
         setError("Ви не увели Пароль")
         return
       }
+      setLoading(true)
       fetch(`${url}/signin`, {
         method: 'POST',
         headers: {
@@ -41,8 +43,10 @@ export default function Login({navigation}) {
       .then(async data => {
         if (data.error) {
           if (username.length < 0){
-            setError("Ви не увели юзернейм")
+            setError("Ви не увели ім'я")
+            setLoading(false)
           } else{
+            setLoading(false)
             setError(data.error)
           }
         } else {
@@ -50,13 +54,18 @@ export default function Login({navigation}) {
             await AsyncStorage.setItem('apikey', `${data.apikey}`);
           } catch (error) {
             setError("Не вдалося зберегти токен у сховищі")
+            setLoading(false)
           } finally {
             setError("")
+            setLoading(false)
             navigation.navigate("Account")
           }
         }
       })
-  
+      .catch(async (err)=>{
+        setLoading(false)
+        await navigation.navigate("Error")
+      })
     }
     return(
       <View style={styles.container}>
@@ -68,10 +77,10 @@ export default function Login({navigation}) {
         <View style={styles.mainRegLog}>
           <View style={styles.form}>
   
-            <Text style={[styles.white,styles.font32]}>Login</Text>
+            <Text style={[styles.white,styles.font32]}>Вхід</Text>
             <TextInput 
               style={styles.input}
-              placeholder="Имя пользователя"
+              placeholder="Ім'я"
               value={username}
               onChangeText={setUsername}
             />
@@ -90,7 +99,12 @@ export default function Login({navigation}) {
             {error &&
             <Text style={[styles.orange, styles.font24]}>{error}</Text>
             }
-            <TouchableOpacity style={styles.orangeButton} onPress={()=>{handleSubmit()}}><Text style={[styles.black, styles.font24]}>Войти</Text></TouchableOpacity>
+            {!loading &&
+              <TouchableOpacity style={styles.orangeButton} disabled={loading} onPress={()=>{handleSubmit()}}><Text style={[styles.black, styles.font24]}>Увійти</Text></TouchableOpacity>
+            }
+            {loading &&
+              <TouchableOpacity style={styles.orangeButton} disabled={loading}><ActivityIndicator size="large" color="#000000"/></TouchableOpacity>
+            }
           </View>
   
   

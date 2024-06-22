@@ -37,6 +37,9 @@ export default function Account({navigation}){
           }
         }
       )
+      .catch(async (err)=>{
+        await navigation.navigate("Error")
+      })
     }
   
     useEffect(()=>{getProfile()},[])
@@ -58,10 +61,9 @@ export default function Account({navigation}){
   
             <View style={styles.profileMid}>
               <Image style={styles.avatar} source={ require("../assets/account.png") }/>
-              {/* <View style={{flexDirection: 'row', width: "100%", justifyContent: "space-evenly"}}> */}
+
                 <Text style={[styles.orange,styles.font24]}>{userData.name} {userData.surname}</Text>
-                {/* <Text style={[styles.orange,styles.font24]}>{userData.surname}</Text> */}
-              {/* </View> */}
+
               
             </View>
             <View style={styles.profileDown}>
