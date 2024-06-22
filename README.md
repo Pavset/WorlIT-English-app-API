@@ -3,12 +3,14 @@
 
 
 # API For World IT English
-### React Native [here](myLib/README.md)
+### React Native [here](https://github.com/Pavset/WorlIT-English-app-ReactNative)
+### Figma [here](https://www.figma.com/design/aEzanbPToElnEwYgmRPONp/Untitled?node-id=132-582&t=XtuugYN4TjwqLilr-1)
+### FigJam [here](https://www.figma.com/board/ErOJZwu5ySTPJHghzrkTz3/Untitled?node-id=0-1&t=vJpjBLJrGrVonNJ9-1)
 World IT English — is an API for managing World IT's English course. The API is developed using Node.js and Express. The database is developed using Node.js and Sequelize 
 
 ## Table of Contents
 - [Installation](#installation)
-- [API Reference](#apireference)
+- [API Reference](#api-reference-only-important-requests)
 - [Authors](#authors)
 ## Installation
 1. Clone the repository:
@@ -38,12 +40,12 @@ router.listen(YOUR_PORT, () => {console.log('Server is running on',port)})
 5. Run your project
 
 ```bash
- node index.js
+ node index.js  # Or you can use nodemon index.js
 ```
 
 ## API Reference ***(ONLY IMPORTANT REQUESTS)***
 
-#### Get your account and your course information
+#### Get your account and course information
 
 ```http
   GET /account
