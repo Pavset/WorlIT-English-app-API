@@ -152,7 +152,6 @@ router.post("/signup", async (req, res) => {
             createTasksWithStatus(data.apikey)
 
         return res.status(201).json({apikey: data.apikey})
-        // }
     } catch (error) {
         return res.status(400).json({error: "Виникла помилка"})
 
@@ -199,7 +198,6 @@ router.get("/course", async (req, res) => {
                             }
                         })
                         if (topics.length > 0){
-                            console.log(topics.length)
                             let moduleTasks = []
                             for (let topic of topics){
                                 for(let task of topic.dataValues.tasks){
@@ -245,10 +243,7 @@ router.get("/course", async (req, res) => {
                                                 completedTasksList.push(task)
                                             }
                                         }
-                                        console.log(completedTasksList)
                                         if (completedTasksList.length > 0){
-                                            console.log(allTasksList.length)
-                                            console.log(completedTasksList.length)
                                             modulePercentage = (completedTasksList.length/allTasksList.length)*100
                                         }
                                         modulePercentageList.push(modulePercentage)
@@ -277,57 +272,6 @@ router.get("/course", async (req, res) => {
         return res.status(500).json({error: "Виникла помилка"})
     }
 })
-
-// router.get("/course", async (req, res) => {
-//     let apikey = req.headers.token
-// if (!apikey){
-//     return res.status(403).json({error: "У вас немає API-ключа"})
-// }
-// try {
-//     let data = await User.findOne({
-//         where:{
-//             apikey: apikey
-//         }
-//     })
-//     if (data){
-//         let course = await Courses.findOne({
-//             where: { 
-//                 id: data.course,
-//             }
-//         })
-//         if (course){
-//             let modules = []
-//             const moduleList = await ModuleCourse.findAll({
-//                 where:{
-//                     CourseId: course.id
-//                 }
-//             })
-//             for (let key of moduleList) {
-//                 const module = await Modules.findOne({
-//                     where:{
-//                         id: key["dataValues"]["ModuleId"]
-//                     }
-//                 })
-//                 if (module) {
-//                   modules.push(module.dataValues);
-//                 }
-//             }
-//             if (modules.length > 0){
-//                 return res.status(200).json({course: course, modules: modules})
-//             }else{
-//                 return res.status(404).json({error: "Немає модулів"})
-//             }
-//         }else{
-//             return res.status(404).json({error: "Вас немає у курсі"})
-//         }
-//     }else{
-//         return res.status(403).json({error: "Ви не увійшли в акаунт"})
-//     }
-// } catch(err){
-//     console.error(err)
-//     return res.status(500).json({error: "Виникла помилка"})
-// }
-// })
 
 router.get("/modules", async (req, res)=>{
     let allModules = await Modules.findAll()

@@ -30,6 +30,7 @@
     "react-dom": "^18.3.1",
     "react-native": "0.74.1",
     "react-native-mask-input": "^1.2.3",
+    "react-native-router-flux": "^4.3.1",
     "react-native-safe-area-context": "^3.3.2",
     "react-native-screens": "3.31.1",
     "react-native-svg": "^12.1.1",

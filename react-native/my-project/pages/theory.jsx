@@ -31,22 +31,22 @@ export default function Theory({ navigation, route }) {
     function replaceHighlighting(text){
       const regex = /~(.*?)~/g;
     
-      // Используем регулярное выражение для замены ~...~ на компоненты <Text> в React Native
+      // Using regular expression to replace ~...~ with <Text> components in React Native
       const parts = [];
       let lastIndex = 0;
     
       text.replace(regex, (match, p1, offset) => {
-        // Добавляем текст до текущего совпадения
+        // Add text up to the current match
         if (offset > lastIndex) {
           parts.push(text.substring(lastIndex, offset));
         }
-        // Добавляем выделенный текст как компонент <Text>
+        // Add the selected text as a <Text> component
         parts.push(<Text style={[styles.orange, styles.font16]}>{p1.trim()}</Text>);
-        // Обновляем последний индекс
+        // Updating the last index
         lastIndex = offset + match.length;
       });
     
-      // Добавляем оставшийся текст после последнего совпадения
+      // Add the remaining text after the last match
       if (lastIndex < text.length) {
         parts.push(text.substring(lastIndex));
       }

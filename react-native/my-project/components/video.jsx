@@ -19,11 +19,6 @@ export default function VideoScreen({videoSource}) {
         useNativeControls
         isLooping
         resizeMode='stretch'
-        onReadyForDisplay={videoData => {
-          videoData.srcElement.style.position = "initial";
-          videoData.srcElement.style.width = "100%";
-          videoData.srcElement.style.height = "100%";
-        }}
       />
     </View>
   );

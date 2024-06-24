@@ -374,7 +374,7 @@ Word.belongsToMany(User,{through:UsersWords})
 
 
 sequelize.authenticate()
-// sequelize.sync()
+sequelize.sync()
 
 
 module.exports = {

@@ -64,7 +64,6 @@ export default function AudioBar({url}) {
         if (status){
          var percent = status.durationMillis/100
          var percentNow = Math.floor(status.positionMillis/percent)
-         console.log(percentNow)
          setProgress(percentNow)
         } 
       }
@@ -72,7 +71,6 @@ export default function AudioBar({url}) {
 
     return sound
       ? () => {
-          console.log('Unloading Sound');
           sound.unloadAsync();
           clearInterval(timer)
         }

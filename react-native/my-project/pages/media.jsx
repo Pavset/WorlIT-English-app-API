@@ -51,7 +51,6 @@ export default function Media ({ navigation, route}){
         }
         {mediaUrl &&
            <VideoScreen videoSource={mediaUrl}/>
-           
         }
         
         {mediaUrl &&

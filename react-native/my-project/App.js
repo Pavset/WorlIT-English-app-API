@@ -16,7 +16,7 @@ import WordTest from "./pages/wordTest"
 import Error from "./pages/error"
 const Stack = createNativeStackNavigator()
 
-export const url = `http://localhost:8000`//process.env.EXPO_PUBLIC_URL
+export const url = process.env.EXPO_PUBLIC_URL
 LogBox.ignoreAllLogs();
 
 export default function App() {
@@ -258,7 +258,9 @@ export const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 10,
-    border: "3px #252124 solid"
+    borderStyle: "solid",
+    borderWidth: 3,
+    borderColor: "#252124"
   },
   profileSectorRight:{
     display: "flex",
@@ -295,7 +297,9 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 10,
     paddingHorizontal: 20,
-    border: "4px solid #fff",
+    borderWidth: 4,
+    borderColor: "#fff",
+    borderStyle: "solid",
     borderRadius: 10,
     width:"100px"
   },
@@ -317,7 +321,9 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 20,
-    border: "2px #E19A38 solid",
+    borderWidth: 2,
+    borderColor: '#E19A38',
+    borderStyle: "solid",
     borderRadius: 5,
     backgroundColor:"#3B3B3B",
     width: "100%"
@@ -328,7 +334,9 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 20,
-    border: "2px #9DACAC solid",
+    borderWidth: 2,
+    borderColor: "#9DACAC",
+    borderStyle: "solid",
     borderRadius: 5,
     backgroundColor:"#3B3B3B",
     width: "100%"
@@ -398,8 +406,9 @@ export const styles = StyleSheet.create({
     flexDirection:"column",
     alignItems: 'center',
     justifyContent: 'center',
-    border: "4px #E19A38 solid",
-
+    borderColor: "#E19A38",
+    borderWidth: 4,
+    borderStyle: 'solid',
     borderRadius: 20
   },
   taskIndex:{
@@ -407,9 +416,12 @@ export const styles = StyleSheet.create({
     display: "flex",
     alignItems: 'center',
     justifyContent: 'center',
+    textAlign: 'center',
     width: 40,
     height: 40,
-    border: "4px #252124 solid",
+    borderColor: "#252124",
+    borderWidth: 4,
+    borderStyle: 'solid',
     borderRadius: 360,
     backgroundColor:"#E19A38",
     top: 46,
@@ -419,11 +431,15 @@ export const styles = StyleSheet.create({
   },
   uncompletedTask:{
     backgroundColor:"#D1D8DB",
-    border:"4px #E19A38 solid"
+    borderColor: "#E19A38",
+    borderWidth: 4,
+    borderStyle: 'solid',
   },
   completedTask:{
     backgroundColor:"#E19A38",
-    border:"4px #252124 solid"
+    borderColor: "#252124",
+    borderWidth: 4,
+    borderStyle: 'solid',
   },
   
   modalWraper:{
@@ -503,13 +519,10 @@ export const styles = StyleSheet.create({
     marginVertical: 20
   },
   removeButton:{
-    // flex: 1, 
     display:"flex",
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    // width: 250,
-    // height: 200,
     paddingVertical: 10,
     paddingHorizontal: 40,
     backgroundColor: '#252124',

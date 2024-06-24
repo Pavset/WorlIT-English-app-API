@@ -97,7 +97,7 @@ export default function Register({navigation}) {
           } finally {
             setLoading(false)
             setError("")
-            navigation.navigate("Account")
+            navigation.replace("Account")
           }
         }
       })

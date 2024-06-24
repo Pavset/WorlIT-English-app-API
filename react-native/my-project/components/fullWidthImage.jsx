@@ -7,13 +7,15 @@ export default function FullWidthImage(imageUrl){
   }
   const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
   Image.getSize(imageUrl.imageUrl, (width, height) => {setImageDimensions({width, height})});
+  if (imageDimensions.height > 0){
+    var aspectRatio = imageDimensions.width / imageDimensions.height;
+  }
   
-  const aspectRatio = imageDimensions.width / imageDimensions.height;
   return (
     <View style={styles.container}>
       <Image
         source={imageUrl.imageUrl}
-        style={[styles.image, { aspectRatio }]}
+        style={[styles.image, { aspectRatio: aspectRatio }]}
         resizeMode="contain"
       />
     </View>

@@ -58,7 +58,7 @@ export default function Login({navigation}) {
           } finally {
             setError("")
             setLoading(false)
-            navigation.navigate("Account")
+            navigation.replace("Account")
           }
         }
       })

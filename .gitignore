@@ -7,11 +7,23 @@
 /node/public/person
 /node/public/photo
 /node/public/video
+./react-native/my-project/node_modules/
+./node/node_modules/
+./node/package-lock.json
+./node/public/person
+./node/public/photo
+./node/public/video
+
 # Expo
 /react-native/my-project/.expo/
 /react-native/my-project/dist/
 /react-native/my-project/web-build/
 /react-native/my-project/package-lock.json
+
+./react-native/my-project/.expo/
+./react-native/my-project/dist/
+./react-native/my-project/web-build/
+./react-native/my-project/package-lock.json
 # Native
 *.orig.*
 *.jks
@@ -29,12 +41,15 @@ yarn-debug.*
 yarn-error.*
 
 # macOS
-/react-native/my-project/.DS_Store
+./react-native/my-project/.DS_Store
 *.pem
-
+/react-native/my-project/.DS_Store
 # local env files
 .env*.local
+*.env
 /react-native/my-project/.env
 /node/.env
+./react-native/my-project/.env
+./node/.env
 # typescript
 *.tsbuildinfo

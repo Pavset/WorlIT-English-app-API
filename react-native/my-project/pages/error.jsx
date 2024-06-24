@@ -1,9 +1,23 @@
-import { StyleSheet, Text, View, LogBox, TouchableOpacity, TextInput, Image, Linking, ScrollView, StatusBar,ActivityIndicator } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useState, useEffect } from 'react';
+import { Text, View, TouchableOpacity, Image } from 'react-native';
 import {url, styles} from "../App.js"
 
 export default function Error({navigation}) {
+  async function handleSubmit(){
+    fetch(`${url}/`, {
+      method: "GET"
+    })
+    .then((response)=> response.json())
+    .then(
+      async data =>{
+        await navigation.replace("Account")
+      }
+    )
+    .catch(async (err)=>{
+      await navigation.navigate("Error")
+    })
+  }
+
+
     return(
       <View style={styles.container}>
           <View style={styles.header}>
@@ -20,7 +34,7 @@ export default function Error({navigation}) {
               />
               
               <Text style={[styles.white, styles.font24]}>Немає підключення до серверу</Text>
-              <TouchableOpacity style={styles.orangeButton} onPress={()=>{navigation.navigate("Account")}}><Text style={[styles.black, styles.font24]}>Повторити</Text></TouchableOpacity>
+              <TouchableOpacity style={styles.orangeButton} onPress={()=>{handleSubmit()}}><Text style={[styles.black, styles.font24]}>Повторити</Text></TouchableOpacity>
           </View>
 
       </View>

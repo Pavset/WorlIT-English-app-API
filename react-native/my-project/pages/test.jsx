@@ -88,7 +88,6 @@ export default function Test ({ navigation, route}){
             setQuestionStatuses(await data.questionsStatuses)
             setAnswerStyle([styles.white, styles.font20])
 
-            console.log(data)
             
             if(data.progress.progress > data.data.length){
               completeTask()
@@ -118,7 +117,6 @@ export default function Test ({ navigation, route}){
           setQuestionProgress(await data.progress.progress)
           getInfoOfTask()
 
-          console.log(data.progress.progress)
           
           if(await questionProgress.progress > await questions.length){
             navigation.navigate("Modules")

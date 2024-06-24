@@ -23,7 +23,7 @@ export default function Modules({ navigation }) {
           SetListOfModules(await data.modules)
           SetCourse(await data.course)
           SetModulePercantages(await data.modulePercentageList)
-          console.log(data)
+
         }
       )
       .catch(async (err)=>{
@@ -42,7 +42,7 @@ export default function Modules({ navigation }) {
       .then(
         async data => {
           SetAllModules(await data.allModules)
-          console.log(data)
+
         }
       )
       .catch(async (err)=>{
@@ -55,7 +55,7 @@ export default function Modules({ navigation }) {
     return(
       <ScrollView style={styles.modulesContainer} >
         
-        <Text style={[styles.orange,styles.font32,{width:"100%",display:"flex",justifyContent:"center"}]}>Модулі</Text>
+        <Text style={[styles.orange,styles.font32,{width:"100%",display:"flex",justifyContent:"center", textAlign: 'center'}]}>Модулі</Text>
         {!allModules && !listOfModules &&
           <View style={{height: "100%", width: "100%", alignItems: "center", justifyContent: "center"}}>
           <ActivityIndicator size="large" color="#e19a38"/>

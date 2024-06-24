@@ -62,15 +62,11 @@ export default function WordTest ({ navigation, route}){
         async data => {
           if (!data.error){
               
-            console.log(data)
             setTask(await data.task)
 
             groupedQuestions = await groupByWordId(data.data);
 
             setQuestions(groupedQuestions)
-            console.log(groupByWordId(data.data))
-            console.log(await groupByWordId(data.data)[getRandomElement(Object.keys(groupByWordId(data.data)))])
-            // console.log(groupByWordId(data.data)[1])
             setListOfIdKeys(Object.keys(groupByWordId(await data.data)))
             setRandomWordList(getRandomElement(Object.keys(groupByWordId(await data.data))))
             setWordList(await data.words)
@@ -111,7 +107,6 @@ export default function WordTest ({ navigation, route}){
               setQuestionProgress(await data.progress.progress)
               getInfoOfTask()
     
-              console.log(data.progress.progress)
               
               if(await questionProgress.progress > await questions.length){
                 navigation.navigate("Modules")
@@ -138,10 +133,6 @@ export default function WordTest ({ navigation, route}){
         .then(
           async data => {
             setWordsCounters(await data)
-            console.log(data)
-            console.log("gdhfgikjhhfjyuiokljfuiolkgffuiolk")
-            console.log(groupedQuestions)
-            // console.log(groupedQuestions[aaad])
           }
         )
         .catch(async (err)=>{
