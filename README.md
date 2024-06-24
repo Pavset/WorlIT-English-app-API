@@ -43,7 +43,7 @@ router.listen(YOUR_PORT, () => {console.log('Server is running on',port)})
  node index.js  # Or you can use nodemon index.js
 ```
 
-## API Reference ***(ONLY IMPORTANT REQUESTS)***
+## API Reference
 
 #### Get your account and course information
 
