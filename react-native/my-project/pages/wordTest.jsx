@@ -24,6 +24,7 @@ export default function WordTest ({ navigation, route}){
   
     let [questionsPack, setQuestionsPack] = useState([])
 
+    // let aaaa
     let groupedQuestions
     let qStat
 
