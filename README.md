@@ -3,10 +3,8 @@
 
 
 # API For World IT English
-### React Native [here](https://github.com/Pavset/WorlIT-English-app-ReactNative)
-### Figma [here](https://www.figma.com/design/aEzanbPToElnEwYgmRPONp/Untitled?node-id=132-582&t=XtuugYN4TjwqLilr-1)
-### FigJam [here](https://www.figma.com/board/ErOJZwu5ySTPJHghzrkTz3/Untitled?node-id=0-1&t=vJpjBLJrGrVonNJ9-1)
-World IT English — is an API for managing World IT's English course. The API is developed using Node.js and Express. The database is developed using Node.js and Sequelize 
+### [Database Structure](https://www.figma.com/board/ErOJZwu5ySTPJHghzrkTz3/Untitled?node-id=0-1&t=vJpjBLJrGrVonNJ9-1)
+World IT English — is an API for managing World IT's English course. The API is developed using Node.js and Express.js. The database is developed using Node.js, Postgres and Sequelize.
 
 ## Table of Contents
 - [Installation](#installation)
@@ -186,8 +184,13 @@ router.listen(YOUR_PORT, () => {console.log('Server is running on',port)})
 
 
 ## 😊 Thanks to these technologies!
-![My Skills](https://skillicons.dev/icons?i=js,react,sequelize,ts,figma,androidstudio,postgres,express,npm,github,git)
-
+![JS](https://skillicons.dev/icons?i=js) — A versatile programming language used primarily for web development to create interactive and dynamic content.
+![SQ](https://skillicons.dev/icons?i=sequelize) — An ORM (Object-Relational Mapping) library for Node.js that facilitates database operations with SQL-based databases.
+![PSQL](https://skillicons.dev/icons?i=postgres) — A powerful, open-source relational database system known for its robustness and scalability.
+![EX](https://skillicons.dev/icons?i=express) — A minimal and flexible Node.js web application framework that provides a robust set of features for web and mobile applications.
+![NPM](https://skillicons.dev/icons?i=npm) — A package manager for JavaScript that allows developers to install, share, and manage dependencies in their projects.
+![GITHUB](https://skillicons.dev/icons?i=github) — A web-based platform that uses Git for version control and provides hosting for software development and collaboration.
+![GIT](https://skillicons.dev/icons?i=git) — A distributed version control system that helps track changes in source code during software development.
 
 ## Authors
 - [@Pavset](https://github.com/Pavset)
