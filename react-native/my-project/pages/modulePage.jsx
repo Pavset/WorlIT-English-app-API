@@ -49,6 +49,7 @@ export default function ModulePage({ navigation, route }){
     }
     
     async function downgradeTask(task) {
+      
       fetch(`${url}/taskProgress/${task}/${1}/false`,{
         method: "PUT",
         headers:{
@@ -214,6 +215,8 @@ export default function ModulePage({ navigation, route }){
                       let counter = 0
                       let completeStyle = styles.uncompletedTask
                       let redirect = "Test"
+                      let modalOp = false
+
                       
                       if (work.type == "video"){
                         typeImage = require("../assets/video.png")
@@ -229,6 +232,7 @@ export default function ModulePage({ navigation, route }){
                         counter = testCounter
                       } else if (work.type == "words"){
                         typeImage = require("../assets/words.png")
+                        redirect = "WordTest"
                         typeText = "words"
                         wordsCounter += 1
                         counter = wordsCounter
@@ -259,11 +263,12 @@ export default function ModulePage({ navigation, route }){
   
                       if(taskStatuses.completed.includes(work.id)){
                         completeStyle = styles.completedTask
+                        modalOp = true
                       }
   
   
                       return(
-                          <TouchableOpacity style={[styles.taskButton,styles.antiIndexMargin]} key={idx} onPress={()=>{navigation.navigate( redirect,{id: work.id,moduleName: moduleInfo.name} )}}>
+                          <TouchableOpacity style={[styles.taskButton,styles.antiIndexMargin]} key={idx} onPress={modalOp ? ()=>{modal(redirect,work.id)} : ()=>{navigation.navigate( redirect,{id: work.id,moduleName: moduleInfo.name} )}}>
                             <Text style={[styles.black, styles.font20,styles.taskIndex]}>{counter}</Text>
                             <View style={[styles.taskButtonView, completeStyle]}>
                               <Image style={styles.taskButtonImg} source={ typeImage }/>

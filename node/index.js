@@ -60,7 +60,7 @@ async function createTasksWithStatus(apikey) {
             let QuQ = await QuestionUsers.create({
                 UserId: user.id,
                 QuestionId: question.id,
-                correct: null
+                correct: false
             })
         }
 
@@ -77,11 +77,12 @@ async function createTasksWithStatus(apikey) {
             let QuQ = await UsersWords.create({
                 UserId: user.id,
                 WordId: word.id,
-                counter: 0
+                counter: 1
             })
         }
     }
 }
+
 
 // Check Connection
 
@@ -152,6 +153,7 @@ router.post("/signup", async (req, res) => {
             createTasksWithStatus(data.apikey)
 
         return res.status(201).json({apikey: data.apikey})
+        // }
     } catch (error) {
         return res.status(400).json({error: "Виникла помилка"})
 
@@ -198,6 +200,7 @@ router.get("/course", async (req, res) => {
                             }
                         })
                         if (topics.length > 0){
+                            console.log(topics.length)
                             let moduleTasks = []
                             for (let topic of topics){
                                 for(let task of topic.dataValues.tasks){
@@ -243,7 +246,10 @@ router.get("/course", async (req, res) => {
                                                 completedTasksList.push(task)
                                             }
                                         }
+                                        console.log(completedTasksList)
                                         if (completedTasksList.length > 0){
+                                            console.log(allTasksList.length)
+                                            console.log(completedTasksList.length)
                                             modulePercentage = (completedTasksList.length/allTasksList.length)*100
                                         }
                                         modulePercentageList.push(modulePercentage)
@@ -578,14 +584,14 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                         }
                     })
                     if (course)
-                                var words = await Word.findAll({
-                                    where:{
-                                        list: task.wordArray
-                                    }
-                                })
+                        var words = await Word.findAll({
+                            where:{
+                                list: task.wordArray
+                            }
+                        })
                         if (task.type == 'audio' || task.type == 'video'){
                             return res.status(200).json({data: task, words: words, module: module})
-                        }else{
+                        } else{
                             let ques = []
                             
                             let questions = await Question.findAll({
@@ -607,6 +613,22 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                             })
 
                             if (ques.length > 0){
+
+                                let usersWords = null
+
+                                if (task.type == 'words'){
+                                    let usersWds = await UsersWords.findAll({
+                                        where:{
+                                            UserId: data.id
+                                        }
+                                    })
+                                    if (usersWds.length > 0){
+                                        usersWords = usersWds
+                                    } else{
+                                        return res.status(404).json({error: "Немаэ зв'язків даного юзера зі словами у базі данних"})
+                                    }
+                                }
+
                                 let questionsStatuses = []
                                 let queStat = await QuestionUsers.findAll({
                                     where:{
@@ -623,7 +645,7 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                                     }
                                 }
 
-                                return res.status(200).json({data: ques, task: task, words: words, module: module,progress: taskProgress, questionsStatuses: questionsStatuses})
+                                return res.status(200).json({data: ques, task: task, words: words, module: module,progress: taskProgress, questionsStatuses: questionsStatuses, usersWords:usersWords})
                             } else {
                                 return res.status(404).json({error: "Немає питань"})
                             }
@@ -651,7 +673,7 @@ router.get("/tasks/:tasksId",async(req,res)=>{
 
                             if (task.type == 'audio' || task.type == 'video'){
                                 return res.status(200).json({data: task, module: module})
-                            }else{
+                            } else{
 
                                 let ques = []
                                 let questions = await Question.findAll({
@@ -673,6 +695,22 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                                 })
 
                                 if (ques.length > 0){
+
+                                    let usersWords = null
+
+                                    if (task.type == 'words'){
+                                        let usersWds = await UsersWords.findAll({
+                                            where:{
+                                                UserId: data.id
+                                            }
+                                        })
+                                        if (usersWds.length > 0){
+                                            usersWords = usersWds
+                                        } else{
+                                            return res.status(404).json({error: "Немаэ зв'язків даного юзера зі словами у базі данних"})
+                                        }
+                                    }
+
                                     let questionsStatuses = []
                                     let queStat = await QuestionUsers.findAll({
                                         where:{
@@ -688,7 +726,7 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                                             }
                                         }
                                     }
-                                    return res.status(200).json({data: ques, task: task, module: module,progress: taskProgress, questionsStatuses: questionsStatuses})
+                                    return res.status(200).json({data: ques, task: task, module: module,progress: taskProgress, questionsStatuses: questionsStatuses, usersWords: usersWords})
                                 } else {
                                     return res.status(404).json({error: "Немає питань"})
                                 }
@@ -761,39 +799,96 @@ router.put("/taskProgress/:taskId/:newProgress/:correct", async (req, res) =>{
                     UserId: user.id
                 }
             })
+            console.log(taskProgress)
+            let task = await Tasks.findOne({
+                where: {
+                    id: taskId,
+                }
+            })
+
+            let wordId
+
+            if (task.dataValues.type == 'words'){
+                if(req.body.wordId){
+                    wordId = req.body.wordId
+                    console.log("ghjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj")
+                    console.log(wordId)
+                }
+            }
+
             let questions = await Question.findAll({
                 where:{
                     taskId: taskId
                 }
             })
+            console.log('words')
+            console.log(taskProgress)
+            let questionValue = questions[taskProgress.progress-1].dataValues
+            console.log(questionValue)
             let quesUs = await QuestionUsers.findOne({
                 where:{
                     UserId: user.id,
-                    QuestionId: questions[taskProgress.progress-1].dataValues.id
+                    QuestionId: questionValue.id
                 }
             })
             if(taskProgress){
                 if(quesUs){
                     if(newProgress > 1){
-                        quesUs.update({ correct: correct })
+                        if (task.dataValues.type == 'words'){
+                            let wordUser = await UsersWords.findOne({
+                                where:{
+                                    UserId: user.id,
+                                    WordId: wordId
+                                }
+                            })
+                            if(wordUser){
+                                wordUser.update({counter: wordUser.counter+1})
+                                await wordUser.save()
+                            }
+                            console.log(wordUser)
+                        } 
                         taskProgress.update({ progress: newProgress })
+                        quesUs.update({ correct: correct })
                         await taskProgress.save();
                         return res.status(200).json({progress: taskProgress})
                     } else{
-                        for(let question of questions){
-                            let questionUserToChange = await QuestionUsers.findOne({
-                                where:{
-                                    UserId: user.id,
-                                    QuestionId: question.id
+                        if (task.dataValues.type == 'words'){
+
+                            console.log("fsdghjkkl;")
+                            console.log(questions)
+                            for (i of questions){
+                                console.log(i)
+                                let wordUser = await UsersWords.findOne({
+                                    where:{
+                                        UserId: user.id,
+                                        WordId: i.dataValues.wordId
+                                    }
+                                })
+                                if(wordUser){
+                                    wordUser.update({counter: 1})
+                                    await wordUser.save()
                                 }
-                            })
-                            if(questionUserToChange){
-                                questionUserToChange.update({correct: null})
+                                // console.log(wordUser)
                             }
+                            taskProgress.update({ progress: 1, completed: false })
+                            await taskProgress.save();
+                            return res.status(200).json({progress: taskProgress})
+                        } else{
+                            for(let question of questions){
+                                let questionUserToChange = await QuestionUsers.findOne({
+                                    where:{
+                                        UserId: user.id,
+                                        QuestionId: question.id
+                                    }
+                                })
+                                if(questionUserToChange){
+                                    questionUserToChange.update({correct: null})
+                                }
+                            }
+                            taskProgress.update({ progress: 1, completed: false })
+                            await taskProgress.save();
+                            return res.status(200).json({progress: taskProgress})
                         }
-                        taskProgress.update({ progress: 1, completed: false })
-                        await taskProgress.save();
-                        return res.status(200).json({progress: taskProgress})
                     }
                 } else{
                     return res.status(500).json({error: "Помилка була здійснена на стороні сервера"})
@@ -833,16 +928,21 @@ router.put("/complete/:taskId", async (req,res)=>{
 
             let unlockingTask = null
             if(taskCompleted){
-                taskCompleted.update({progress: taskCompleted.progress-1, completed: true })
-                await taskCompleted.save();
 
+                
                 let task = await Tasks.findOne({
                     where:{
                         id: taskId
                     }
                 })
-
+                
                 if (task){
+                    if (task.type = "words"){
+                        taskCompleted.update({progress: taskCompleted.progress, completed: true })
+                    } else{
+                        taskCompleted.update({progress: taskCompleted.progress-1, completed: true })
+                    }
+                    await taskCompleted.save();
                     if(task.unlockingTaskId){
                         unlockingTask = await TasksUsers.findOne({
                             where:{

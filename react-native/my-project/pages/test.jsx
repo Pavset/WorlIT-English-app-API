@@ -88,6 +88,7 @@ export default function Test ({ navigation, route}){
             setQuestionStatuses(await data.questionsStatuses)
             setAnswerStyle([styles.white, styles.font20])
 
+            console.log(data)
             
             if(data.progress.progress > data.data.length){
               completeTask()
@@ -117,6 +118,7 @@ export default function Test ({ navigation, route}){
           setQuestionProgress(await data.progress.progress)
           getInfoOfTask()
 
+          console.log(data.progress.progress)
           
           if(await questionProgress.progress > await questions.length){
             navigation.navigate("Modules")
@@ -237,6 +239,7 @@ export default function Test ({ navigation, route}){
                 }
                 shuffleAnswers(answersList)
               })}
+              {/* вшгравша */}
               {answersList.map((ans, idx) =>{
                   let answerStyleExtra = []
                   if (questions[questionProgress.progress-1].trueAnswers[0] == ans){
@@ -257,6 +260,7 @@ export default function Test ({ navigation, route}){
                     }}>
                     <Text style={[styles.white,answerStyleExtra]}>{ans}</Text>
                   </TouchableOpacity>
+                  // ввшірашгрлвалвпавпа
                   )
                 })
               }
@@ -324,6 +328,7 @@ export default function Test ({ navigation, route}){
                       let correct = false
                       if (arraysEqual(multipleTemp,questions[questionProgress.progress-1].trueAnswers)){
                         correct = true
+                        console.log(4444)
                       }
                       updateProgresId(questionProgress.progress+1,correct)
                     }

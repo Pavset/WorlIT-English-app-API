@@ -33,7 +33,7 @@
 *.mobileprovision
 
 # Metro
-.metro-health-check*
+.metro-health-check*F
 
 # debug
 npm-debug.*

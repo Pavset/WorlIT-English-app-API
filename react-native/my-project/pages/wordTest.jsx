@@ -15,16 +15,27 @@ export default function WordTest ({ navigation, route}){
     const [module, setModule] = useState()
     const [questionStatuses, setQuestionStatuses] = useState()
     const [completed, setCompleted] = useState(false)
-    const [listOfIdKeys, setListOfIdKeys] = useState([])
-    const [randomWordList, setRandomWordList] = useState()
+    // const [listOfIdKeys, setListOfIdKeys] = useState([])
+    const [randomWordListId, setRandomWordListId] = useState()
     const [wordsCounters, setWordsCounters] = useState()
+
+    const [qqq, setqqq] = useState()
+
   
+    let [questionsPack, setQuestionsPack] = useState([])
 
     let groupedQuestions
+    let qStat
 
     let [answerStyle, setAnswerStyle] = useState([styles.white, styles.font20])
     const [answer, setAnswer] = useState("")
     let answersList = []
+
+
+    let mmm 
+    
+    let rdNew 
+
 
     function shuffleAnswers(arr) {
       arr.sort(() => Math.random() - 0.5);
@@ -40,6 +51,29 @@ export default function WordTest ({ navigation, route}){
             return acc;
         }, {});
     };
+
+    function uncompletedQPonly(obj, statusObj){
+      for (let id of Object.keys(obj)){
+        let counter = obj[id].length
+        for (let question of obj[id]){
+          console.log(question)
+          for(let statId of statusObj){
+            if (question.id == statId.QuestionId){
+              console.log(statId)
+              if(statId.correct){
+                counter -= 1
+              }
+            }
+          }
+        }
+        if (counter == 0){
+          delete obj[id]
+          console.log(obj)
+        }
+      }
+      console.log("obj",obj)
+      return obj
+    }
 
     function getRandomElement(array) {
         // Generate a random index
@@ -61,22 +95,57 @@ export default function WordTest ({ navigation, route}){
       .then(
         async data => {
           if (!data.error){
+
+            console.log("----------------------------------------------------------------------------------------------------------------------------")
               
+            console.log("InfoOfTask",data)
             setTask(await data.task)
 
             groupedQuestions = await groupByWordId(data.data);
+            qStat = await data.questionsStatuses
+            setQuestionStatuses(qStat)
+            console.log("qstat", qStat)
 
+            groupedQuestions = uncompletedQPonly(groupedQuestions, qStat)
+            console.log("groupedQuestions",await groupedQuestions)
             setQuestions(groupedQuestions)
-            setListOfIdKeys(Object.keys(groupByWordId(await data.data)))
-            setRandomWordList(getRandomElement(Object.keys(groupByWordId(await data.data))))
+            console.log("groupedQuestions",groupedQuestions)
+
+            if(Object.keys(groupedQuestions).length <= 0){
+              completeTask()
+              navigation.navigate("Modules")
+            }
+
+            let rd = getRandomElement(Object.keys(await groupedQuestions))
+            
+            setRandomWordListId(rd)
             setWordList(await data.words)
             setModule(await data.module)
             setQuestionProgress(await data.progress)
             setCompleted(await data.progress.completed)
-            setQuestionStatuses(await data.questionsStatuses)
+
             setAnswerStyle([styles.white, styles.font20])
             
-            getWordCounters()
+
+            // let qp = []
+
+            console.log("wordsCounters",data.usersWords)
+            let usWords = data.usersWords
+            setWordsCounters(data.usersWords)
+
+            await usWords.map((elem,key)=>{
+              if(elem.WordId == rd){
+                rdNew = key
+                console.log("rdNew",rdNew)
+              }
+            })
+
+            setqqq(rdNew)
+            console.log("rd",rd)
+            console.log("groupedQuestions[rd]",groupedQuestions[rd])
+            console.log("data.usersWords[rdNew].counter-1",data.usersWords[rdNew].counter-1)
+            mmm = groupedQuestions[rd][data.usersWords[rdNew].counter-1]
+            console.log("mmm",mmm)
 
             if(data.progress.progress > data.data.length){
               completeTask()
@@ -89,56 +158,44 @@ export default function WordTest ({ navigation, route}){
         }
       )
       .catch(async (err)=>{
+        console.error(err)
         await navigation.navigate("Error")
       })
     }
   
-    async function updateProgresId(newProg, correct) {
+    async function updateProgresId(newProg, correct,wordId) {
       if (correct){
           fetch(`${url}/taskProgress/${testId}/${newProg}/${correct}`,{
             method: "PUT",
             headers:{
-              "token": await AsyncStorage.getItem('apikey')
-            }
+              "token": await AsyncStorage.getItem('apikey'),
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              wordId: wordId
+            })
           })
           .then(response => response.json())
           .then(
             async data => {
               setQuestionProgress(await data.progress.progress)
-              getInfoOfTask()
-    
-              
-              if(await questionProgress.progress > await questions.length){
-                navigation.navigate("Modules")
-              }
+              console.log("data.progress",data.progress)
             }
           )
           .catch(async (err)=>{
             await navigation.navigate("Error")
           })
       }
-      aaad = Number(getRandomElement(listOfIdKeys))
-      setRandomWordList(Number(getRandomElement(listOfIdKeys)))
-    }
-  
-  
-    async function getWordCounters(){
-        fetch(`${url}/wordCounters`,{
-          method: "GET",
-          headers:{
-            "token": await AsyncStorage.getItem('apikey')
-          }
-        })
-        .then(response => response.json())
-        .then(
-          async data => {
-            setWordsCounters(await data)
-          }
-        )
-        .catch(async (err)=>{
-          await navigation.navigate("Error")
-        })
+      getInfoOfTask()
+
+      // setRandomWordListId(Number(getRandomElement(Object.keys(questions))))
+
+      if(await questionProgress.progress > await questions.length){
+        navigation.navigate("Modules")
       }
+    }
+
   
     async function completeTask(){
       fetch(`${url}/complete/${testId}`,{
@@ -157,13 +214,11 @@ export default function WordTest ({ navigation, route}){
         await navigation.navigate("Error")
       })
     }
-    
     useEffect(()=>{getInfoOfTask()},[testId])
-
     return(
       <View style={styles.profileContainer}>
         <View style={[styles.orangeBG,{width: "100%", height: 30}]}></View>
-        {!questions && !questionProgress && !error &&
+        {!questions || !questionProgress || !error || !wordsCounters &&
         
           <View style={{height: "100%", width: "100%", alignItems: "center", justifyContent: "center"}}>
             <ActivityIndicator size="large" color="#e19a38"/>
@@ -181,34 +236,33 @@ export default function WordTest ({ navigation, route}){
             </View>
           </View>
         }
-  
-        {questions && questionProgress && questionProgress.progress && randomWordList && wordsCounters &&
+   
+        {questions && questionProgress && randomWordListId && wordsCounters && 
         <View style={{width: '100%', height: '90%', justifyContent: 'space-around', alignItems: 'center'}}>
-          
-          { questionStatuses &&
-            <Text style={{color: 'white', textAlign: 'center', fontSize: 32}}>{questionProgress.progress}/{questionStatuses.length}</Text>
+          { questions && wordsCounters && wordsCounters[qqq].counter && 
+            <Text style={[styles.white, styles.font20]}>{wordsCounters[qqq].counter}</Text>
           }
-          { questions[randomWordList][wordsCounters.usersWords[randomWordList].counter].extraQuestionText &&
-            <Text style={[styles.white, styles.font20]}>{questions[randomWordList][wordsCounters.usersWords[randomWordList].counter].extraQuestionText}</Text>
+          { questions && wordsCounters && questions[randomWordListId][wordsCounters[qqq].counter-1].extraQuestionText && 
+            <Text style={[styles.white, styles.font20]}>{questions[randomWordListId][wordsCounters[qqq].counter-1].extraQuestionText}</Text>
           }
-          { questions[randomWordList][wordsCounters.usersWords[randomWordList].counter].imagePath &&
-            <FullWidthImage imageUrl={questions[randomWordList][wordsCounters.usersWords[randomWordList].counter].imagePath}/>
+          { questions && wordsCounters && questions[randomWordListId][wordsCounters[qqq].counter-1].imagePath &&
+            <FullWidthImage imageUrl={questions[randomWordListId][wordsCounters[qqq].counter-1].imagePath}/>
           }
-          { questions[randomWordList][wordsCounters.usersWords[randomWordList].counter].question && 
-            <Text style={[styles.white, styles.font24]}>{questions[randomWordList][wordsCounters.usersWords[randomWordList].counter].question}</Text>
+          { questions && wordsCounters && questions[randomWordListId][wordsCounters[qqq].counter-1].question && 
+            <Text style={[styles.white, styles.font24]}>{questions[randomWordListId][wordsCounters[qqq].counter-1].question}</Text>
           }
           
           <View style={styles.viewForAnswers}>
-            { questions[randomWordList][wordsCounters.usersWords[randomWordList].counter].wrongAnswers.map((answer, idx) =>{
+            { questions[randomWordListId][wordsCounters[qqq].counter-1].wrongAnswers.map((answer, idx) =>{
               answersList.push(answer)
-              if (!answersList.includes(questions[randomWordList][wordsCounters.usersWords[randomWordList].counter].trueAnswers[0])){
-                answersList.push(questions[randomWordList][wordsCounters.usersWords[randomWordList].counter].trueAnswers[0])
+              if (!answersList.includes(questions[randomWordListId][wordsCounters[qqq].counter-1].trueAnswers[0])){
+                answersList.push(questions[randomWordListId][wordsCounters[qqq].counter-1].trueAnswers[0])
               }
               shuffleAnswers(answersList)
             })}
             {answersList.map((ans, idx) =>{
                 let answerStyleExtra = []
-                if (questions[randomWordList][wordsCounters.usersWords[randomWordList].counter].trueAnswers[0] == ans){
+                if (questions[randomWordListId][wordsCounters[qqq].counter-1].trueAnswers[0] == ans){
                   answerStyleExtra = answerStyle
                 } else{
                   answerStyleExtra = [styles.white, styles.font20]
@@ -217,11 +271,14 @@ export default function WordTest ({ navigation, route}){
                 <TouchableOpacity key={idx} style={styles.buttonAnswer} onPress={()=>{
                   correct = false
                   setAnswerStyle([styles.red, styles.font20])
-                  if (ans == questions[randomWordList][wordsCounters.usersWords[randomWordList].counter].trueAnswers[0]){
+                  if (ans == questions[randomWordListId][wordsCounters[qqq].counter-1].trueAnswers[0]){
                     correct = true
                     setAnswerStyle([styles.orange, styles.font20])
                   }
-                  updateProgresId(questionProgress.progress+1,correct)
+                  console.log("counter")
+                  console.log(wordsCounters[qqq].counter)
+                  console.log(wordsCounters[qqq].counter+1)
+                  updateProgresId(questionProgress.progress+1, correct, wordsCounters[qqq].WordId)
                   }}>
                   <Text style={[styles.white,answerStyleExtra]}>{ans}</Text>
                 </TouchableOpacity>
@@ -231,7 +288,7 @@ export default function WordTest ({ navigation, route}){
         </View>
         }
   
-        {questions && questionProgress && questionProgress.progress &&
+        {questions && 
           <NavigationPanelTest word={true} module={route.params.moduleName} wordList={wordList} navigation={navigation}/>
         }
       </View>
