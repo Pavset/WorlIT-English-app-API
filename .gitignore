@@ -52,6 +52,7 @@ yarn-error.*
 ./react-native/my-project/.env
 ./node/.env
 /next/admin_panel/.env
+/next/admin_panel/package-lock.json
 ./next/admin_panel/.env
 # typescript
 *.tsbuildinfo
