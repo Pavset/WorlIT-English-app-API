@@ -799,41 +799,52 @@ router.put("/taskProgress/:taskId/:newProgress/:correct", async (req, res) =>{
                     UserId: user.id
                 }
             })
-            console.log(taskProgress)
             let task = await Tasks.findOne({
                 where: {
                     id: taskId,
                 }
             })
 
-            let wordId
-
-            if (task.dataValues.type == 'words'){
-                if(req.body.wordId){
-                    wordId = req.body.wordId
-                    console.log("ghjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj")
-                    console.log(wordId)
-                }
-            }
-
             let questions = await Question.findAll({
                 where:{
                     taskId: taskId
                 }
             })
-            console.log('words')
-            console.log(taskProgress)
-            let questionValue = questions[taskProgress.progress-1].dataValues
-            console.log(questionValue)
-            let quesUs = await QuestionUsers.findOne({
-                where:{
-                    UserId: user.id,
-                    QuestionId: questionValue.id
+            console.log(taskProgress.dataValues.progress-1)
+            console.log(questions)
+
+            let questionValueId
+            let wordId
+
+            if (task.dataValues.type == 'words'){
+                if(req.body.wordId){
+                    wordId = req.body.wordId
                 }
-            })
+                if(req.body.questionId){
+                    questionValueId = req.body.questionId
+                } 
+            } else{
+                questionValueId = questions[taskProgress.dataValues.progress-1].dataValues.id
+            }
+
+
+
+            console.log('words')
+            console.log(taskProgress.dataValues.progress)
+            console.log('questions')
+            console.log(questions.length)
+
+
             if(taskProgress){
-                if(quesUs){
-                    if(newProgress > 1){
+                if(newProgress > 1){
+                    let quesUs = await QuestionUsers.findOne({
+                        where:{
+                            UserId: user.id,
+                            QuestionId: questionValueId
+                        }
+                    })
+
+                    if(quesUs){
                         if (task.dataValues.type == 'words'){
                             let wordUser = await UsersWords.findOne({
                                 where:{
@@ -842,56 +853,59 @@ router.put("/taskProgress/:taskId/:newProgress/:correct", async (req, res) =>{
                                 }
                             })
                             if(wordUser){
-                                wordUser.update({counter: wordUser.counter+1})
-                                await wordUser.save()
+                                if(correct){
+                                    wordUser.update({counter: wordUser.counter+1})
+                                    taskProgress.update({ progress: newProgress })
+                                    await wordUser.save()
+                                    await taskProgress.save();
+                                }
                             }
-                            console.log(wordUser)
+                            // console.log(wordUser)
                         } 
-                        taskProgress.update({ progress: newProgress })
                         quesUs.update({ correct: correct })
-                        await taskProgress.save();
+                        await quesUs.save()
                         return res.status(200).json({progress: taskProgress})
                     } else{
-                        if (task.dataValues.type == 'words'){
-
-                            console.log("fsdghjkkl;")
-                            console.log(questions)
-                            for (i of questions){
-                                console.log(i)
-                                let wordUser = await UsersWords.findOne({
-                                    where:{
-                                        UserId: user.id,
-                                        WordId: i.dataValues.wordId
-                                    }
-                                })
-                                if(wordUser){
-                                    wordUser.update({counter: 1})
-                                    await wordUser.save()
-                                }
-                                // console.log(wordUser)
-                            }
-                            taskProgress.update({ progress: 1, completed: false })
-                            await taskProgress.save();
-                            return res.status(200).json({progress: taskProgress})
-                        } else{
-                            for(let question of questions){
-                                let questionUserToChange = await QuestionUsers.findOne({
-                                    where:{
-                                        UserId: user.id,
-                                        QuestionId: question.id
-                                    }
-                                })
-                                if(questionUserToChange){
-                                    questionUserToChange.update({correct: null})
-                                }
-                            }
-                            taskProgress.update({ progress: 1, completed: false })
-                            await taskProgress.save();
-                            return res.status(200).json({progress: taskProgress})
-                        }
+                        return res.status(500).json({error: "Помилка була здійснена на стороні сервера"})
                     }
                 } else{
-                    return res.status(500).json({error: "Помилка була здійснена на стороні сервера"})
+                    if (task.dataValues.type == 'words'){
+                        console.log("fsdghjkkl;")
+                        console.log(questions)
+                        for (i of questions){
+                            // console.log(i)
+                            let wordUser = await UsersWords.findOne({
+                                where:{
+                                    UserId: user.id,
+                                    WordId: i.dataValues.wordId
+                                }
+                            })
+                            if(wordUser){
+                                wordUser.update({counter: 1})
+                                await wordUser.save()
+                            }
+                            // console.log(wordUser)
+                        }
+                        // taskProgress.update({ progress: 1, completed: false })
+                        // await taskProgress.save();
+                        // return res.status(200).json({progress: taskProgress})
+                    } 
+                    for(let question of questions){
+                        let questionUserToChange = await QuestionUsers.findOne({
+                            where:{
+                                UserId: user.id,
+                                QuestionId: question.id
+                            }
+                        })
+                        if(questionUserToChange){
+                            questionUserToChange.update({correct: null})
+                            await questionUserToChange.save()
+                        }
+                    }
+                    taskProgress.update({ progress: 1, completed: false })
+                    await taskProgress.save();
+                    return res.status(200).json({progress: taskProgress})
+                    
                 }
             } else{
                 return res.status(404).json({error: "Такої таски не існує"})
@@ -937,11 +951,7 @@ router.put("/complete/:taskId", async (req,res)=>{
                 })
                 
                 if (task){
-                    if (task.type = "words"){
-                        taskCompleted.update({progress: taskCompleted.progress, completed: true })
-                    } else{
-                        taskCompleted.update({progress: taskCompleted.progress-1, completed: true })
-                    }
+                    taskCompleted.update({progress: taskCompleted.progress-1, completed: true })
                     await taskCompleted.save();
                     if(task.unlockingTaskId){
                         unlockingTask = await TasksUsers.findOne({

@@ -12,29 +12,16 @@ export default function WordTest ({ navigation, route}){
     const [questions, setQuestions] = useState()
     const [wordList, setWordList] = useState()
     const [questionProgress, setQuestionProgress] = useState()
-    const [module, setModule] = useState()
-    const [questionStatuses, setQuestionStatuses] = useState()
     const [completed, setCompleted] = useState(false)
-    // const [listOfIdKeys, setListOfIdKeys] = useState([])
     const [randomWordListId, setRandomWordListId] = useState()
     const [wordsCounters, setWordsCounters] = useState()
-
     const [qqq, setqqq] = useState()
 
-  
-    let [questionsPack, setQuestionsPack] = useState([])
-
-    // let aaaa
     let groupedQuestions
     let qStat
-
-    let [answerStyle, setAnswerStyle] = useState([styles.white, styles.font20])
+    const [answerStyle, setAnswerStyle] = useState([styles.white, styles.font20])
     const [answer, setAnswer] = useState("")
-    let answersList = []
-
-
-    let mmm 
-    
+    let answersList = [] 
     let rdNew 
 
 
@@ -42,8 +29,8 @@ export default function WordTest ({ navigation, route}){
       arr.sort(() => Math.random() - 0.5);
     }
 
-    function groupByWordId(arr) {
-        return arr.reduce((acc, obj) => {
+    function groupByWordId(arrayOfQuestions) {
+        return arrayOfQuestions.reduce((acc, obj) => {
             const { wordId } = obj;
             if (!acc[wordId]) {
                 acc[wordId] = [];
@@ -53,27 +40,33 @@ export default function WordTest ({ navigation, route}){
         }, {});
     };
 
-    function uncompletedQPonly(obj, statusObj){
-      for (let id of Object.keys(obj)){
-        let counter = obj[id].length
-        for (let question of obj[id]){
-          console.log(question)
-          for(let statId of statusObj){
+    function uncompletedQPonly(allQuestions, statusesOfQuestions){
+      for (let id of Object.keys(allQuestions)){
+
+        let counter = allQuestions[id].length
+
+        for (let question of allQuestions[id]){
+
+          for(let statId of statusesOfQuestions){
             if (question.id == statId.QuestionId){
-              console.log(statId)
               if(statId.correct){
                 counter -= 1
               }
             }
           }
+
         }
+
         if (counter == 0){
-          delete obj[id]
-          console.log(obj)
+          delete allQuestions[id]
         }
       }
-      console.log("obj",obj)
-      return obj
+      if (Object.keys(allQuestions).length > 0 || allQuestions != null){
+        return allQuestions
+      } else{
+        completeTask()
+        navigation.navigate("Modules")
+      }
     }
 
     function getRandomElement(array) {
@@ -104,32 +97,23 @@ export default function WordTest ({ navigation, route}){
 
             groupedQuestions = await groupByWordId(data.data);
             qStat = await data.questionsStatuses
-            setQuestionStatuses(qStat)
-            console.log("qstat", qStat)
 
             groupedQuestions = uncompletedQPonly(groupedQuestions, qStat)
-            console.log("groupedQuestions",await groupedQuestions)
             setQuestions(groupedQuestions)
-            console.log("groupedQuestions",groupedQuestions)
 
-            if(Object.keys(groupedQuestions).length <= 0){
+            if(Object.keys(groupedQuestions).length <= 0 || await groupedQuestions == null){
               completeTask()
               navigation.navigate("Modules")
-            }
-
+            } 
             let rd = getRandomElement(Object.keys(await groupedQuestions))
             
             setRandomWordListId(rd)
             setWordList(await data.words)
-            setModule(await data.module)
             setQuestionProgress(await data.progress)
             setCompleted(await data.progress.completed)
 
             setAnswerStyle([styles.white, styles.font20])
             
-
-            // let qp = []
-
             console.log("wordsCounters",data.usersWords)
             let usWords = data.usersWords
             setWordsCounters(data.usersWords)
@@ -137,21 +121,16 @@ export default function WordTest ({ navigation, route}){
             await usWords.map((elem,key)=>{
               if(elem.WordId == rd){
                 rdNew = key
-                console.log("rdNew",rdNew)
               }
             })
 
             setqqq(rdNew)
-            console.log("rd",rd)
-            console.log("groupedQuestions[rd]",groupedQuestions[rd])
-            console.log("data.usersWords[rdNew].counter-1",data.usersWords[rdNew].counter-1)
-            mmm = groupedQuestions[rd][data.usersWords[rdNew].counter-1]
-            console.log("mmm",mmm)
 
             if(data.progress.progress > data.data.length){
               completeTask()
               navigation.navigate("Modules")
             }
+
           }else{
             setError(data.error)
           }
@@ -164,37 +143,37 @@ export default function WordTest ({ navigation, route}){
       })
     }
   
-    async function updateProgresId(newProg, correct,wordId) {
-      if (correct){
-          fetch(`${url}/taskProgress/${testId}/${newProg}/${correct}`,{
-            method: "PUT",
-            headers:{
-              "token": await AsyncStorage.getItem('apikey'),
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              wordId: wordId
-            })
-          })
-          .then(response => response.json())
-          .then(
-            async data => {
-              setQuestionProgress(await data.progress.progress)
-              console.log("data.progress",data.progress)
-            }
-          )
-          .catch(async (err)=>{
-            await navigation.navigate("Error")
-          })
-      }
-      getInfoOfTask()
+    async function updateProgresId(newProg, correct,wordId, questionId) {
+      
+      console.log("fetch is going on")
+      console.log("questionId",questionId)
+      fetch(`${url}/taskProgress/${testId}/${newProg}/${correct}`,{
+        method: "PUT",
+        headers:{
+          "token": await AsyncStorage.getItem('apikey'),
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          wordId: wordId,
+          questionId: questionId
+        })
+      })
+      .then(response => response.json())
+      .then(
+        async data => {
+          setQuestionProgress(await data.progress.progress)
+          getInfoOfTask()
+          if(await questionProgress.progress > await questions.length){
+            navigation.navigate("Modules")
+          }
+        }
+      )
+      .catch(async (err)=>{
+        console.error(err)
 
-      // setRandomWordListId(Number(getRandomElement(Object.keys(questions))))
-
-      if(await questionProgress.progress > await questions.length){
-        navigation.navigate("Modules")
-      }
+        await navigation.navigate("Error")
+      })
     }
 
   
@@ -212,6 +191,7 @@ export default function WordTest ({ navigation, route}){
         }
       )
       .catch(async (err)=>{
+        console.error(err)
         await navigation.navigate("Error")
       })
     }
@@ -279,7 +259,7 @@ export default function WordTest ({ navigation, route}){
                   console.log("counter")
                   console.log(wordsCounters[qqq].counter)
                   console.log(wordsCounters[qqq].counter+1)
-                  updateProgresId(questionProgress.progress+1, correct, wordsCounters[qqq].WordId)
+                  updateProgresId(questionProgress.progress+1, correct, wordsCounters[qqq].WordId, questions[randomWordListId][wordsCounters[qqq].counter-1].id)
                   }}>
                   <Text style={[styles.white,answerStyleExtra]}>{ans}</Text>
                 </TouchableOpacity>

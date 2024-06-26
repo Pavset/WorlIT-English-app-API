@@ -51,5 +51,7 @@ yarn-error.*
 /node/.env
 ./react-native/my-project/.env
 ./node/.env
+/next/admin_panel/.env
+./next/admin_panel/.env
 # typescript
 *.tsbuildinfo
