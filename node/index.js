@@ -855,14 +855,14 @@ router.put("/taskProgress/:taskId/:newProgress/:correct", async (req, res) =>{
                             if(wordUser){
                                 if(correct){
                                     wordUser.update({counter: wordUser.counter+1})
-                                    taskProgress.update({ progress: newProgress })
                                     await wordUser.save()
-                                    await taskProgress.save();
                                 }
                             }
                             // console.log(wordUser)
                         } 
+                        taskProgress.update({ progress: newProgress })
                         quesUs.update({ correct: correct })
+                        await taskProgress.save();
                         await quesUs.save()
                         return res.status(200).json({progress: taskProgress})
                     } else{

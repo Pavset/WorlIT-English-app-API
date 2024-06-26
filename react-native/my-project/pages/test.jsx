@@ -239,7 +239,6 @@ export default function Test ({ navigation, route}){
                 }
                 shuffleAnswers(answersList)
               })}
-              {/* вшгравша */}
               {answersList.map((ans, idx) =>{
                   let answerStyleExtra = []
                   if (questions[questionProgress.progress-1].trueAnswers[0] == ans){
@@ -260,7 +259,6 @@ export default function Test ({ navigation, route}){
                     }}>
                     <Text style={[styles.white,answerStyleExtra]}>{ans}</Text>
                   </TouchableOpacity>
-                  // ввшірашгрлвалвпавпа
                   )
                 })
               }

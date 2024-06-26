@@ -251,15 +251,17 @@ export default function WordTest ({ navigation, route}){
                 return(
                 <TouchableOpacity key={idx} style={styles.buttonAnswer} onPress={()=>{
                   correct = false
+                  let questionProg = questionProgress.progress
                   setAnswerStyle([styles.red, styles.font20])
                   if (ans == questions[randomWordListId][wordsCounters[qqq].counter-1].trueAnswers[0]){
                     correct = true
+                    questionProg = questionProgress.progress+1
                     setAnswerStyle([styles.orange, styles.font20])
                   }
                   console.log("counter")
                   console.log(wordsCounters[qqq].counter)
                   console.log(wordsCounters[qqq].counter+1)
-                  updateProgresId(questionProgress.progress+1, correct, wordsCounters[qqq].WordId, questions[randomWordListId][wordsCounters[qqq].counter-1].id)
+                  updateProgresId(questionProg, correct, wordsCounters[qqq].WordId, questions[randomWordListId][wordsCounters[qqq].counter-1].id)
                   }}>
                   <Text style={[styles.white,answerStyleExtra]}>{ans}</Text>
                 </TouchableOpacity>
