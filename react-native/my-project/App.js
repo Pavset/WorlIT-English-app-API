@@ -16,7 +16,7 @@ import WordTest from "./pages/wordTest"
 import Error from "./pages/error"
 const Stack = createNativeStackNavigator()
 
-export const url = process.env.EXPO_PUBLIC_URL
+export const url = "https://worlit-english-app-api.onrender.com"
 LogBox.ignoreAllLogs();
 
 export default function App() {
@@ -444,8 +444,11 @@ export const styles = StyleSheet.create({
   
   modalWraper:{
     position:"absolute",
-    top:0,
-    left:0,
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    margin: 'auto',
     width:"100vw",
     height:"100vh",
     display:"flex",
@@ -463,7 +466,9 @@ export const styles = StyleSheet.create({
     width:"90%",
     backgroundColor:"#3B3B3B",
     borderRadius:10,
-    border:"3px #252124 solid"
+    borderWidth: 3,
+    borderColor: "#252124",
+    borderStyle: "solid"
   },
 
   // theory

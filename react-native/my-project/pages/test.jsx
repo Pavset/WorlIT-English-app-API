@@ -97,7 +97,10 @@ export default function Test ({ navigation, route}){
             if (data.data[data.progress.progress-1] != null){
               let mmmm =  data.data[data.progress.progress-1]
               setQuestionMainText(mmmm.question)
-              setExtraQuestionText(mmmm.extraQuestionText)
+              if (mmmm.extraQuestionText){
+                setExtraQuestionText(mmmm.extraQuestionText)
+              }
+              
               setImagePath(mmmm.imagePath)
               console.log(mmmm)
             }
@@ -231,6 +234,7 @@ export default function Test ({ navigation, route}){
                 {multipleAnswer.length > 0 &&
                 <TouchableOpacity style={styles.removeButton} onPress={()=>{
                   let word = multipleAnswer.slice(-1)
+                  let tempString = multipleString.replace(word,"...")
                   multipleAnswer.pop()
                   let multipleTemp = []
                   for (let temp of multipleAnswer){
@@ -264,7 +268,7 @@ export default function Test ({ navigation, route}){
                   }
                   return(
                   <TouchableOpacity key={idx} style={styles.buttonAnswer} onPress={()=>{
-                    correct = false
+                    let correct = false
                     setAnswerStyle([styles.red, styles.font20])
                     if (ans == questions[questionProgress.progress-1].trueAnswers[0]){
                       correct = true

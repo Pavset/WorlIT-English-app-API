@@ -253,7 +253,7 @@ export default function WordTest ({ navigation, route}){
                 }
                 return(
                 <TouchableOpacity key={idx} style={styles.buttonAnswer} onPress={()=>{
-                  correct = false
+                  let correct = false
                   let questionProg = questionProgress.progress
                   setAnswerStyle([styles.red, styles.font20])
                   if (ans == questions[randomWordListId][wordsCounters[qqq].counter-1].trueAnswers[0]){
