@@ -20,7 +20,6 @@ export default function WordTest ({ navigation, route}){
     let groupedQuestions
     let qStat
     const [answerStyle, setAnswerStyle] = useState([styles.white, styles.font20])
-    const [answer, setAnswer] = useState("")
     let answersList = [] 
     let rdNew 
 
@@ -89,10 +88,6 @@ export default function WordTest ({ navigation, route}){
       .then(
         async data => {
           if (!data.error){
-
-            console.log("----------------------------------------------------------------------------------------------------------------------------")
-              
-            console.log("InfoOfTask",data)
             setTask(await data.task)
 
             groupedQuestions = await groupByWordId(data.data);
@@ -100,7 +95,6 @@ export default function WordTest ({ navigation, route}){
 
             groupedQuestions = uncompletedQPonly(groupedQuestions, qStat)
             setQuestions(groupedQuestions)
-
             if(Object.keys(groupedQuestions).length <= 0 || await groupedQuestions == null){
               completeTask()
               navigation.navigate("Modules")
@@ -113,8 +107,6 @@ export default function WordTest ({ navigation, route}){
             setCompleted(await data.progress.completed)
 
             setAnswerStyle([styles.white, styles.font20])
-            
-            console.log("wordsCounters",data.usersWords)
             let usWords = data.usersWords
             setWordsCounters(data.usersWords)
 
@@ -144,9 +136,6 @@ export default function WordTest ({ navigation, route}){
     }
   
     async function updateProgresId(newProg, correct,wordId, questionId) {
-      
-      console.log("fetch is going on")
-      console.log("questionId",questionId)
       fetch(`${url}/taskProgress/${testId}/${newProg}/${correct}`,{
         method: "PUT",
         headers:{
@@ -219,19 +208,33 @@ export default function WordTest ({ navigation, route}){
         }
    
         {questions && questionProgress && randomWordListId && wordsCounters && 
-        <View style={{width: '100%', height: '90%', justifyContent: 'space-around', alignItems: 'center'}}>
-          { questions && wordsCounters && wordsCounters[qqq].counter && 
-            <Text style={[styles.white, styles.font20]}>{wordsCounters[qqq].counter}</Text>
-          }
-          { questions && wordsCounters && questions[randomWordListId][wordsCounters[qqq].counter-1].extraQuestionText && 
-            <Text style={[styles.white, styles.font20]}>{questions[randomWordListId][wordsCounters[qqq].counter-1].extraQuestionText}</Text>
-          }
-          { questions && wordsCounters && questions[randomWordListId][wordsCounters[qqq].counter-1].imagePath &&
-            <FullWidthImage imageUrl={questions[randomWordListId][wordsCounters[qqq].counter-1].imagePath}/>
-          }
-          { questions && wordsCounters && questions[randomWordListId][wordsCounters[qqq].counter-1].question && 
-            <Text style={[styles.white, styles.font24]}>{questions[randomWordListId][wordsCounters[qqq].counter-1].question}</Text>
-          }
+        <View style={styles.questionsView}>
+          <View style={styles.viewForQuestions}>
+            { questions && wordsCounters && wordsCounters[qqq].counter && questions[randomWordListId] &&
+              <View style={styles.viewForCounter}>
+                { questions[randomWordListId].map((question, idx)=>{
+                  if (idx < wordsCounters[qqq].counter-1){
+                    return (
+                      <Image source={require("../assets/EllipseFull.png")} width={22} height={22}/>
+                    )
+                  } else{
+                    return (
+                      <Image source={require("../assets/EllipseEmpty.png")} width={22} height={22}/>
+                    )
+                  }
+                })}
+              </View>
+            }
+            { questions && wordsCounters && questions[randomWordListId][wordsCounters[qqq].counter-1].extraQuestionText && 
+              <Text style={[styles.white, styles.font20]}>{questions[randomWordListId][wordsCounters[qqq].counter-1].extraQuestionText}</Text>
+            }
+            { questions && wordsCounters && questions[randomWordListId][wordsCounters[qqq].counter-1].imagePath &&
+              <FullWidthImage imageUrl={questions[randomWordListId][wordsCounters[qqq].counter-1].imagePath}/>
+            }
+            { questions && wordsCounters && questions[randomWordListId][wordsCounters[qqq].counter-1].question && 
+              <Text style={[styles.white, styles.font24]}>{questions[randomWordListId][wordsCounters[qqq].counter-1].question}</Text>
+            }
+          </View>
           
           <View style={styles.viewForAnswers}>
             { questions[randomWordListId][wordsCounters[qqq].counter-1].wrongAnswers.map((answer, idx) =>{
@@ -258,9 +261,6 @@ export default function WordTest ({ navigation, route}){
                     questionProg = questionProgress.progress+1
                     setAnswerStyle([styles.orange, styles.font20])
                   }
-                  console.log("counter")
-                  console.log(wordsCounters[qqq].counter)
-                  console.log(wordsCounters[qqq].counter+1)
                   updateProgresId(questionProg, correct, wordsCounters[qqq].WordId, questions[randomWordListId][wordsCounters[qqq].counter-1].id)
                   }}>
                   <Text style={[styles.white,answerStyleExtra]}>{ans}</Text>

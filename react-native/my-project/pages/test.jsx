@@ -16,10 +16,17 @@ export default function Test ({ navigation, route}){
     const [questionStatuses, setQuestionStatuses] = useState()
   
     let [answerStyle, setAnswerStyle] = useState([styles.white, styles.font20])
+    const [questionMainTextStyle, setQuestionMainTextStyle] = useState([styles.white, styles.font24])
+
+
+    const [questionMainText, setQuestionMainText] = useState()
+    const [extraQuestionText, setExtraQuestionText] = useState()
+    const [imagePath, setImagePath] = useState()
   
     // for type "multiple" question
     let [sectionCounter,setSectionCounter] = useState(1)
     let [multipleAnswer, setMultipleAnswer] = useState([])
+    let [multipleAnswerStyle, setMultipleAnswerStyle] = useState([styles.white, styles.font24])
     let arrayOfQuestionSections =  {}
     let [dotsCounter,setDotsCounter] = useState(0)
     let [multipleString, setMultipleString] = useState("")
@@ -87,7 +94,13 @@ export default function Test ({ navigation, route}){
             setCompleted(await data.progress.completed)
             setQuestionStatuses(await data.questionsStatuses)
             setAnswerStyle([styles.white, styles.font20])
-
+            if (data.data[data.progress.progress-1] != null){
+              let mmmm =  data.data[data.progress.progress-1]
+              setQuestionMainText(mmmm.question)
+              setExtraQuestionText(mmmm.extraQuestionText)
+              setImagePath(mmmm.imagePath)
+              console.log(mmmm)
+            }
             console.log(data)
             
             if(data.progress.progress > data.data.length){
@@ -156,9 +169,8 @@ export default function Test ({ navigation, route}){
     useEffect(()=>{getInfoOfTask()},[testId])
     return(
       <View style={styles.profileContainer}>
-        <View style={[styles.orangeBG,{width: "100%", height: 30}]}></View>
-        {!questions && !questionProgress && !error &&
         
+        {!questions && !questionProgress && !error &&
           <View style={{height: "100%", width: "100%", alignItems: "center", justifyContent: "center"}}>
             <ActivityIndicator size="large" color="#e19a38"/>
           </View>
@@ -177,59 +189,63 @@ export default function Test ({ navigation, route}){
         }
   
         {questions && questionProgress && questionProgress.progress &&
-        <View style={{width: '100%', height: '90%', justifyContent: 'space-around', alignItems: 'center'}}>
-          { questionStatuses &&
-            <Text style={{color: 'white', textAlign: 'center', fontSize: 32}}>{questionProgress.progress}/{questionStatuses.length}</Text>
-          }
-          { questions[questionProgress.progress-1].extraQuestionText &&
-            <Text style={[styles.white, styles.font20]}>{questions[questionProgress.progress-1].extraQuestionText}</Text>
-          }
-          { questions[questionProgress.progress-1].imagePath &&
-            <FullWidthImage imageUrl={questions[questionProgress.progress-1].imagePath}/>
-          }
-          { questions[questionProgress.progress-1].question && dotsCounter > 0 &&
-            <View style={{width: '100%', justifyContent: 'space-between', alignItems: "center", flexDirection: 'column'}}>
-              <Text style={[styles.white, styles.font24]}>{multipleString}</Text>
-              <TouchableOpacity style={styles.removeButton} onPress={()=>{
-                let word = multipleAnswer.slice(-1)
-                multipleAnswer.pop()
-                let multipleTemp = []
-                for (let temp of multipleAnswer){
-                  multipleTemp.push(temp)
+        <View style={styles.questionsView}>
+          <View style={[styles.orangeBG,{width: "100%", height: 30}]}></View>
+
+          <View style={styles.viewForQuestions}>
+            { questionStatuses &&
+              <Text style={{color: 'white', textAlign: 'center', fontSize: 32}}>{questionProgress.progress}/{questionStatuses.length}</Text>
+            }
+            { questions[questionProgress.progress-1].extraQuestionText &&
+              <Text style={[styles.orange, styles.font24]}>{extraQuestionText}</Text>
+            }
+            { questions[questionProgress.progress-1].imagePath &&
+              <FullWidthImage imageUrl={imagePath}/>
+            }
+            { questions[questionProgress.progress-1].question && dotsCounter > 0 &&
+              <View style={styles.multipleInputView}>
+                <Text style={multipleAnswerStyle}>{multipleString}</Text>
+                <TouchableOpacity style={styles.removeButton} onPress={()=>{
+                  let word = multipleAnswer.slice(-1)
+                  multipleAnswer.pop()
+                  let multipleTemp = []
+                  for (let temp of multipleAnswer){
+                    multipleTemp.push(temp)
+                  }
+                  setDotsCounter(dotsCounter-1)
+                  let tempString = multipleString.replace(word,"...")
+                  setSectionCounter(sectionCounter-1)
+                  setMultipleAnswer(multipleTemp)      
+                  setMultipleString(tempString)
+                }}>
+                  <Text style={[styles.white, styles.font20]}>Remove</Text>
+                </TouchableOpacity>
+              </View>
+            }
+            { questions[questionProgress.progress-1].question && dotsCounter <= 0 &&
+                <Text style={questionMainTextStyle}>{questionMainText}</Text>
+            }
+            { multipleAnswer && questions[questionProgress.progress-1].questionType == "multiple" && !questions[questionProgress.progress-1].question && 
+              <View style={styles.multipleInputView}>
+                <Text style={multipleAnswerStyle}>{multipleAnswer.join(' ')}</Text>
+                {multipleAnswer.length > 0 &&
+                <TouchableOpacity style={styles.removeButton} onPress={()=>{
+                  let word = multipleAnswer.slice(-1)
+                  multipleAnswer.pop()
+                  let multipleTemp = []
+                  for (let temp of multipleAnswer){
+                    multipleTemp.push(temp)
+                  }
+                  setSectionCounter(sectionCounter-1)
+                  setMultipleAnswer(multipleTemp)      
+                  setMultipleString(tempString)   
+                }}>
+                  <Text style={[styles.white, styles.font20]}>Remove</Text>
+                </TouchableOpacity>
                 }
-                setDotsCounter(dotsCounter-1)
-                let tempString = multipleString.replace(word,"...")
-                setSectionCounter(sectionCounter-1)
-                setMultipleAnswer(multipleTemp)      
-                setMultipleString(tempString)
-              }}>
-                <Text style={[styles.white, styles.font20]}>Remove</Text>
-              </TouchableOpacity>
-            </View>
-          }
-          { questions[questionProgress.progress-1].question && dotsCounter <= 0 &&
-              <Text style={[styles.white, styles.font24]}>{questions[questionProgress.progress-1].question}</Text>
-          }
-          { multipleAnswer && questions[questionProgress.progress-1].questionType == "multiple" && !questions[questionProgress.progress-1].question && 
-            <View style={{width: '100%', justifyContent: 'space-between', alignItems: "center", flexDirection: 'column'}}>
-              <Text style={[styles.white, styles.font24]}>{multipleAnswer.join(' ')}</Text>
-              {multipleAnswer.length > 0 &&
-              <TouchableOpacity style={styles.removeButton} onPress={()=>{
-                let word = multipleAnswer.slice(-1)
-                multipleAnswer.pop()
-                let multipleTemp = []
-                for (let temp of multipleAnswer){
-                  multipleTemp.push(temp)
-                }
-                setSectionCounter(sectionCounter-1)
-                setMultipleAnswer(multipleTemp)      
-                setMultipleString(tempString)   
-              }}>
-                <Text style={[styles.white, styles.font20]}>Remove</Text>
-              </TouchableOpacity>
-              }
-            </View> 
-          }
+              </View> 
+            }
+          </View>
           { questions[questionProgress.progress-1].questionType == "word" &&
             <View style={styles.viewForAnswers}>
               { questions[questionProgress.progress-1].wrongAnswers.map((answer, idx) =>{
@@ -265,20 +281,29 @@ export default function Test ({ navigation, route}){
             </View>
           }
           { questions[questionProgress.progress-1].questionType == "input" &&
-            <View style={styles.viewForAnswers}>
-              <Text style={[styles.white, styles.font24]}>Уведіть відповідь</Text>
+            <View style={[styles.viewForAnswers,{alignContent:"center", justifyContent:"space-around"}]}>
+              {/* <Text style={[styles.white, styles.font24]}>Уведіть відповідь</Text> */}
               <TextInput 
                 style={styles.input}
                 value={answer}
                 onChangeText={setAnswer}
+                placeholder='Уведіть відповідь'
               />
               <TouchableOpacity style={styles.buttonAnswer} onPress={ ()=>{
                 let correct = false
                 if(answer.length > 0){
+
+                  let replacedQuestion = questionMainText.replace("...", answer)
+                  console.log(replacedQuestion)
+                  setQuestionMainText(replacedQuestion)
+                  
                   if(answer.toLowerCase() == questions[questionProgress.progress-1].trueAnswers[0]){
                     correct = true
+                    setQuestionMainTextStyle([styles.orange, styles.font24])
+                  } else{
+                    setQuestionMainTextStyle([styles.red, styles.font24])
                   }
-    
+
                   updateProgresId(questionProgress.progress+1,correct)
                 } 
               }
@@ -325,8 +350,10 @@ export default function Test ({ navigation, route}){
                     } else{
                       let correct = false
                       if (arraysEqual(multipleTemp,questions[questionProgress.progress-1].trueAnswers)){
+                        setMultipleAnswerStyle([styles.orange, styles.font24])
                         correct = true
-                        console.log(4444)
+                      } else{
+                        setMultipleAnswerStyle([styles.red, styles.font24])
                       }
                       updateProgresId(questionProgress.progress+1,correct)
                     }

@@ -516,7 +516,8 @@ export const styles = StyleSheet.create({
     borderRadius: 15,
     minWidth: "40%",
     marginHorizontal: 10,
-    marginVertical: 20
+    marginVertical: 20,
+    alignSelf:"stretch"
   },
   removeButton:{
     display:"flex",
@@ -530,14 +531,45 @@ export const styles = StyleSheet.create({
     borderColor: '#E8F0FE',
     borderRadius: 10,
   },
+  viewForQuestions:{
+    width: '90%', 
+    flex: 1,  
+    display: "flex",
+    flexDirection:"column",
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    maxHeight:"40%",
+  },
   viewForAnswers:{
     width: '90%', 
     flex: 1,  
     display: "flex",
     flexDirection:"row",
-    alignItems: 'start',
     justifyContent: 'center',
     flexWrap:"wrap",
-    maxHeight:"50%"
+    maxHeight:"55%",
+    alignContent:"stretch"
+  },
+  viewForCounter:{
+    display: "flex",
+    flexDirection:"row",
+    alignItems: 'start',
+    justifyContent: 'center',
+    gap:10
+  },
+  questionsView:{
+    width: '100%', 
+    height: '90%', 
+    justifyContent: 'start', 
+    alignItems: 'center',
+    flexDirection: 'column'
+  },
+  multipleInputView:{
+    width: '100%',
+    display:"flex", 
+    justifyContent: 'center', 
+    alignItems: "center", 
+    flexDirection: 'column',
+    gap:10
   }
 });
