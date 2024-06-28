@@ -268,7 +268,7 @@ The database schema for "World It English" project is managed using Sequelize. B
 
 ## 😊 Thanks to these technologies!
 
-| Table Name      | Fields                                                                                     |
+| Techs      | Description                                                                                     |
 |-----------------|--------------------------------------------------------------------------------------------|
 | ![JS](https://skillicons.dev/icons?i=js)        | **JavaScript** — A versatile programming language used primarily for web development to create interactive and dynamic content. |
 | ![SQ](https://skillicons.dev/icons?i=sequelize)     | **Sequelize** — An ORM (Object-Relational Mapping) library for Node.js that facilitates database operations with SQL-based databases.                                                               |
