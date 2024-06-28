@@ -13,6 +13,7 @@ World IT English — is an API for managing World IT's English course. The API i
 - [API Reference](#api-reference)
 - [Technologies](#-thanks-to-these-technologies)
 - [Authors](#authors)
+- [License](#license)
 ## Installation
 1. Clone the repository:
 ```bash
