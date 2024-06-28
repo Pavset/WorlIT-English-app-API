@@ -1002,7 +1002,7 @@ router.get("/account",async (req, res)=>{
     }
 })
 
-router.get("/wordCounters", async (req, res)=>{
+router.get("/wordCounters/:wordListId", async (req, res)=>{
     let apikey = req.headers.token
 
     if (!apikey){
@@ -1015,13 +1015,37 @@ router.get("/wordCounters", async (req, res)=>{
             }
         })
         if(user){
+            let wordListId = req.params.wordListId
+
             let usersWords = await UsersWords.findAll({
                 where:{
                     UserId: user.id
                 }
             })
             if (usersWords.length > 0){
-                return res.status(200).json({usersWords: usersWords})
+                let listOfWords = []
+                for (let word of usersWords){
+                    console.log(word.dataValues)
+                    let counter = word.dataValues.counter
+                    let wordInTable = await Word.findOne({
+                        where:{
+                            id: word.dataValues.WordId,
+                            list: wordListId
+                        }
+                    })
+                    if (wordInTable){
+                        let wordObject = {
+                            counter: counter,
+                            word: wordInTable.dataValues.word,
+                            translation: wordInTable.dataValues.translated,
+                            role: wordInTable.dataValues.role
+                        }
+                        listOfWords.push(wordObject)
+                    } else{
+                        return res.status(404).json({error: "Такого слова не знайдено"})
+                    }
+                }
+                return res.status(200).json({listOfWords: listOfWords})
             } else{
                 return res.status(404).json({error: "Немаэ зв'язків даного користувача зі словами у базі данних"})
             }
