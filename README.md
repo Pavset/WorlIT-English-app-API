@@ -85,15 +85,19 @@ The database schema for "World It English" project is managed using Sequelize. B
 | :-------- | :------- | :------------------------- |
 | `token` | `string` | **Required**. Your API key |
 
-  - **Response:**
-    - `200 OK` - Returns user data.
-    - `403 Forbidden` - Invalid or missing token.
+**Response:**
+- `200 OK` - Returns user and course data.
+- `403 Forbidden` - Missing token or didn't join to course group.
 
 #### Get all modules
 
 ```http
   GET /modules
 ```
+
+**Response:**
+- `200 OK` - Returns modules data.
+- `404 Not Found` - Missing modules.
 
 #### Login
 
@@ -104,6 +108,10 @@ The database schema for "World It English" project is managed using Sequelize. B
 | :-------- | :------- | :------------------------- |
 | `name` | `string` | **Required**. Your name |
 | `password` | `string` | **Required**. Your password |
+
+**Response:**
+- `200 OK` - Returns user's apikey.
+- `400 Bad Request` - Empty or incorrect name or password.
 
 #### Register
 
@@ -120,6 +128,10 @@ The database schema for "World It English" project is managed using Sequelize. B
 | `address` | `string` | **Required**. Your address |
 | `phone` | `string` | **Required**. Your phone number |
 
+**Response:**
+- `201 OK` - Returns user's apikey.
+- `400 Bad Request` - Empty some data.
+
 #### Get module by ID
 
 ```http
@@ -133,6 +145,11 @@ The database schema for "World It English" project is managed using Sequelize. B
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
 | `id` | `integer` | **Required**. Id of item to fetch |
+
+**Response:**
+- `200 OK` - Returns module and his tasks data.
+- `404 Not Found` - Missing module or his data.
+- `403 Forbidden` - Missing token or access to module.
 
 #### Get theory by ID
 
@@ -148,19 +165,10 @@ The database schema for "World It English" project is managed using Sequelize. B
 | :-------- | :------- | :------------------------- |
 | `id` | `integer` | **Required**. Id of item to fetch |
 
-#### Get task by ID
-
-```http
-  GET /tasks/${id}
-```
-
-| Headers | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `token` | `string` | **Required**. Your API Key |
-
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `id` | `integer` | **Required**. Id of item to fetch |
+**Response:**
+- `200 OK` - Returns theory and his sections data.
+- `404 Not Found` - Missing theory or his data.
+- `403 Forbidden` - Missing token or access to theory.
 
 #### Get task by ID
 
@@ -176,7 +184,12 @@ The database schema for "World It English" project is managed using Sequelize. B
 | :-------- | :------- | :------------------------- |
 | `id` | `integer` | **Required**. Id of item to fetch |
 
-#### Get completed task by ID
+**Response:**
+- `200 OK` - Returns task and his data.
+- `404 Not Found` - Missing task or his data.
+- `403 Forbidden` - Missing token or access to task.
+
+#### Get progress task by ID
 
 ```http
   GET /taskProgress/${id}
@@ -185,6 +198,10 @@ The database schema for "World It English" project is managed using Sequelize. B
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
 | `id` | `integer` | **Required**. Id of item to fetch |
+
+**Response:**
+- `200 OK` - Returns progress task.
+- `404 Not Found` - Missing task
 
 #### Put progress task by ID
 
@@ -203,6 +220,12 @@ The database schema for "World It English" project is managed using Sequelize. B
 | `progressValue` | `integer` | **Required**. New value of progress |
 | `isCorrect` | `bool` | **Required**. Correct (or not) answer |
 
+**Response:**
+- `200 OK` - Returns progress task.
+- `400 Bad Request` - Invalid status task.
+- `404 Not Found` - Missing task.
+- `403 Forbidden` - Missing or invalid token.
+
 #### Put complete task by ID
 
 ```http
@@ -218,6 +241,30 @@ The database schema for "World It English" project is managed using Sequelize. B
 | :-------- | :------- | :------------------------- |
 | `id` | `integer` | **Required**. Id of item to fetch |
 
+**Response:**
+- `200 OK` - Returns completed and unlocked tasks.
+- `404 Not Found` - Missing task and his progress.
+- `403 Forbidden` - Missing or invalid token.
+
+#### Get word counters
+
+```http
+  PUT /wordCounters
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your API Key |
+
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `id` | `integer` | **Required**. Id of item to fetch |
+
+**Response:**
+- `200 OK` - Returns user words.
+- `404 Not Found` - Missing user words.
+- `403 Forbidden` - Missing or invalid token.
 
 ## 😊 Thanks to these technologies!
 ![JS](https://skillicons.dev/icons?i=js) **JavaScript** — A versatile programming language used primarily for web development to create interactive and dynamic content.
