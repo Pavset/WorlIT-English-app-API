@@ -620,7 +620,7 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                                     if (usersWds.length > 0){
                                         usersWords = usersWds
                                     } else{
-                                        return res.status(404).json({error: "Немаэ зв'язків даного юзера зі словами у базі данних"})
+                                        return res.status(404).json({error: "Немаэ зв'язків даного користувача зі словами у базі данних"})
                                     }
                                 }
 
@@ -702,7 +702,7 @@ router.get("/tasks/:tasksId",async(req,res)=>{
                                         if (usersWds.length > 0){
                                             usersWords = usersWds
                                         } else{
-                                            return res.status(404).json({error: "Немаэ зв'язків даного юзера зі словами у базі данних"})
+                                            return res.status(404).json({error: "Немаэ зв'язків даного користувача зі словами у базі данних"})
                                         }
                                     }
 
@@ -886,10 +886,10 @@ router.put("/taskProgress/:taskId/:newProgress/:correct", async (req, res) =>{
                     
                 }
             } else{
-                return res.status(404).json({error: "Такої таски не існує"})
+                return res.status(404).json({error: "Такого завдання не існує"})
             }
         } else{
-            return res.status(404).json({error: "Немаэ такого юзера"})
+            return res.status(404).json({error: "Немаэ такого користувача"})
         }
     }catch(error){
         console.error(error)
@@ -942,18 +942,18 @@ router.put("/complete/:taskId", async (req,res)=>{
                             unlockingTask.update({blocked: false})
                             await unlockingTask.save();
                         } else{
-                            return res.status(404).json({error: "Такої таски для розблокування не існує"})
+                            return res.status(404).json({error: "Такого завдання для розблокування не існує"})
                         }
                     }     
                     return res.status(200).json({taskCompleted: taskCompleted, unlockingTask: unlockingTask})               
                 } else{
-                    return res.status(404).json({error: "Такої таски не існує"})
+                    return res.status(404).json({error: "Такого завдання не існує"})
                 }
             } else{
-                return res.status(500).json({error: "Такої таски не існує у юзера, помилка при створені у дб"})
+                return res.status(500).json({error: "Такого завдання не існує у користувача, помилка при створені у дб"})
             }
         } else{
-            return res.status(500).json({error: "Немаэ такого юзера"})
+            return res.status(500).json({error: "Немаэ такого користувача"})
         }
     }catch(error){
         console.error(error)
@@ -1023,10 +1023,10 @@ router.get("/wordCounters", async (req, res)=>{
             if (usersWords.length > 0){
                 return res.status(200).json({usersWords: usersWords})
             } else{
-                return res.status(404).json({error: "Немаэ зв'язків даного юзера зі словами у базі данних"})
+                return res.status(404).json({error: "Немаэ зв'язків даного користувача зі словами у базі данних"})
             }
         } else{
-            return res.status(404).json({error: "Такого юзера немаэ"})
+            return res.status(403).json({error: "Увійдіть в акаунт"})
         }
     }catch(err){
         console.error(err)
