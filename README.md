@@ -11,6 +11,7 @@ World IT English — is an API for managing World IT's English course. The API i
 - [API Reference](#api-reference)
 - [Authors](#authors)
 - [DataBase Schema](#database-schema)
+- [Relationships](#relationships)
 ## Installation
 1. Clone the repository:
 ```bash
