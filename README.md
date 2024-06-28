@@ -286,3 +286,7 @@ The database schema for "World It English" project is managed using Sequelize. B
 - [@dimasribnyj14](https://www.github.com/dimasribnyj14)
 - [@NaruChigo31](https://github.com/NaruChigo31)
 - [@alex21000211](https://github.com/alex21000211)
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
