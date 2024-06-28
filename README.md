@@ -85,6 +85,10 @@ The database schema for "World It English" project is managed using Sequelize. B
 | :-------- | :------- | :------------------------- |
 | `token` | `string` | **Required**. Your API key |
 
+  - **Response:**
+    - `200 OK` - Returns user data.
+    - `403 Forbidden` - Invalid or missing token.
+
 #### Get all modules
 
 ```http
