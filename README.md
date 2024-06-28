@@ -41,6 +41,38 @@ router.listen(YOUR_PORT, () => {console.log('Server is running on',port)})
  node index.js  # Or you can use nodemon index.js
 ```
 
+## Database Schema
+
+The database schema for "World It English" project is managed using Sequelize. Below is a table of the main models:
+
+| Table Name      | Fields                                                                                     |
+|-----------------|--------------------------------------------------------------------------------------------|
+| **User**        | `name`, `surname`, `email`, `yearsOld`, `password`, `phoneNumber`, `address`, `apikey`, `completedTasks`, `course` |
+| **Courses**     | `name`, `teacher`, `manager`                                                               |
+| **Modules**     | `name`                                                                                     |
+| **Topics**      | `mainName`, `name`, `tasks`, `homework`, `theories`, `module`                              |
+| **Sections**    | `text`, `title`, `imagePath`, `theory`                                                     |
+| **Theories**    | `name`                                                                                     |
+| **Tasks**       | `type`, `audio`, `video`, `wordArray`, `initialyBlocked`, `unlockingTaskId`                |
+| **TasksUsers**  | `blocked`, `completed`, `progress`                                                         |
+| **QuestionUsers** | `correct`                                                                                  |
+| **UsersWords**  | `counter`                                                                                  |
+| **WordList**    | `name`                                                                                     |
+| **Word**        | `word`, `translated`, `list`, `role`                                                       |
+| **Question**    | `question`, `questionType`, `imagePath`, `trueAnswers`, `wrongAnswers`, `extraQuestionText`, `taskId`, `wordId` |
+| **Staff**       | `name`, `surname`, `image`, `phone`, `tg`, `viber`                                         |
+
+### Relationships
+
+- **User - Courses:** A user belongs to a course.
+- **Courses - Staff:** A course is managed and taught by staff.
+- **Modules - Topics:** A module contains multiple topics.
+- **Tasks - Users:** Many-to-many relationship through `TasksUsers`.
+- **Questions - Users:** Many-to-many relationship through `QuestionUsers`.
+- **Words - Users:** Many-to-many relationship through `UsersWords`.
+- **Theories - Sections:** A theory has many sections.
+- **Modules - Courses:** Many-to-many relationship through `ModuleCourse`.
+
 ## API Reference
 
 #### Get your account and course information
