@@ -851,7 +851,7 @@ router.put("/taskProgress/:taskId/:newProgress/:correct", async (req, res) =>{
                         await quesUs.save()
                         return res.status(200).json({progress: taskProgress})
                     } else{
-                        return res.status(500).json({error: "Помилка була здійснена на стороні сервера"})
+                        return res.status(404).json({error: "Не було знайдено користувача з питаннями"})
                     }
                 } else{
                     if (task.dataValues.type == 'words'){
@@ -950,10 +950,10 @@ router.put("/complete/:taskId", async (req,res)=>{
                     return res.status(404).json({error: "Такого завдання не існує"})
                 }
             } else{
-                return res.status(500).json({error: "Такого завдання не існує у користувача, помилка при створені у дб"})
+                return res.status(404).json({error: "Такого завдання не існує у користувача, помилка при створені у базу даних"})
             }
         } else{
-            return res.status(500).json({error: "Немаэ такого користувача"})
+            return res.status(403).json({error: "Увійдіть в акаунт"})
         }
     }catch(error){
         console.error(error)
