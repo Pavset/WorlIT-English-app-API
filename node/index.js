@@ -153,7 +153,6 @@ router.post("/signup", async (req, res) => {
             createTasksWithStatus(data.apikey)
 
         return res.status(201).json({apikey: data.apikey})
-        // }
     } catch (error) {
         return res.status(400).json({error: "Виникла помилка"})
 
@@ -200,7 +199,6 @@ router.get("/course", async (req, res) => {
                             }
                         })
                         if (topics.length > 0){
-                            console.log(topics.length)
                             let moduleTasks = []
                             for (let topic of topics){
                                 for(let task of topic.dataValues.tasks){
@@ -246,10 +244,7 @@ router.get("/course", async (req, res) => {
                                                 completedTasksList.push(task)
                                             }
                                         }
-                                        console.log(completedTasksList)
                                         if (completedTasksList.length > 0){
-                                            console.log(allTasksList.length)
-                                            console.log(completedTasksList.length)
                                             modulePercentage = (completedTasksList.length/allTasksList.length)*100
                                         }
                                         modulePercentageList.push(modulePercentage)
@@ -810,9 +805,6 @@ router.put("/taskProgress/:taskId/:newProgress/:correct", async (req, res) =>{
                     taskId: taskId
                 }
             })
-            console.log(taskProgress.dataValues.progress-1)
-            console.log(questions)
-
             let questionValueId
             let wordId
 
@@ -827,12 +819,6 @@ router.put("/taskProgress/:taskId/:newProgress/:correct", async (req, res) =>{
                 questionValueId = questions[taskProgress.dataValues.progress-1].dataValues.id
             }
 
-
-
-            console.log('words')
-            console.log(taskProgress.dataValues.progress)
-            console.log('questions')
-            console.log(questions.length)
 
 
             if(taskProgress){
@@ -858,7 +844,6 @@ router.put("/taskProgress/:taskId/:newProgress/:correct", async (req, res) =>{
                                     await wordUser.save()
                                 }
                             }
-                            // console.log(wordUser)
                         } 
                         taskProgress.update({ progress: newProgress })
                         quesUs.update({ correct: correct })
@@ -870,10 +855,7 @@ router.put("/taskProgress/:taskId/:newProgress/:correct", async (req, res) =>{
                     }
                 } else{
                     if (task.dataValues.type == 'words'){
-                        console.log("fsdghjkkl;")
-                        console.log(questions)
                         for (i of questions){
-                            // console.log(i)
                             let wordUser = await UsersWords.findOne({
                                 where:{
                                     UserId: user.id,
@@ -884,11 +866,7 @@ router.put("/taskProgress/:taskId/:newProgress/:correct", async (req, res) =>{
                                 wordUser.update({counter: 1})
                                 await wordUser.save()
                             }
-                            // console.log(wordUser)
                         }
-                        // taskProgress.update({ progress: 1, completed: false })
-                        // await taskProgress.save();
-                        // return res.status(200).json({progress: taskProgress})
                     } 
                     for(let question of questions){
                         let questionUserToChange = await QuestionUsers.findOne({
