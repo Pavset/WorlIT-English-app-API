@@ -10,7 +10,7 @@ require('dotenv').config();
 
 // Router
 
-const bot = new Telegraf('7475843858:AAFNPWkyrCWi11WesaikijJDt-7Nzp9TJ7o')
+const bot = new Telegraf(process.env.TELEGRAMTOKEN)
 const router = express()
 const port = process.env.PORT
 router.use(express.json());
@@ -168,7 +168,7 @@ router.post("/signup", async (req, res) => {
             apikey: apikey
         })
             createTasksWithStatus(data.apikey)
-        bot.telegram.sendMessage(782584258,`Новий користувач зарєеструвався:\n
+        bot.telegram.sendMessage(process.env.TELEGRAMUSER,`Новий користувач зареєструвався:\n
         · Імя: ${body.name}\n
         · Прізвище: ${body.surname}\n
         · Кількість років: ${body.age}\n
