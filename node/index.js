@@ -83,6 +83,20 @@ async function createTasksWithStatus(apikey) {
     }
 }
 
+async function isAdminCheck(apikey, res){
+    let you = await User.findOne({
+        where:{
+            apikey: apikey
+        }
+    })
+    if(you){
+        if(!you.dataValues.isAdmin){
+            return res.status(404).json({error: "У вас немає прав Адміна"})
+        }  
+    } else{
+        return res.status(403).json({error: "Такого юзера немаэ"})
+    }
+}
 
 // Check Connection
 
@@ -137,6 +151,7 @@ router.post("/signin", async (req, res) => {
 })
 
 router.post("/signup", async (req, res) => {
+    
     let { body } = req
     let apikey = uuidv4()
     try {
@@ -156,6 +171,141 @@ router.post("/signup", async (req, res) => {
     } catch (error) {
         return res.status(400).json({error: "Виникла помилка"})
 
+    }
+})
+
+router.get("/user/:id", async (req, res) =>{
+
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+    try {
+        let user = await User.findOne({
+            where:{
+                id: req.params.id
+            }
+        })
+        if(user){
+            return res.status(201).json({user:user})
+        } else{
+            return res.status(404).json({error: "Учня з таким id немає"})
+        }
+    } catch (error) {
+        return res.status(400).json({error: "Виникла помилка"})
+
+    }
+})
+
+router.get("/users", async (req, res) =>{
+
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+    let usersIn = []
+    let usersNotIn = []
+
+    try {
+        let users = await User.findAll()
+        if(users.length > 0){
+            for(let user of users){
+                if(user.dataValues.course == null){
+                    usersNotIn.push(user)
+                } else{
+                    usersIn.push(user)
+                }
+            }
+            return res.status(201).json({usersIn:usersIn ,usersNotIn: usersNotIn})
+        } else{
+            return res.status(404).json({error: "Учнів немає"})
+        }
+        
+    } catch (error) {
+        return res.status(400).json({error: "Виникла помилка"})
+
+    }
+})
+
+
+router.delete("/user/:userId", async (req, res) =>{
+
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+
+    if (req.params.userId){
+        const user = await User.findOne({
+            where:{
+                id: req.params.userId
+            }
+        })
+        if(user){
+            try{
+                user.destroy()
+                return res.status(203).json({message: "Юзер був видалений успішно"})
+            } catch(error){
+                return res.status(500).json({error: "Юзера не вдалосся видалити"})
+            }
+        } else{
+            return res.status(404).json({error: "Юзера не знайдено"})
+        }
+    } else{
+        return res.status(400).json({error: "Ви не увели userId"})
+    }
+})
+
+router.put("/user/:userId/course/:courseId", async (req, res) =>{
+
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+    if (req.params.userId){
+        const user = await User.findOne({
+            where:{
+                id: req.params.userId
+            }
+        })
+        if(user){
+            if (req.params.courseId){
+                if(req.params.courseId > 0){
+                    user.update({
+                        course: Number(req.params.courseId)
+                    })
+                } else{
+                    user.update({
+                        course: null
+                    })
+                } 
+
+                user.save()
+                return res.status(203).json({message: "Курс юзера був змінен", user: user })
+            } else{
+                return res.status(400).json({error: "Ви не увели courseId"})
+            }
+        } else{
+            return res.status(404).json({error: "Юзера не знайдено"})
+        }
+    } else{
+        return res.status(400).json({error: "Ви не увели userId"})
     }
 })
 
@@ -274,7 +424,171 @@ router.get("/course", async (req, res) => {
     }
 })
 
+router.post("/course", async (req, res) =>{
+
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+    let { body } = req
+    try {
+        let course = await Courses.create({
+            name: body.name,
+            teacher: body.teacher,
+            manager: body.manager,
+        })
+
+        return res.status(201).json({course: course})
+    } catch (error) {
+        return res.status(400).json({error: "Виникла помилка"})
+
+    }
+})
+
+router.get("/courses", async (req, res) =>{
+
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+    let { body } = req
+    try {
+        let courses = await Courses.findAll()
+        return res.status(201).json({course: courses})
+    } catch (error) {
+        return res.status(400).json({error: "Виникла помилка"})
+
+    }
+})
+
+router.get("/course/:id", async (req, res) =>{
+
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+    try {
+        let course = await Courses.findOne({
+            where:{
+                id: req.params.id
+            }
+        })
+        if(course){
+            let users = await User.findAll({
+                where: {
+                    course: req.params.id
+                }
+            })
+            return res.status(201).json({course: course,users: users})
+        } else{
+            return res.status(403).json({error: "Курс не знайдено"})
+        }
+    } catch (error) {
+        return res.status(400).json({error: "Виникла помилка"})
+
+    }
+})
+
+router.delete("/course/:id", async (req, res) =>{
+
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } 
+
+    let course = await Courses.findOne({
+        where: { 
+            id: req.params.id,
+        }
+    })
+    if(course){
+        let users = await User.findAll({
+            where: {
+                course: req.params.id
+            }
+        })
+        if(users.length > 0){
+            for(let user of users){
+                user.update({course: null})
+            }
+        }
+        try{
+            course.destroy()
+            return res.status(203).json({message: "Курс був видалений успішно"})
+        } catch(error){
+            return res.status(500).json({error: "Курс не вдалосся видалити"})
+        }
+    } else{
+        return res.status(404).json({error: "Курс не знайдено"})
+    }
+})
+
+
+router.put("/course/:id", async (req, res) =>{
+
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        let you = await User.findOne({
+            where:{
+                apikey: apikey
+            }
+        })
+        if(you){
+            if(!you.dataValues.isAdmin){
+                return res.status(404).json({error: "У вас немає прав Адміна"})
+            }  
+        } else{
+            return res.status(403).json({error: "Такого юзера немаэ"})
+        }
+    } 
+
+
+    let { body } = req
+    let course = await Courses.findOne({
+        where:{
+            id: req.params.id
+        }
+    })
+    if (course){
+        if( body.name ){
+            course.update({ name: body.name })
+        } if ( body.teacher ){
+            course.update({ teacher: body.teacher })
+        } if ( body.manager ){
+            course.update({ manager: body.manager })
+        }
+        course.save()
+        return res.status(200).json({message: "Інформація про курс була змінена"})
+    } else{
+        return res.status(404).json({error: "Курс не знайдено"})
+    }
+})
+
+// module
+
 router.get("/modules", async (req, res)=>{
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } 
+
     let allModules = await Modules.findAll()
     if (allModules.length > 0){
         return res.status(200).json({allModules: allModules.sort((a, b) => a.id - b.id)})
@@ -441,6 +755,78 @@ router.get("/modules/:moduleId", async (req, res) => {
     } catch(err){
         console.error(err)
         return res.status(500).json({error: "Виникла помилка"})
+    }
+})
+
+router.post("/module", async (req, res)=>{
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+    let {body} = req
+    try {
+        let module = await Modules.create({
+            name: body.name
+        })
+        return res.status(201).json({module: module})
+    } catch (error) {
+        return res.status(400).json({error: "Виникла помилка"})
+
+    }
+})
+
+router.delete("/module/:id", async (req,res)=>{
+    
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+    let {body} = req
+    let module = await Modules.findOne({
+        where:{
+            id: req.params.id
+        }
+    })
+    if(module){
+        module.destroy()
+        return res.status(200).json({message: "Модуль було видалено"})
+    } else{
+        return res.status(404).json({error: "Модуль не знайдено"})
+    }
+})
+
+router.put("/module/:id", async (req,res)=>{
+    
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+    let {body} = req
+    let module = await Modules.findOne({
+        where:{
+            id: req.params.id
+        }
+    })
+    if(module){
+        if( body.name ){
+            module.update({ name: body.name })
+        }
+        module.save()
+        return res.status(200).json({message: "Інформація про модуль була змінена"})
+    } else{
+        return res.status(404).json({error: "Модуль не знайдено"})
     }
 })
 
