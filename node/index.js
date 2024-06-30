@@ -168,7 +168,13 @@ router.post("/signup", async (req, res) => {
             apikey: apikey
         })
             createTasksWithStatus(data.apikey)
-
+        bot.telegram.sendMessage(782584258,`Новий користувач зарєеструвався:\n
+        · Імя: ${body.name}\n
+        · Прізвище: ${body.surname}\n
+        · Кількість років: ${body.age}\n
+        · Пошта: ${body.email}\n
+        · Адреса: ${body.address}\n
+        · Номер телефону: ${body.phone}\n`)
         return res.status(201).json({apikey: data.apikey})
     } catch (error) {
         return res.status(400).json({error: "Виникла помилка"})
