@@ -5,10 +5,12 @@ const cors = require('cors');
 const { User,Courses,Modules,Topics,Theories,Tasks,Question,Staff,Word,WordList,Sections,ModuleCourse,TasksUsers, QuestionUsers, UsersWords } = require("./db.js")
 const { v4: uuidv4 } = require('uuid');
 const { Op } = require("sequelize");
+const { Telegraf } = require('telegraf');
 require('dotenv').config();
 
 // Router
 
+const bot = new Telegraf('7475843858:AAFNPWkyrCWi11WesaikijJDt-7Nzp9TJ7o')
 const router = express()
 const port = process.env.PORT
 router.use(express.json());
