@@ -10,7 +10,7 @@ require('dotenv').config();
 
 // Router
 
-const bot = new Telegraf(process.env.TELEGRAMTOKEN)
+const bot = new Telegraf(`${process.env.TELEGRAMTOKEN}`)
 const router = express()
 const port = process.env.PORT
 router.use(express.json());
