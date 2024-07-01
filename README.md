@@ -8,8 +8,10 @@ World IT English — is an API for managing World IT's English course. The API i
 
 ## Table of Contents
 - [Installation](#installation)
+- [Features](#features)
 - [DataBase Schema](#database-schema)
 - [Relationships](#relationships)
+- [Functions](#functions)
 - [API Reference](#api-reference)
 - [Technologies](#-thanks-to-these-technologies)
 - [Authors](#authors)
@@ -63,6 +65,14 @@ bot.telegram.sendMessage(YOUR_TELEGRAM_USER_ID,`Новий користувач 
  node index.js  # Or you can use nodemon index.js
 ```
 
+## Features
+- After registration, `admin-user` gets a message about it by telegram bot
+- Uses `CRUD` for admin-panels *(not always)*
+- Uses static files in folder: `public`
+- Uses relationships through other tables
+- Uses `uuid` to generate API tokens
+- And more...
+
 ## Database Schema
 
 The database schema for "World It English" project is managed using Sequelize. Below is a table of the main models:
@@ -84,7 +94,7 @@ The database schema for "World It English" project is managed using Sequelize. B
 | **Question**    | `question`, `questionType`, `imagePath`, `trueAnswers`, `wrongAnswers`, `extraQuestionText`, `taskId`, `wordId` |
 | **Staff**       | `name`, `surname`, `image`, `phone`, `tg`, `viber`                                         |
 
-### Relationships
+## Relationships
 
 - **User - Courses:** A user belongs to a course.
 - **Courses - Staff:** A course is managed and taught by staff.
@@ -94,6 +104,100 @@ The database schema for "World It English" project is managed using Sequelize. B
 - **Words - Users:** Many-to-many relationship through `UsersWords`.
 - **Theories - Sections:** A theory has many sections.
 - **Modules - Courses:** Many-to-many relationship through `ModuleCourse`.
+
+## Functions
+
+#### createTasksWithStatus
+
+The `createTasksWithStatus` function initializes tasks, questions, and words for a user identified by their API key. It ensures that each user has a record in the many-to-many linking tables for tasks, questions, and words, initializing these records if they do not already exist.
+
+```javascript
+async function createTasksWithStatus(apikey) {
+    let tasks = await Tasks.findAll()
+    let questions = await Question.findAll()
+    let words = await Word.findAll()
+    let user = await User.findOne({
+        where: {
+            apikey: apikey
+        }
+    })
+    for (let task of tasks){
+        let data = await TasksUsers.findAll({
+            where:{
+                UserId: user.id,
+                TaskId: task.id,
+            }
+        })
+        if (data.length <= 0){
+            let block = false
+            if(task.initialyBlocked){
+                block = true
+            }
+            let MtM = await TasksUsers.create({
+                UserId: user.id,
+                TaskId: task.id,
+                blocked: block,
+                completed: false,
+                progress: 1
+            })
+        }
+    }
+    for (let question of questions){
+        let data = await QuestionUsers.findAll({
+            where:{
+                UserId: user.id,
+                QuestionId: question.id,
+            }
+        })
+        if (data.length <= 0){
+            let QuQ = await QuestionUsers.create({
+                UserId: user.id,
+                QuestionId: question.id,
+                correct: false
+            })
+        }
+
+    }
+    for(let word of words){
+        let data = await UsersWords.findAll({
+            where:{
+                UserId: user.id,
+                WordId: word.id,
+            }
+        })
+
+        if (data.length <= 0){
+            let QuQ = await UsersWords.create({
+                UserId: user.id,
+                WordId: word.id,
+                counter: 1
+            })
+        }
+    }
+}
+```
+
+#### isAdminCheck
+
+The `isAdminCheck` function verifies whether a user identified by their API key has administrative privileges. It ensures that only users with admin rights can access certain actions.
+> Use this function to restrict access to administrative functions and ensure that only users with the necessary privileges can perform certain actions.
+
+```javascript
+async function isAdminCheck(apikey, res){
+    let you = await User.findOne({
+        where:{
+            apikey: apikey
+        }
+    });
+    if(you){
+        if(!you.dataValues.isAdmin){
+            return res.status(404).json({error: "У вас немає прав Адміна"});
+        }  
+    } else{
+        return res.status(403).json({error: "Такого юзера немаэ"});
+    }
+}
+```
 
 ## API Reference
 
@@ -418,7 +522,7 @@ The database schema for "World It English" project is managed using Sequelize. B
 | `phone` | `string` | **Required**. Your phone number |
 
 **Response:**
-- `200 OK` - Returns staff.
+- `201 Created` - Returns staff.
 - `400 Bad Request` - Missing or incorrect body information.
 - `403 Forbidden` - Missing or invalid admin token.
 
@@ -522,7 +626,7 @@ The database schema for "World It English" project is managed using Sequelize. B
 | `manager` | `integer` | **Required**. Your staff Id |
 
 **Response:**
-- `200 OK` - Returns staff.
+- `201 Created` - Returns staff.
 - `400 Bad Request` - Missing or incorrect body information.
 - `403 Forbidden` - Missing or invalid admin token.
 
@@ -571,7 +675,279 @@ The database schema for "World It English" project is managed using Sequelize. B
 - `403 Forbidden` - Missing or invalid admin token.
 - `404 Not Found` - Missing course.
 
+#### Get module by Id
 
+```http
+  GET /module/${id}
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `id` | `integer` | **Required**. Id of item to fetch |
+
+**Response:**
+- `200 OK` - Returns module and his topics.
+- `404 Not Found` - Missing module.
+- `403 Forbidden` - Missing or invalid admin token.
+
+#### Post module
+
+```http
+  POST /module
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+| Body | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `name` | `string` | **Required**. Your module name |
+
+**Response:**
+- `201 Created` - Returns staff.
+- `400 Bad Request` - Missing or incorrect body information.
+- `403 Forbidden` - Missing or invalid admin token.
+
+#### Put module by Id
+
+```http
+  PUT /module/${id}
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `id` | `integer` | **Required**. Id of item to fetch |
+
+| Body | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `name` | `string` | Your module name |
+
+
+**Response:**
+- `200 OK` - Returns course.
+- `400 Bad Request` - Incorrect body information.
+- `403 Forbidden` - Missing or invalid admin token.
+- `404 Not Found` - Missing course.
+
+#### Delete module by Id
+
+```http
+  DELETE /module/${id}
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `id` | `integer` | **Required**. Id of item to fetch |
+
+**Response:**
+- `203 Non-Authoritative Information` - Returns success.
+- `403 Forbidden` - Missing or invalid admin token.
+- `404 Not Found` - Missing module.
+
+#### Get theory by Id
+
+```http
+  GET /theory/${id}
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `id` | `integer` | **Required**. Id of item to fetch |
+
+**Response:**
+- `200 OK` - Returns theory.
+- `404 Not Found` - Missing theory and his sections.
+- `403 Forbidden` - Missing or invalid admin token.
+
+#### Post theory
+
+```http
+  POST /theory
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+| Body | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `name` | `string` | **Required**. Your module name |
+| `topicId` | `integer` | **Required**. Your topic id |
+
+**Response:**
+- `201 Created` - Returns theory.
+- `400 Bad Request` - Missing or incorrect body information.
+- `403 Forbidden` - Missing or invalid admin token.
+
+#### Put theory by Id
+
+```http
+  PUT /theory/${id}
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `id` | `integer` | **Required**. Id of item to fetch |
+
+| Body | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `name` | `string` | Your theory name |
+
+**Response:**
+- `200 OK` - Returns theory.
+- `400 Bad Request` - Incorrect body information.
+- `403 Forbidden` - Missing or invalid admin token.
+- `404 Not Found` - Missing theory.
+
+#### Delete theory by Id
+
+```http
+  DELETE /theory/${id}
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `id` | `integer` | **Required**. Id of item to fetch |
+
+**Response:**
+- `203 Non-Authoritative Information` - Returns success.
+- `403 Forbidden` - Missing or invalid admin token.
+- `404 Not Found` - Missing theory.
+
+#### Post section
+
+```http
+  POST /section
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+| Body | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `title` | `string` | Your title |
+| `text` | `string` | Your text |
+| `imagePath` | `string` | Your image url |
+| `theory` | `integer` | **Required**. Your theory id |
+
+**Response:**
+- `201 Created` - Returns section.
+- `400 Bad Request` - Missing or incorrect body information.
+- `403 Forbidden` - Missing or invalid admin token.
+
+#### Put section by Id
+
+```http
+  PUT /section/${id}
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `id` | `integer` | **Required**. Id of item to fetch |
+
+| Body | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `title` | `string` | Your title |
+| `text` | `string` | Your text |
+| `imagePath` | `string` | Your image url |
+
+**Response:**
+- `200 OK` - Returns section.
+- `403 Forbidden` - Missing or invalid admin token.
+- `404 Not Found` - Missing section.
+
+#### Delete section by Id
+
+```http
+  DELETE /section/${id}
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `id` | `integer` | **Required**. Id of item to fetch |
+
+**Response:**
+- `203 Non-Authoritative Information` - Returns success.
+- `403 Forbidden` - Missing or invalid admin token.
+- `404 Not Found` - Missing section.
+
+#### Get task by Id
+
+```http
+  GET /task/${id}
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `id` | `integer` | **Required**. Id of item to fetch |
+
+**Response:**
+- `200 OK` - Returns task (and maybe also his questions).
+- `404 Not Found` - Missing task.
+- `403 Forbidden` - Missing or invalid admin token.
+
+#### Post task
+
+```http
+  POST /task
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+| Body | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `type` | `string` | **Required**. Your type of task (words, routes, audio, video, test, sentence) |
+| `wordArray` | `integer` | **Required**. Your word array id |
+| `topicId` | `integer` | **Required**. Your topic id |
+| `notHomework` | `boolean` | **Required**. Is task homework |
+
+**Response:**
+- `201 Created` - Returns task and his topic.
+- `400 Bad Request` - Missing or incorrect body information.
+- `403 Forbidden` - Missing or invalid admin token.
 
 ## 😊 Thanks to these technologies!
 
