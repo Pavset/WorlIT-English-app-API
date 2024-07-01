@@ -69,7 +69,7 @@ The database schema for "World It English" project is managed using Sequelize. B
 
 | Table Name      | Fields                                                                                     |
 |-----------------|--------------------------------------------------------------------------------------------|
-| **User**        | `name`, `surname`, `email`, `yearsOld`, `password`, `phoneNumber`, `address`, `apikey`, `completedTasks`, `course` |
+| **User**        | `name`, `surname`, `email`, `yearsOld`, `password`, `phoneNumber`, `address`, `apikey`, `completedTasks`, `course`,`isAdmin` |
 | **Courses**     | `name`, `teacher`, `manager`                                                               |
 | **Modules**     | `name`                                                                                     |
 | **Topics**      | `mainName`, `name`, `tasks`, `homework`, `theories`, `module`                              |
