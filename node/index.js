@@ -18,6 +18,7 @@ router.use(express.urlencoded({ extended: true }));
 router.use(cors());
 router.use(express.static('public'))
 
+
 // Auto Run Functions
 
 async function createTasksWithStatus(apikey) {
@@ -106,7 +107,6 @@ router.get("", async (req, res) => {
     return res.status(200).json({data: "Success"})
 })
 
-
 // User
 
 router.get("/apikey", async (req, res) => {
@@ -167,7 +167,7 @@ router.post("/signup", async (req, res) => {
             phoneNumber: body.phone,
             apikey: apikey
         })
-            createTasksWithStatus(data.apikey)
+        createTasksWithStatus(data.apikey)
         bot.telegram.sendMessage(process.env.TELEGRAMUSER,`Новий користувач зареєструвався:\n
         · Імя: ${body.name}\n
         · Прізвище: ${body.surname}\n
@@ -317,6 +317,155 @@ router.put("/user/:userId/course/:courseId", async (req, res) =>{
     }
 })
 
+
+// staff
+
+router.get("/staff", async(req, res)=>{
+
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+    try {
+        let staff = await Staff.findAll()
+        if (staff.length > 0){
+            return res.status(200).json({ staff: staff })
+        } else{
+            return res.status(403).json({error: "Співробітників не існує"})
+        }
+    } catch (error) {
+        return res.status(400).json({error: "Виникла помилка"})
+    }
+})
+
+router.get("/staff/:id", async(req, res)=>{
+
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+    try {
+        let staff = await Staff.findOne({
+            where:{
+                id: req.params.id
+            }
+        })
+        if (staff){
+            return res.status(200).json({ staff: staff })
+        } else{
+            return res.status(403).json({error: "Співробітника не існує"})
+        }
+    } catch (error) {
+        return res.status(400).json({error: "Виникла помилка"})
+    }
+})
+
+router.post("/staff", async(req, res)=>{
+
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+    try {
+
+        let {body} = req
+
+        let staff = await Staff.create({
+            name: body.name,
+            surname: body.surname,
+            image: body.imagePath,
+            phone: body.phone,
+            tg: body.tg,
+            viber: body.viber
+        })
+        return res.status(200).json({ staff: staff })
+    } catch (error) {
+        return res.status(400).json({error: "Виникла помилка"})
+    }
+})
+
+router.put("/staff/:id", async(req, res)=>{
+
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+    try {
+
+        let {body} = req
+
+        let staff = await Staff.findOne({
+            where:{
+                id: req.params.id
+            }
+        })
+        if(staff){
+            if(body.name){
+                staff.update({name: body.name})
+            }
+            if(body.username){
+                staff.update({username: body.username})
+            }
+            if(body.image){
+                staff.update({image: body.image})
+            }
+            if(body.phone){
+                staff.update({phone: body.phone})
+            }
+            if(body.tg){
+                staff.update({tg: body.tg})
+            }
+            if(body.viber){
+                staff.update({tg: body.viber})
+            }
+            staff.save()
+            return res.status(200).json({ staff: staff })
+        } else{
+            return res.status(400).json({error: "Виникла помилка"})
+        }
+    } catch (error) {
+        return res.status(400).json({error: "Виникла помилка"})
+    }
+})
+
+router.delete("/staff/:id", async(req, res)=>{
+
+    let apikey = req.headers.token
+
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+    try {
+        let staff = await Staff.findOne({
+            where:{
+                id: req.params.id
+            }
+        })
+        if (staff){
+            staff.destroy()
+            return res.status(200).json({message: "Співробітник був видалений успішно"})
+        } else{
+            return res.status(403).json({error: "Співробітника не існує"})
+        }
+    } catch (error) {
+        return res.status(400).json({error: "Виникла помилка"})
+    }
+})
+
 // Courses
 
 router.get("/course", async (req, res) => {
@@ -432,7 +581,7 @@ router.get("/course", async (req, res) => {
     }
 })
 
-router.post("/course", async (req, res) =>{
+router.post("/courses", async (req, res) =>{
 
     let apikey = req.headers.token
     
@@ -449,6 +598,8 @@ router.post("/course", async (req, res) =>{
             teacher: body.teacher,
             manager: body.manager,
         })
+
+        console.log(course)
 
         return res.status(201).json({course: course})
     } catch (error) {
@@ -467,13 +618,11 @@ router.get("/courses", async (req, res) =>{
         isAdminCheck(apikey, res)
     } 
 
-    let { body } = req
     try {
         let courses = await Courses.findAll()
         return res.status(201).json({course: courses})
     } catch (error) {
         return res.status(400).json({error: "Виникла помилка"})
-
     }
 })
 
@@ -499,7 +648,17 @@ router.get("/course/:id", async (req, res) =>{
                     course: req.params.id
                 }
             })
-            return res.status(201).json({course: course,users: users})
+            let manager = await Staff.findOne({
+                where:{
+                    id: course.dataValues.manager
+                }
+            })
+            let teacher = await Staff.findOne({
+                where:{
+                    id: course.dataValues.teacher
+                }
+            })
+            return res.status(201).json({course: course,users: users, manager: manager, teacher: teacher})
         } else{
             return res.status(403).json({error: "Курс не знайдено"})
         }
@@ -766,6 +925,107 @@ router.get("/modules/:moduleId", async (req, res) => {
     }
 })
 
+router.get("/module/:id", async (req, res)=>{
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+    try {
+        let module = await Modules.findOne({
+            where:{
+                id: req.params.id
+            }
+        })
+        if(module){
+            let foundTopics = await Topics.findAll({
+                where: { 
+                    module: module.dataValues.id
+                }
+            })
+            if (foundTopics.length > 0){
+                let topics = []
+                for (const val of foundTopics) {
+                    const topic = await Topics.findOne({
+                      where: {
+                        id: val.dataValues.id,
+                      },
+                    });
+                    if (topic) {
+                        topics.push(topic.dataValues);
+                    }
+                }
+                if (topics.length > 0){
+                    
+                    let topicsList = []
+
+                    for (const topic of topics){
+                        let theories = []
+                        let homeworks = []
+                        let tasks = []
+
+                        for (const val of topic.tasks) {
+                            let task = await Tasks.findOne({
+                                where:{
+                                    id: val
+                                }
+                            })
+                            if (task){
+                                tasks.push(task.dataValues)
+                            }
+                        }
+                        for (const val of topic.theories) {
+                            let theory = await Theories.findOne({
+                                where:{
+                                    id: val
+                                }
+                            })
+                            if (theory){
+                                theories.push(theory.dataValues)
+                            }
+                        }
+
+                        for (const val of topic.homework) {
+                            let home = await Tasks.findOne({
+                                where:{
+                                    id: val
+                                }
+                            })
+                            if (home){
+                                homeworks.push(home.dataValues)
+                            }
+                        }
+
+                        let thisTopic = {
+                            topicId: topic.id ,
+                            name: topic.name, 
+                            mainName: topic.mainName,
+                            tasks: tasks, 
+                            theories: theories, 
+                            homework: homeworks
+                        }
+                        topicsList.push(thisTopic)
+                    }
+                    return res.status(200).json({module: module, topicsList: topicsList.sort((a, b) => a.topicId - b.topicId)})
+
+                } else{
+                    return res.status(404).json({error: "Немає тем"})
+                }
+            } else{
+                return res.status(404).json({error: "В цьому модулі немає тем"})
+            }
+        } else{
+            return res.status(403).json({error: "Модуль не знайдено"})
+        }
+    } catch (error) {
+        return res.status(400).json({error: "Виникла помилка"})
+
+    }
+})
+
 router.post("/module", async (req, res)=>{
     let apikey = req.headers.token
     
@@ -780,6 +1040,7 @@ router.post("/module", async (req, res)=>{
         let module = await Modules.create({
             name: body.name
         })
+        
         return res.status(201).json({module: module})
     } catch (error) {
         return res.status(400).json({error: "Виникла помилка"})
@@ -926,6 +1187,141 @@ router.get("/theories/:theoryId",async(req,res)=>{
         return res.status(500).json({error: "Виникла помилка"})
     }
 })
+
+router.get("/theory/:id", async(req, res)=>{
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+    try {
+        let theory = await Theories.findOne({
+            where:{
+                id: req.params.id
+            }
+        })
+        if(theory){
+            let sections = await Sections.findAll({
+                where:{
+                    theory: theory.dataValues.id
+                }
+            })
+            if(sections.length > 0){
+                // for(let section of sections){
+
+                // }
+                return res.status(200).json({sections: sections.sort((a, b) => a.id - b.id), info: theory})
+            }
+        } else{
+            return res.status(403).json({error: "Теорію не знайдено"})
+        }
+    } catch (error) {
+        return res.status(400).json({error: "Виникла помилка"})
+
+    }
+})
+
+
+// sections
+
+router.post("/section", async(req, res)=>{
+        
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+    let {body} = req
+    try {
+        let title = null
+        let text = null
+        let imagePath = null
+        if (body.title){
+            title = body.title
+        }
+        if (body.text){
+            text = body.text
+        }
+        if (body.imagePath){
+            imagePath = body.imagePath
+        }
+        let section = await Sections.create({
+            title: title,
+            text: text,
+            imagePath: imagePath,
+            theory: body.theory
+        })
+        
+        return res.status(201).json({section: section})
+    } catch (error) {
+        console.log(error)
+        return res.status(400).json({error: error, message:"Виникла помилка"})
+
+    }
+})
+
+router.put("/section/:id", async(req, res)=>{
+        
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+    let {body} = req
+    let section = await Sections.findOne({
+        where:{
+            id: req.params.id
+        }
+    })
+    if(section){
+        if( body.title ){
+            section.update({ title: body.title })
+        }
+        if( body.text ){
+            section.update({ text: body.text })
+        }
+        if( body.imagePath ){
+            section.update({ imagePath: body.imagePath })
+        }
+        section.save()
+        return res.status(200).json({message: "Інформація про Секцію була змінена", section: section})
+    } else{
+        return res.status(404).json({error: "Модуль не знайдено"})
+    }
+})
+
+router.delete("/section/:id", async (req,res)=>{
+    
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+    let section = await Sections.findOne({
+        where:{
+            id: req.params.id
+        }
+    })
+    if(section){
+        section.destroy()
+        return res.status(200).json({message: "Секція було видалена"})
+    } else{
+        return res.status(404).json({error: "Модуль не знайдено"})
+    }
+})
+
 
 // Questions
 
