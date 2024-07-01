@@ -39,7 +39,25 @@ const sequelize = new Sequelize(YOUR_URL, {
 router.listen(YOUR_PORT, () => {console.log('Server is running on',port)})
 ```
 
-5. Run your project
+5. Input your telegram token here
+
+```js
+const bot = new Telegraf(YOUR_TELEGRAM_TOKEN)
+```
+
+6. Input your telegram user id here
+
+```js
+bot.telegram.sendMessage(YOUR_TELEGRAM_USER_ID,`Новий користувач зареєструвався:\n
+        · Імя: ${body.name}\n
+        · Прізвище: ${body.surname}\n
+        · Кількість років: ${body.age}\n
+        · Пошта: ${body.email}\n
+        · Адреса: ${body.address}\n
+        · Номер телефону: ${body.phone}\n`)
+```
+
+7. Run your project
 
 ```bash
  node index.js  # Or you can use nodemon index.js
@@ -250,10 +268,10 @@ The database schema for "World It English" project is managed using Sequelize. B
 - `404 Not Found` - Missing task and his progress.
 - `403 Forbidden` - Missing or invalid token.
 
-#### Get word counters
+#### Get word counters by Id
 
 ```http
-  PUT /wordCounters
+  PUT /wordCounters/${wordListId}
 ```
 
 | Headers | Type     | Description                |
@@ -263,12 +281,175 @@ The database schema for "World It English" project is managed using Sequelize. B
 
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
-| `id` | `integer` | **Required**. Id of item to fetch |
+| `wordListId` | `integer` | **Required**. Id of item to fetch |
 
 **Response:**
 - `200 OK` - Returns user words.
 - `404 Not Found` - Missing user words.
 - `403 Forbidden` - Missing or invalid token.
+
+#### Get user by Id
+
+```http
+  GET /user/${userId}
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `userId` | `integer` | **Required**. Id of item to fetch |
+
+**Response:**
+- `200 OK` - Returns user.
+- `404 Not Found` - Missing user.
+- `403 Forbidden` - Missing or invalid admin token.
+
+#### Remove user by Id
+
+```http
+  DELETE /user/${userId}
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `userId` | `integer` | **Required**. Id of item to fetch |
+
+**Response:**
+- `203 Non-Authoritative Information` - Returns success.
+- `404 Not Found` - Missing user.
+- `403 Forbidden` - Missing or invalid admin token.
+
+#### Get users
+
+```http
+  GET /users
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+**Response:**
+- `200 OK` - Returns users.
+- `404 Not Found` - Missing users.
+- `403 Forbidden` - Missing or invalid admin token.
+
+#### Put user's course by Id
+
+```http
+  GET /user/${userId}/course/${courseId}
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `courseId` | `integer` | **Required**. Id of item to fetch |
+| `userId` | `integer` | **Required**. Id of item to fetch |
+
+**Response:**
+- `203 Non-Authoritative Information` - Returns success.
+- `404 Not Found` - Missing user or course.
+- `403 Forbidden` - Missing or invalid admin token.
+
+#### Get staff by Id
+
+```http
+  GET /staff/${staffId}
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `staffId` | `integer` | **Required**. Id of item to fetch |
+
+**Response:**
+- `200 OK` - Returns staff.
+- `404 Not Found` - Missing staff.
+- `403 Forbidden` - Missing or invalid admin token.
+
+#### Get staffs
+
+```http
+  GET /staff
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+**Response:**
+- `200 OK` - Returns staffs.
+- `404 Not Found` - Missing staffs.
+- `403 Forbidden` - Missing or invalid admin token.
+
+#### Post staff
+
+```http
+  POST /staff
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+| Body | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `name` | `string` | **Required**. Your name |
+| `surname` | `string` | **Required**. Your surname |
+| `tg` | `string` | **Required**. Your telegram link to user |
+| `viber` | `string` | **Required**. Your viber link to user |
+| `imagePath` | `string` | **Required**. Your image path |
+| `phone` | `string` | **Required**. Your phone number |
+
+**Response:**
+- `200 OK` - Returns staff.
+- `400 Not Found` - Missing body information.
+- `403 Forbidden` - Missing or invalid admin token.
+
+#### Put staff by Id
+
+```http
+  PUT /staff/${staffId}
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `staffId` | `integer` | **Required**. Id of item to fetch |
+
+| Body | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `name` | `string` | Your name |
+| `surname` | `string` | Your surname |
+| `tg` | `string` | Your telegram link to user |
+| `viber` | `string` | Your viber link to user |
+| `imagePath` | `string` | Your image path |
+| `phone` | `string` | Your phone number |
+
+**Response:**
+- `200 OK` - Returns staff.
+- `400 Not Found` - Incorrect body information.
+- `403 Forbidden` - Missing or invalid admin token.
+- `404 Not Found` - Missing staff.
 
 ## 😊 Thanks to these technologies!
 
