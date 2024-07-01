@@ -419,7 +419,7 @@ The database schema for "World It English" project is managed using Sequelize. B
 
 **Response:**
 - `200 OK` - Returns staff.
-- `400 Not Found` - Missing body information.
+- `400 Bad Request` - Missing or incorrect body information.
 - `403 Forbidden` - Missing or invalid admin token.
 
 #### Put staff by Id
@@ -447,9 +447,131 @@ The database schema for "World It English" project is managed using Sequelize. B
 
 **Response:**
 - `200 OK` - Returns staff.
-- `400 Not Found` - Incorrect body information.
+- `400 Bad Request` - Incorrect body information.
 - `403 Forbidden` - Missing or invalid admin token.
 - `404 Not Found` - Missing staff.
+
+#### Delete staff by Id
+
+```http
+  DELETE /staff/${staffId}
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `staffId` | `integer` | **Required**. Id of item to fetch |
+
+**Response:**
+- `203 Non-Authoritative Information` - Returns success.
+- `403 Forbidden` - Missing or invalid admin token.
+- `404 Not Found` - Missing staff.
+
+#### Get course by Id
+
+```http
+  GET /course/${id}
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `id` | `integer` | **Required**. Id of item to fetch |
+
+**Response:**
+- `200 OK` - Returns course.
+- `404 Not Found` - Missing course.
+- `403 Forbidden` - Missing or invalid admin token.
+
+#### Get courses
+
+```http
+  GET /course
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+**Response:**
+- `200 OK` - Returns courses.
+- `404 Not Found` - Missing courses.
+- `403 Forbidden` - Missing or invalid admin token.
+
+#### Post course
+
+```http
+  POST /course
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+| Body | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `name` | `string` | **Required**. Your name |
+| `teacher` | `integer` | **Required**. Your staff Id |
+| `manager` | `integer` | **Required**. Your staff Id |
+
+**Response:**
+- `200 OK` - Returns staff.
+- `400 Bad Request` - Missing or incorrect body information.
+- `403 Forbidden` - Missing or invalid admin token.
+
+#### Put course by Id
+
+```http
+  PUT /course/${id}
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `id` | `integer` | **Required**. Id of item to fetch |
+
+| Body | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `name` | `string` | Your name |
+| `teacher` | `integer` | Your staff Id |
+| `manager` | `integer` | Your staff Id |
+
+**Response:**
+- `200 OK` - Returns course.
+- `400 Bad Request` - Incorrect body information.
+- `403 Forbidden` - Missing or invalid admin token.
+- `404 Not Found` - Missing course.
+
+#### Delete course by Id
+
+```http
+  DELETE /course/${id}
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `id` | `integer` | **Required**. Id of item to fetch |
+
+**Response:**
+- `203 Non-Authoritative Information` - Returns success.
+- `403 Forbidden` - Missing or invalid admin token.
+- `404 Not Found` - Missing course.
+
+
 
 ## 😊 Thanks to these technologies!
 
