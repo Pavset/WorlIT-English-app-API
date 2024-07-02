@@ -234,7 +234,7 @@ const Word = sequelize.define("Word",{
     word:{
         type: DataTypes.TEXT,
         allowNull: false,
-        unique: false
+        unique: true
     },
     translated:{
         type: DataTypes.TEXT,
@@ -379,7 +379,7 @@ Word.belongsToMany(User,{through:UsersWords})
 
 
 sequelize.authenticate()
-sequelize.sync()
+// sequelize.sync()
 
 
 module.exports = {

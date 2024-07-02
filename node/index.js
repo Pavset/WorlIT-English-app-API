@@ -337,9 +337,10 @@ router.get("/staff", async(req, res)=>{
             return res.status(403).json({error: "Співробітників не існує"})
         }
     } catch (error) {
-        return res.status(400).json({error: "Виникла помилка"})
+        return res.status(500).json({error: "Виникла помилка"})
     }
 })
+
 
 router.get("/staff/:id", async(req, res)=>{
 
@@ -359,7 +360,7 @@ router.get("/staff/:id", async(req, res)=>{
         if (staff){
             return res.status(200).json({ staff: staff })
         } else{
-            return res.status(403).json({error: "Співробітника не існує"})
+            return res.status(404).json({error: "Співробітника не існує"})
         }
     } catch (error) {
         return res.status(400).json({error: "Виникла помилка"})
@@ -389,7 +390,8 @@ router.post("/staff", async(req, res)=>{
         })
         return res.status(200).json({ staff: staff })
     } catch (error) {
-        return res.status(400).json({error: "Виникла помилка"})
+        console.log(error)
+        return res.status(500).json({error: "Виникла помилка"})
     }
 })
 
@@ -415,8 +417,8 @@ router.put("/staff/:id", async(req, res)=>{
             if(body.name){
                 staff.update({name: body.name})
             }
-            if(body.username){
-                staff.update({username: body.username})
+            if(body.surname){
+                staff.update({surname: body.surname})
             }
             if(body.image){
                 staff.update({image: body.image})
@@ -946,6 +948,7 @@ router.get("/module/:id", async (req, res)=>{
                     module: module.dataValues.id
                 }
             })
+
             if (foundTopics.length > 0){
                 let topics = []
                 for (const val of foundTopics) {
@@ -959,6 +962,8 @@ router.get("/module/:id", async (req, res)=>{
                     }
                 }
                 if (topics.length > 0){
+                    console.log("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")
+                    console.log(topics)
                     
                     let topicsList = []
 
@@ -1015,7 +1020,7 @@ router.get("/module/:id", async (req, res)=>{
                     return res.status(404).json({error: "Немає тем"})
                 }
             } else{
-                return res.status(404).json({error: "В цьому модулі немає тем"})
+                return res.status(200).json({module: module, topicsList: []})
             }
         } else{
             return res.status(403).json({error: "Модуль не знайдено"})
@@ -1210,10 +1215,9 @@ router.get("/theory/:id", async(req, res)=>{
                 }
             })
             if(sections.length > 0){
-                // for(let section of sections){
-
-                // }
                 return res.status(200).json({sections: sections.sort((a, b) => a.id - b.id), info: theory})
+            } else{
+                return res.status(200).json({info: theory})
             }
         } else{
             return res.status(403).json({error: "Теорію не знайдено"})
@@ -1224,6 +1228,129 @@ router.get("/theory/:id", async(req, res)=>{
     }
 })
 
+router.post("/theory", async(req, res)=>{
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+    let {body} = req
+    try {
+        if (body.name){
+            let theory = await Theories.create({
+                name: body.name,
+            })
+            if(body.topicId){
+                let topic = await Topics.findOne({
+                    where:{
+                        id: body.topicId
+                    }
+                })
+                if(topic){
+                    let theoryArray = []
+                    for(let theoryId of topic.dataValues.theories){
+                        theoryArray.push(theoryId)
+                    }
+                    theoryArray.push(theory.dataValues.id)
+                    topic.update({theories: theoryArray})
+                    topic.save()
+                    return res.status(201).json({theory: theory, topic: topic})
+                }else{
+                    return res.status(404).json({message:"Уроку з таким ID немаэ"})
+                }
+                
+            } else{
+                return res.status(400).json({message:"Ви не увели ID уроку"})
+            }
+        } else{
+            return res.status(400).json({message:"Ви не увели назву теорії"})
+        }
+
+    } catch (error) {
+        console.log(error)
+        return res.status(400).json({error: "Виникла помилка"})
+
+    }
+})
+
+router.put("/theory/:id", async(req, res)=>{
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+    let {body} = req
+    try {
+        let theory = await Theories.findOne({
+            where:{
+                id: req.params.id
+            }
+        })
+        if(theory){
+            if (body.name){
+                theory.update({name: body.name})
+                theory.save()
+                return res.status(404).json({message:"Уроку з таким ID немаэ"})
+            } else{
+                return res.status(400).json({message:"Ви не увели назву теорії"})
+            }
+        }
+
+    } catch (error) {
+        console.log(error)
+        return res.status(400).json({error: "Виникла помилка"})
+
+    }
+})
+
+
+router.delete("/theory/:id", async (req, res) =>{
+
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+
+    if (req.params.id){
+        const theory = await Theories.findOne({
+            where:{
+                id: req.params.id
+            }
+        })
+        if(theory){
+            let sections = await Sections.findAll({
+                where:{
+                    theory: req.params.id
+                }
+            })
+            if(sections.length > 0){
+                for(let section of sections){
+                    section.destroy()
+                }
+            }
+            try{
+                theory.destroy()
+                return res.status(203).json({message: "Теорія та її секції були видаленні успішно"})
+            } catch(error){
+                return res.status(500).json({error: "Теорію не вдалосся видалити"})
+            }
+        } else{
+            return res.status(404).json({error: "Теорії не знайдено"})
+        }
+    } else{
+        return res.status(400).json({error: "Ви не увели ID Теорії"})
+    }
+})
 
 // sections
 
@@ -1323,7 +1450,285 @@ router.delete("/section/:id", async (req,res)=>{
 })
 
 
+// tasks
+
+// stststststststststststststststststststsdsfsdfsdfsdgvdfhdgfjhfsasafghjkgffdsghjkh
+router.get("/task/:id", async(req, res)=>{
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+    try {
+        let task = await Tasks.findOne({
+            where:{
+                id: req.params.id 
+            }
+        }) 
+        if(task){ 
+            if(task.type == "video" || task.type == "audio"){
+                return res.status(200).json({info: task})
+            } else{
+                let questions = await Question.findAll({
+                    where:{
+                        taskId: task.dataValues.id
+                    }
+                })
+                if(questions.length > 0){
+                    return res.status(200).json({questions: questions.sort((a, b) => a.id - b.id), info: task})
+                } else{
+                    return res.status(200).json({info: task})
+                }
+            }
+        } else{
+            return res.status(403).json({error: "Теорію не знайдено"})
+        }
+    } catch (error) {
+        console.log(error)
+        return res.status(400).json({error: "Виникла помилка"})
+
+    }
+})
+
+router.post("/task", async(req, res)=>{
+            
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+    let {body} = req
+    try {
+        if (body.type){
+            if (body.wordArray){
+
+                let task = await Tasks.create({
+                    type: body.type,
+                    wordArray: body.wordArray,
+                    initialyBlocked: false
+                })
+                if(body.topicId){
+                    let topic = await Topics.findOne({
+                        where:{
+                            id: body.topicId
+                        }
+                    })
+                    if(topic){
+                        if(body.notHomework || !body.notHomework){ //Может там !body.notHomework зачтиться как undefined, а не как false
+                            console.log(body.notHomework)
+                            let initialTaskArray = topic.dataValues.homework
+                            if(body.notHomework){
+                                initialTaskArray = topic.dataValues.tasks
+                            }
+                            console.log(initialTaskArray)
+                            let taskArray = []
+                            for(let taskId of initialTaskArray){
+                                taskArray.push(taskId)
+                            }
+                            taskArray.push(task.dataValues.id)
+                            console.log(taskArray)
+                            if(body.notHomework){
+                                topic.update({tasks: taskArray})
+                            } else{
+                                topic.update({homework: taskArray})
+                            }
+                            topic.save()
+                            return res.status(201).json({task: task, topic: topic})
+                        } else{
+                            return res.status(404).json({message:"Ви не зазначили, чи це домашнэ завдання, чи це простэ завдання"})
+                        }
+                    }else{
+                        return res.status(404).json({message:"Уроку з таким ID немаэ"})
+                    }
+                } else{
+                    return res.status(400).json({message:"Ви не увели ID уроку"})
+                }
+            } else{
+                return res.status(400).json({error: "Список слів не вказан"})
+            }
+        } else{
+            return res.status(400).json({error: "Тип таски не вказан"})
+        }
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({error: "Виникла помилка"})
+
+    }
+})
+
 // Questions
+
+router.post("/question", async(req, res)=>{
+                
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+    let {body} = req
+    try {
+        if(body.taskId){
+            if(body.trueAnswers){
+                if (body.questionType){
+                    const taskForQuestion = await Tasks.findOne({
+                        where:{
+                            id: body.taskId
+                        }
+                    })
+        
+                    if (taskForQuestion){
+                        
+                        let wordId = null
+                        let wrongAnswers = []
+                        let questionText = null
+                        let imagePath = null
+                        let extraQuestionText = null
+                
+                        if (body.question){
+                            questionText = body.question
+                        }
+                        if (body.extraQuestionText){
+                            extraQuestionText = body.extraQuestionText
+                        }
+                        if (body.imagePath){
+                            imagePath = body.imagePath
+                        }
+                        if(body.wrongAnswers && body.wrongAnswers.length > 0){
+                            wrongAnswers = body.wrongAnswers
+                        } else{
+                            wordId = taskForQuestion.wordArray
+                            const wordsFromList = await Word.findAll({
+                                where:{
+                                    list: taskForQuestion.wordArray
+                                }
+                            })
+                            if (wordsFromList.length > 0){
+                                maxWords = 6
+                                if(wordsFromList.length >= maxWords){
+                                    while (wrongAnswers.length < maxWords){
+                                        function get_random (list) {
+                                            return list[Math.floor((Math.random()*list.length))];
+                                          }
+                                        let randomWord = get_random(wordsFromList)
+                                        console.log(randomWord.dataValues.word)
+                                        if (!body.trueAnswers.includes(randomWord.dataValues.word.toLowerCase())){
+                                            if(!wrongAnswers.includes(randomWord.dataValues.word.toLowerCase())){
+                                                wrongAnswers.push(randomWord.dataValues.word)
+                                            }
+                                        }
+                                    }
+                                } else{
+                                    return res.status(500).json({error: "У списку маэ бути хочаб 6 слів"})
+                                }
+                            } else{
+                                return res.status(404).json({error: "У цьому списку слів не існує слів"})
+                            }
+                        }
+                        let question = await Question.create({
+                            question: questionText,
+                            questionType: body.questionType,
+                            imagePath: imagePath,
+                            trueAnswers: body.trueAnswers,
+                            wrongAnswers: wrongAnswers,
+                            extraQuestionText: extraQuestionText,
+                            taskId: body.taskId,
+                            wordId: wordId
+                        })
+                        
+                        return res.status(201).json({question: question})
+        
+                    } else{
+                        return res.status(404).json({error: "Таски не існує"})
+                    }
+                } else{
+                    return res.status(400).json({error: "Ви не увели тип питання"})   
+                }
+            } else{
+                return res.status(400).json({error: "Ви не увели правельну відповідь"})    
+            }
+
+        } else{
+            return res.status(400).json({error: "ID таски не уведено"})
+        }
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({error: error, message:"Виникла помилка"})
+
+    }
+
+})
+
+// router.put("/question/:id", async(req, res)=>{
+        
+//     let apikey = req.headers.token
+    
+//     if (!apikey){
+//         return res.status(403).json({error: "У вас немає API-ключа"})
+//     } else{
+//         isAdminCheck(apikey, res)
+//     } 
+
+//     let {body} = req
+//     let question = await Question.findOne({
+//         where:{
+//             id: req.params.id,
+//         }
+//     })
+//     if(question){
+//         if( body.questionText ){
+//             question.update({ question: body.questionText })
+//         }
+//         if( body.extraQuestionText ){
+//             question.update({ extraQuestionText: body.extraQuestionText })
+//         }
+//         if( body.imagePath ){
+//             question.update({ imagePath: body.imagePath })
+//         }
+//         if( body.trueAnswers ){
+//             question.update({ trueAnswers: body.trueAnswers })
+//         }
+//         if( body.wrongAnswers ){
+//             question.update({ wrongAnswers: body.wrongAnswers })
+//         }
+//         question.save()
+//         return res.status(200).json({message: "Інформація про Секцію була змінена", section: section})
+//     } else{
+//         return res.status(404).json({error: "Модуль не знайдено"})
+//     }
+// })
+
+
+router.delete("/question/:id", async(req, res)=>{
+        
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+    let question = await Question.findOne({
+        where:{
+            id: req.params.id,
+        }
+    })
+    if(question){
+        question.destroy()
+        return res.status(200).json({message: "Питання було видаленно успішно"})
+    } else{
+        return res.status(404).json({error: "Модуль не знайдено"})
+    }
+})
 
 router.get("/tasks/:tasksId",async(req,res)=>{
         let apikey = req.headers.token
@@ -1560,7 +1965,7 @@ router.put("/taskProgress/:taskId/:newProgress/:correct", async (req, res) =>{
     if (!apikey){
         return res.status(403).json({error: "У вас немає API-ключа"})
     }
-    try{
+    try{ 
         let user = await User.findOne({
             where:{
                 apikey: apikey
@@ -1791,6 +2196,267 @@ router.get("/account",async (req, res)=>{
         return res.status(500).json({error: "Виникла помилка"})
     }
 })
+
+// wordsList
+
+router.get("/wordList", async (req,res)=>{
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } 
+
+    let wordLists = await WordList.findAll()
+    if (wordLists.length > 0){
+        return res.status(200).json({wordLists: wordLists.sort((a, b) => a.id - b.id)})
+    }else{
+        return res.status(404).json({error: "Немає списків слів"})
+    }
+})
+
+router.get("/wordList/:id", async (req,res)=>{
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+    try {
+        let wordList = await WordList.findOne({
+            where:{
+                id: req.params.id
+            }
+        })
+        if (wordList){
+            let words = await Word.findAll({
+                where:{
+                    list: req.params.id
+                }
+            })
+            return res.status(200).json({wordList: wordList, words:words})
+        }else{
+            return res.status(404).json({error: "Немає Списка слів"})
+        }
+    } catch (error) {
+        console.log(error)
+        return res.status(400).json({error: "Виникла помилка"})
+
+    }
+
+
+})
+
+router.delete("/wordList/:id", async (req,res)=>{
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+    try {
+        let wordList = await WordList.findOne({
+            where:{
+                id: req.params.id
+            }
+        })
+        if (wordList){
+            let words = await Word.findAll({
+                where:{
+                    list: req.params.id
+                }
+            })
+            for(let word of words){
+                word.destroy()
+            }
+            wordList.destroy()
+            return res.status(200).json({wordList: wordList, words:words})
+        }else{
+            return res.status(404).json({error: "Немає Списка слів"})
+        }
+    } catch (error) {
+        console.log(error)
+        return res.status(400).json({error: "Виникла помилка"})
+
+    }
+})
+
+router.put("/wordList/:id", async (req,res)=>{
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+    let {body} = req
+
+    try {
+        let wordList = await WordList.findOne({
+            where:{
+                id: req.params.id
+            }
+        })
+        if (wordList){
+            if(body.name){
+                wordList.update({name: body.name})
+            }
+            return res.status(200).json({wordList: wordList})
+        }else{
+            return res.status(404).json({error: "Немає Списка слів"})
+        }
+    } catch (error) {
+        console.log(error)
+        return res.status(400).json({error: "Виникла помилка"})
+
+    }
+})
+
+router.post("/wordList", async (req,res)=>{
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+    let {body} = req
+
+    try {
+        let wordList = await WordList.create({
+            name: body.name
+        })
+
+        return res.status(200).json({wordList: wordList})
+    } catch (error) {
+        console.log(error)
+        return res.status(400).json({error: "Виникла помилка"})
+
+    }
+})
+
+
+// words
+router.get("/word/:id", async (req,res)=>{
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } 
+
+    let word = await Word.findOne({
+        where:{
+            id: req.params.id
+        }
+    })
+    if (word){
+        return res.status(200).json({word: word})
+    }else{
+        return res.status(404).json({error: "Немає списків слів"})
+    }
+})
+
+
+router.delete("/word/:id", async (req,res)=>{
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+    try {
+        let word = await Word.findOne({
+            where:{
+                id: req.params.id
+            }
+        })
+        if (word){
+            word.destroy()
+            return res.status(200).json({word: word})
+        }else{
+            return res.status(404).json({error: "Немає Списка слів"})
+        }
+    } catch (error) {
+        console.log(error)
+        return res.status(400).json({error: "Виникла помилка"})
+
+    }
+})
+
+router.put("/word/:id", async (req,res)=>{
+    let apikey = req.headers.token
+    
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
+
+    let {body} = req
+
+    try {
+        let word = await Word.findOne({
+            where:{
+                id: req.params.id
+            }
+        })
+        if (word){
+            if(body.word){
+                word.update({word: body.word})
+            }
+            if(body.translated){
+                word.update({translated: body.translated})
+            }
+            if(body.role){
+                word.update({role: body.role})
+            }
+            word.save()
+            return res.status(200).json({word: word})
+        }else{
+            return res.status(404).json({error: "Немає Списка слів"})
+        }
+    } catch (error) {
+        console.log(error)
+        return res.status(400).json({error: "Виникла помилка"})
+
+    }
+})
+
+router.post("/word", async (req,res)=>{
+    let apikey = req.headers.token
+
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    }
+
+    let {body} = req
+
+    try {
+        let word = await Word.create({
+            word: body.word,
+            translated: body.translated,
+            role: body.role,
+            list: body.wordList
+        })
+
+        return res.status(200).json({word: word})
+    } catch (error) {
+        console.log(error)
+        return res.status(400).json({error: "Виникла помилка"})
+    }
+})
+
+
+// wordCounter
 
 router.get("/wordCounters/:wordListId", async (req, res)=>{
     let apikey = req.headers.token
