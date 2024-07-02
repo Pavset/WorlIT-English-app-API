@@ -943,11 +943,84 @@ async function isAdminCheck(apikey, res){
 | `wordArray` | `integer` | **Required**. Your word array id |
 | `topicId` | `integer` | **Required**. Your topic id |
 | `notHomework` | `boolean` | **Required**. Is task homework |
+| `video` | `string` | **Required if type is "video"**. Your video url |
+| `audio` | `string` | **Required if type is "audio"**. Your audio url |
 
 **Response:**
 - `201 Created` - Returns task and his topic.
 - `400 Bad Request` - Missing or incorrect body information.
 - `403 Forbidden` - Missing or invalid admin token.
+
+#### Post question
+
+```http
+  POST /question
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+| Body | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `taskId` | `integer` | **Required**. Your task id |
+| `trueAnswers` | `string[]` | **Required**. Your true answers |
+| `questionType` | `string` | **Required**. Your question type (word, multiple, input) |
+| `question` | `string` | Your question |
+| `extraQuestionText` | `string` | Your extra question text |
+| `imagePath` | `string` | Your image path |
+| `wrongAnswers` | `string[]` | Your image path |
+
+**Response:**
+- `201 Created` - Returns question.
+- `400 Bad Request` - Missing or incorrect body information.
+- `403 Forbidden` - Missing or invalid admin token.
+
+#### Delete question by Id
+
+```http
+  DELETE /question/${id}
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `id` | `integer` | **Required**. Id of item to fetch |
+
+**Response:**
+- `203 Non-Authoritative Information` - Returns success.
+- `403 Forbidden` - Missing or invalid admin token.
+- `404 Not Found` - Missing question.
+
+#### Put question by Id
+
+```http
+  PUT /question/${id}
+```
+
+| Headers | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token` | `string` | **Required**. Your Admin API Key |
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `id` | `integer` | **Required**. Id of item to fetch |
+
+| Body | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `trueAnswers` | `string[]` | Your true answers |
+| `questionText` | `string` | Your question |
+| `extraQuestionText` | `string` | Your extra question text |
+| `imagePath` | `string` | Your image path |
+| `wrongAnswers` | `string[]` | Your image path |
+
+**Response:**
+- `200 OK` - Returns success and question.
+- `403 Forbidden` - Missing or invalid admin token.
+- `404 Not Found` - Missing question.
 
 ## 😊 Thanks to these technologies!
 
