@@ -1719,7 +1719,7 @@ router.put("/question/:id", async(req, res)=>{
             question.update({ wrongAnswers: body.wrongAnswers })
         }
         question.save()
-        return res.status(200).json({message: "Інформація про Секцію була змінена", section: section})
+        return res.status(200).json({message: "Інформація про питання була змінена", question: question})
     } else{
         return res.status(404).json({error: "Модуль не знайдено"})
     }
