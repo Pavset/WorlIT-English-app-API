@@ -165,7 +165,8 @@ router.post("/signup", async (req, res) => {
             password: body.password,
             address: body.address,
             phoneNumber: body.phone,
-            apikey: apikey
+            apikey: apikey,
+            isAdmin: false
         })
         createTasksWithStatus(data.apikey)
         bot.telegram.sendMessage(process.env.TELEGRAMUSER,`Новий користувач зареєструвався:\n
@@ -1531,8 +1532,24 @@ router.post("/task", async(req, res)=>{
                             for(let taskId of initialTaskArray){
                                 taskArray.push(taskId)
                             }
+                            if (body.type == 'audio'){
+                                if (body.audio){
+                                    task.audio = body.audio
+                                }else{
+                                    task.destroy()
+                                    return res.status(400).json({error: "Не вказано аудіо"})
+                                }
+                            }
+                            if (body.type == 'video'){
+                                if (body.video){
+                                    task.video = body.video
+                                }else{
+                                    task.destroy()
+                                    return res.status(400).json({error: "Не вказано відео"})
+                                }
+                            }
+                            task.save()
                             taskArray.push(task.dataValues.id)
-                            console.log(taskArray)
                             if(body.notHomework){
                                 topic.update({tasks: taskArray})
                             } else{
@@ -1544,9 +1561,11 @@ router.post("/task", async(req, res)=>{
                             return res.status(404).json({message:"Ви не зазначили, чи це домашнэ завдання, чи це простэ завдання"})
                         }
                     }else{
+                        task.destroy()
                         return res.status(404).json({message:"Уроку з таким ID немаэ"})
                     }
                 } else{
+                    task.destroy()
                     return res.status(400).json({message:"Ви не увели ID уроку"})
                 }
             } else{
@@ -1667,44 +1686,44 @@ router.post("/question", async(req, res)=>{
 
 })
 
-// router.put("/question/:id", async(req, res)=>{
+router.put("/question/:id", async(req, res)=>{
         
-//     let apikey = req.headers.token
+    let apikey = req.headers.token
     
-//     if (!apikey){
-//         return res.status(403).json({error: "У вас немає API-ключа"})
-//     } else{
-//         isAdminCheck(apikey, res)
-//     } 
+    if (!apikey){
+        return res.status(403).json({error: "У вас немає API-ключа"})
+    } else{
+        isAdminCheck(apikey, res)
+    } 
 
-//     let {body} = req
-//     let question = await Question.findOne({
-//         where:{
-//             id: req.params.id,
-//         }
-//     })
-//     if(question){
-//         if( body.questionText ){
-//             question.update({ question: body.questionText })
-//         }
-//         if( body.extraQuestionText ){
-//             question.update({ extraQuestionText: body.extraQuestionText })
-//         }
-//         if( body.imagePath ){
-//             question.update({ imagePath: body.imagePath })
-//         }
-//         if( body.trueAnswers ){
-//             question.update({ trueAnswers: body.trueAnswers })
-//         }
-//         if( body.wrongAnswers ){
-//             question.update({ wrongAnswers: body.wrongAnswers })
-//         }
-//         question.save()
-//         return res.status(200).json({message: "Інформація про Секцію була змінена", section: section})
-//     } else{
-//         return res.status(404).json({error: "Модуль не знайдено"})
-//     }
-// })
+    let {body} = req
+    let question = await Question.findOne({
+        where:{
+            id: req.params.id,
+        }
+    })
+    if(question){
+        if( body.questionText ){
+            question.update({ question: body.questionText })
+        }
+        if( body.extraQuestionText ){
+            question.update({ extraQuestionText: body.extraQuestionText })
+        }
+        if( body.imagePath ){
+            question.update({ imagePath: body.imagePath })
+        }
+        if( body.trueAnswers ){
+            question.update({ trueAnswers: body.trueAnswers })
+        }
+        if( body.wrongAnswers ){
+            question.update({ wrongAnswers: body.wrongAnswers })
+        }
+        question.save()
+        return res.status(200).json({message: "Інформація про Секцію була змінена", section: section})
+    } else{
+        return res.status(404).json({error: "Модуль не знайдено"})
+    }
+})
 
 
 router.delete("/question/:id", async(req, res)=>{
